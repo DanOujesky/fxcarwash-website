@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply font-sans text-white;
+  }
+}
+.header-navlink {
+  @apply hover:text-gray-500 text-5xl md:text-6xl xl:text-7xl;
+}
+.header-navlink-active {
+  @apply text-gray-500;
+}
+.header-color {
+  @apply bg-[#1a1a1a];
+}
+.body-bg-color {
+  @apply bg-[#252525];
+}
