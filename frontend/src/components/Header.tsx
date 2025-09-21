@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
+import ExternalLink from "./ExternalLink";
 
 type HeaderProps = {
   homePage: boolean;
@@ -17,30 +18,17 @@ function Header({ homePage }: HeaderProps) {
     } else {
       document.body.style.paddingTop = "0px";
     }
-  }, [homePage]);
+  }, []);
 
   useEffect(() => {
-    let scrollY = 0;
-
     if (isSideBarOpen) {
-      scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
     } else {
-      scrollY = Math.abs(parseInt(document.body.style.top || "0"));
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      window.scrollTo(0, scrollY);
+      document.body.style.overflow = "";
     }
 
     return () => {
-      const currentScrollY = Math.abs(parseInt(document.body.style.top || "0"));
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      window.scrollTo(0, currentScrollY);
+      document.body.style.overflow = "";
     };
   }, [isSideBarOpen]);
 
@@ -51,7 +39,7 @@ function Header({ homePage }: HeaderProps) {
       }  z-51 p-5`}
     >
       <div
-        className="flex gap-5 items-center  z-100 cursor-pointer w-50 h-32"
+        className="flex gap-5 items-center  z-100 cursor-pointer w-60 h-32"
         onClick={toggleSideBar}
       >
         <div className="flex flex-col justify-between w-10 h-6">
@@ -72,21 +60,43 @@ function Header({ homePage }: HeaderProps) {
           ></span>
         </div>
         <div className="text-white text-2xl">
-          {isSideBarOpen ? "Zavřít Menu" : "Menu"}
+          {isSideBarOpen ? "ZAVŘÍT MENU" : "MENU"}
         </div>
       </div>
       {!homePage && (
-        <div className="w-50 h-32 hidden sm:block">
+        <div className="w-32 h-32 hidden sm:block">
           <NavLink to={"/"}>
             <img
-              className="w-full h-full"
-              src="/car_wash_logo.svg"
+              className="w-full h-full object-cover"
+              src="/car-wash-logo.png"
               alt="car-wash-logo"
             />
           </NavLink>
         </div>
       )}
-      <div className="w-50 h-32"></div>
+      <div className="w-60 h-32 flex justify-center items-center gap-5">
+        <ExternalLink href="https://instagram.com">
+          <img
+            className="w-10 h-10 invert"
+            src="src/assets/instagram-icon-2.svg"
+            alt="instagram-icon"
+          />
+        </ExternalLink>
+        <ExternalLink href="https://facebook.com">
+          <img
+            className="w-10 h-10 invert"
+            src="src/assets/facebook-icon-2.svg"
+            alt="facebook-icon"
+          />
+        </ExternalLink>
+        <ExternalLink href="https://youtube.com">
+          <img
+            className="w-10 h-10 invert"
+            src="src/assets/youtube-icon-2.svg"
+            alt="youtube-icon"
+          />
+        </ExternalLink>
+      </div>
       {isSideBarOpen && (
         <div className="fixed top-0 left-0 w-full sm:w-1/2 bottom-0 z-99 bg-black flex justify-center items-center">
           <ul className="flex flex-col gap-4">
@@ -99,7 +109,7 @@ function Header({ homePage }: HeaderProps) {
                 }
                 to="/"
               >
-                Úvod
+                ÚVOD
               </NavLink>
             </li>
             <li>
@@ -111,7 +121,7 @@ function Header({ homePage }: HeaderProps) {
                 }
                 to="/o-nas"
               >
-                O Nás
+                O NÁS
               </NavLink>
             </li>
             <li>
@@ -123,7 +133,7 @@ function Header({ homePage }: HeaderProps) {
                 }
                 to="/novinky"
               >
-                Novinky
+                NOVINKY
               </NavLink>
             </li>
             <li>
@@ -133,9 +143,21 @@ function Header({ homePage }: HeaderProps) {
                     isActive ? "header-navlink-active" : "text-white"
                   } header-navlink`
                 }
-                to="/pro-firmy"
+                to="/nabidka"
               >
-                Pro Firmy
+                NABÍDKA
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                className={({ isActive }) =>
+                  `${
+                    isActive ? "header-navlink-active" : "text-white"
+                  } header-navlink`
+                }
+                to="/firmy"
+              >
+                FIRMY
               </NavLink>
             </li>
             <li>
@@ -147,7 +169,7 @@ function Header({ homePage }: HeaderProps) {
                 }
                 to="/kontakt"
               >
-                Kontakt
+                KONTAKT
               </NavLink>
             </li>
           </ul>

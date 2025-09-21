@@ -8,6 +8,7 @@ import "@fontsource/inter/700.css";
 import NewsPage from "./pages/NewsPage";
 import PartnersPage from "./pages/PartnersPage";
 import ContactPage from "./pages/ContactPage";
+import OfferPage from "./pages/OfferPage";
 
 function App() {
   return (
@@ -15,7 +16,8 @@ function App() {
       <Route index element={<HomePage />}></Route>
       <Route path="o-nas" element={<AboutPage />}></Route>
       <Route path="novinky" element={<NewsPage />}></Route>
-      <Route path="pro-firmy" element={<PartnersPage />}></Route>
+      <Route path="nabidka" element={<OfferPage />}></Route>
+      <Route path="firmy" element={<PartnersPage />}></Route>
       <Route path="kontakt" element={<ContactPage />}></Route>
     </Routes>
   );

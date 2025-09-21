@@ -1,10 +1,33 @@
+import Footer from "../components/Footer";
 import Header from "../components/Header";
+import NewsPageContent from "../components/NewsPageContent";
 
 function AboutPage() {
   return (
     <div className="flex flex-col w-full h-full">
       <Header homePage={false} />
-      <div className="bg-white w-full h-full"></div>
+      <div className="header-color w-full page-title-height header-margin flex justify-center items-center        flex-col gap-1">
+        <h2 className="text-white page-title-size mb-7">
+          MODERNÍ SAMOOBSLUŽNÉ MYCÍ CENTRUM
+        </h2>
+        <p className="">
+          Zakládáme si na kvalitě a využití inovativních technologií. Spojujeme
+          vášeň pro krásná auta s technologiemi, které Vaše auto ošetří
+          efektivně a zároveň šetrně.
+        </p>
+      </div>
+      <div className="grid grid-cols-2">
+        <NewsPageContent
+          rightSite={false}
+          title="O nás"
+          text="Partnerem našeho projektu je společnost MyWash, která má v oblasti realizace
+                bezkontaktních mycích center dlouholeté zkušenosti. Kvalitní komponenty zajišťují vysokou
+                účinnost umytí, s důrazem na ekologické řešení, úsporu vody a maximální komfort pro
+                zákazníky. Vše doplňuje příjemný a nadčasový design myčky."
+          image="car-about-image-1.jpg"
+        />
+      </div>
+      <Footer></Footer>
     </div>
   );
 }

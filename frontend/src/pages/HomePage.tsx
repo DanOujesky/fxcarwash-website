@@ -1,3 +1,4 @@
+import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { useEffect, useState } from "react";
 
@@ -26,7 +27,13 @@ function HomePage() {
             }`}
           />
         ))}
+        <div className="absolute top-[30%] left-[10%] flex flex-col gap-2">
+          <p className="text-3xl">AUTOMYČKA</p>
+          <h2 className="text-6xl font-medium">FX CARWASH</h2>
+          <p className="text-3xl">AHADHAHD </p>
+        </div>
       </div>
+      <Footer></Footer>
     </div>
   );
 }

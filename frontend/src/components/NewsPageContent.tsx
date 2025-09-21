@@ -4,17 +4,18 @@ type NewsPageContent = {
   rightSite: boolean;
   title: string;
   text: string;
+  image: string;
 };
 
-function NewsPageContent({ rightSite, title, text }: NewsPageContent) {
+function NewsPageContent({ rightSite, title, text, image }: NewsPageContent) {
   if (rightSite) {
     return (
       <>
         <div className="h-140">
           <img
             className="h-full w-full object-cover"
-            src="src/assets/car-news-image-1.webp"
-            alt="image-1"
+            src={`src/assets/${image}`}
+            alt="image"
           />
         </div>
         <div className="h-140 flex justify-center items-center px-30 body-bg-color">
@@ -31,8 +32,8 @@ function NewsPageContent({ rightSite, title, text }: NewsPageContent) {
         <div className="h-140">
           <img
             className="h-full w-full object-cover"
-            src="src/assets/car-news-image-1.webp"
-            alt="image-1"
+            src={`src/assets/${image}`}
+            alt="image"
           />
         </div>
       </>

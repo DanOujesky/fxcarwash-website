@@ -6,7 +6,7 @@
   }
 }
 .header-navlink {
-  @apply hover:text-gray-500 text-5xl md:text-6xl xl:text-7xl;
+  @apply hover:text-gray-500 text-4xl md:text-5xl xl:text-6xl;
 }
 .header-navlink-active {
   @apply text-gray-500;
@@ -16,4 +16,10 @@
 }
 .body-bg-color {
   @apply bg-[#252525];
+}
+.page-title-height {
+  @apply h-[256px];
+}
+.page-title-size {
+  @apply text-7xl;
 }
