@@ -8,7 +8,7 @@ function AboutPage() {
       <Header homePage={false} />
       <div className="header-color w-full page-title-height header-margin flex justify-center items-center        flex-col gap-1">
         <h2 className="text-white page-title-size mb-7">
-          MODERNÍ SAMOOBSLUŽNÉ MYCÍ CENTRUM
+          MODERNÍ MYCÍ CENTRUM
         </h2>
         <p className="">
           Zakládáme si na kvalitě a využití inovativních technologií. Spojujeme
@@ -23,8 +23,11 @@ function AboutPage() {
           text="Partnerem našeho projektu je společnost MyWash, která má v oblasti realizace
                 bezkontaktních mycích center dlouholeté zkušenosti. Kvalitní komponenty zajišťují vysokou
                 účinnost umytí, s důrazem na ekologické řešení, úsporu vody a maximální komfort pro
-                zákazníky. Vše doplňuje příjemný a nadčasový design myčky."
-          image="car-about-image-1.jpg"
+                zákazníky. Vše doplňuje příjemný a nadčasový design myčky. Máme zájem Vám nabídnout kvalitní službu a přispět tak k lepší nabídce služeb ve Vašem
+                regionu. Doufáme, že návštěva našeho mycího centra bude pro Vás příjemným zážitkem.
+                Přijeďte se k nám podívat.
+                Máme otevřeno 24/7."
+          image="/car-about-image-1.jpg"
         />
       </div>
       <Footer></Footer>

@@ -14,13 +14,13 @@ function NewsPage() {
           rightSite={true}
           title="Základy mycího centra už jsou hotové"
           text="Vše pokračuje dle plánu a základy máme připravené. Můžete se těšit na tři plně vybavené moderní mycí boxy. Současně plánujeme zahájit úpravy nejbližšího okolí myčky, abyste se u nás cítili příjemně."
-          image="car-news-image-2.jpg"
+          image="/car-news-image-2.jpg"
         />
         <NewsPageContent
           rightSite={false}
           title="Připravujeme pro Vás nový projekt v Horní Bříze u Plzně"
           text="Už to pro Vás chystáme. Rádi bychom Vám v brzké době nabídli služby bezkontaktní samoobslužné automyčky. Práce zahájeny. Do budoucna nás najdete v blízkosti čerpací stanice MOL. Plánujeme otevření na přelomu říjen/listopad 2025."
-          image="car-news-image-1.jpg"
+          image="/car-news-image-1.jpg"
         />
       </div>
       <Footer></Footer>

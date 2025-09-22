@@ -20,7 +20,7 @@ function HomePage() {
         {images.map((src, index) => (
           <img
             key={index}
-            src={`src/assets${src}`}
+            src={src}
             alt={`image-${index}`}
             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-2000 ease-in-out ${
               index === currentIndex ? "opacity-100" : "opacity-0"
@@ -29,8 +29,8 @@ function HomePage() {
         ))}
         <div className="absolute top-[30%] left-[10%] flex flex-col gap-2">
           <p className="text-3xl">AUTOMYČKA</p>
-          <h2 className="text-6xl font-medium">FX CARWASH</h2>
-          <p className="text-3xl">AHADHAHD </p>
+          <h2 className="text-6xl font-medium">F.X. CARWASH</h2>
+          <p className="text-3xl">PROFESIONÁLNÍ PÉČE O VÁŠ VŮZ</p>
         </div>
       </div>
       <Footer></Footer>

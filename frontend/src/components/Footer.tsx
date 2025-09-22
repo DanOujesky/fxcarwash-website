@@ -30,24 +30,24 @@ function Footer() {
         </div>
       </div>
       <div className="flex justify-center mt-20 gap-4">
-        <ExternalLink href="https://instagram.com">
+        <ExternalLink href="https://www.instagram.com/f.x.carwash/">
           <img
             className="w-6 h-6 invert"
-            src="src/assets/instagram-icon-2.svg"
+            src="/instagram-icon.svg"
             alt="instagram-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://facebook.com">
           <img
             className="w-6 h-6 invert"
-            src="src/assets/facebook-icon-2.svg"
+            src="/facebook-icon.svg"
             alt="facebook-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://youtube.com">
           <img
             className="w-6 h-6 invert"
-            src="src/assets/youtube-icon-2.svg"
+            src="/youtube-icon.svg"
             alt="youtube-icon"
           />
         </ExternalLink>

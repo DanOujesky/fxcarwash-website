@@ -75,24 +75,24 @@ function Header({ homePage }: HeaderProps) {
         </div>
       )}
       <div className="w-60 h-32 flex justify-center items-center gap-5">
-        <ExternalLink href="https://instagram.com">
+        <ExternalLink href="https://www.instagram.com/f.x.carwash/">
           <img
             className="w-10 h-10 invert"
-            src="src/assets/instagram-icon-2.svg"
+            src="/instagram-icon.svg"
             alt="instagram-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://facebook.com">
           <img
             className="w-10 h-10 invert"
-            src="src/assets/facebook-icon-2.svg"
+            src="/facebook-icon.svg"
             alt="facebook-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://youtube.com">
           <img
             className="w-10 h-10 invert"
-            src="src/assets/youtube-icon-2.svg"
+            src="/youtube-icon.svg"
             alt="youtube-icon"
           />
         </ExternalLink>
