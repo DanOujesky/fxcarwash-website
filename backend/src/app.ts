@@ -12,7 +12,7 @@ app.use(express.json());
 // routes
 app.use("/api/news", newsRoute);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 mongoose
   .connect(
