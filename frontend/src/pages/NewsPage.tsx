@@ -18,6 +18,7 @@ function NewsPage() {
     fetch(`${API_URL}/api/news`)
       .then((res) => res.json())
       .then((data) => setNews(data));
+    console.log(API_URL);
   }, []);
 
   return (

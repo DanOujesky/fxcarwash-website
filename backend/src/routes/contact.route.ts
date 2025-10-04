@@ -1,12 +1,8 @@
 import express, { Request, Response } from "express";
-import nodemailer from "nodemailer";
 import { body, validationResult } from "express-validator";
+import sgMail from "@sendgrid/mail";
 
-interface ContactRequest {
-  email: string;
-  telephone: string;
-  message: string;
-}
+sgMail.setApiKey(process.env.SENDGRID_API_KEY as string);
 
 const router = express.Router();
 
@@ -24,29 +20,19 @@ router.post(
   async (req: Request, res: Response) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res
-        .status(400)
-        .json({ message: "Validation failed", errors: errors.array() });
+      return res.status(400).json({
+        message: "Validation failed",
+        errors: errors.array(),
+      });
     }
 
-    const { email, telephone, message } = req.body as ContactRequest;
+    const { email, telephone, message } = req.body;
 
     try {
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: process.env.GMAIL_USER,
-          pass: process.env.GMAIL_PASS,
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      });
-
-      await transporter.sendMail({
-        from: process.env.GMAIL_USER,
+      await sgMail.send({
+        to: process.env.EMAIL_TO as string,
+        from: process.env.EMAIL_FROM as string,
         replyTo: email,
-        to: process.env.GMAIL_USER,
         subject: "Message from fxcarwash-website",
         text: `Email: ${email}\nTelefon: ${telephone}\nMessage: ${message}`,
       });
