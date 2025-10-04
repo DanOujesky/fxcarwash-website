@@ -2,6 +2,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import NewsPageContent from "../components/NewsPageContent";
 import { useEffect, useState } from "react";
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface News {
   id: string;
@@ -14,7 +15,7 @@ function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/news")
+    fetch(`${API_URL}/api/news`)
       .then((res) => res.json())
       .then((data) => setNews(data));
   }, []);

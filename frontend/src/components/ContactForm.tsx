@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-
+const API_URL = import.meta.env.VITE_API_URL;
 interface FormData {
   email: string;
   telephone: string;
@@ -29,7 +29,7 @@ export default function ContactForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch("http://localhost:5000/api/contact", {
+    const res = await fetch(`${API_URL}/api/contact`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
