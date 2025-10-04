@@ -9,12 +9,13 @@ dotenv.config();
 
 const app = express();
 
+const allowedOrigins = ["https://fxcarwash-website-frontend.onrender.com"];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://fxcarwash-website-frontend.onrender.com",
-    ],
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 app.use(express.json());

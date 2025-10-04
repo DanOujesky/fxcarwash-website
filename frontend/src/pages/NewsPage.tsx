@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const API_URL = import.meta.env.VITE_API_URL;
 
 interface News {
-  id: string;
+  _id: string;
   title: string;
   text: string;
   image: string;
@@ -30,7 +30,7 @@ function NewsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2">
         {news.map((item, index) => (
           <NewsPageContent
-            key={item.id}
+            key={item._id}
             title={item.title}
             text={item.text}
             image={item.image}
