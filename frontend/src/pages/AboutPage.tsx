@@ -6,17 +6,17 @@ function AboutPage() {
   return (
     <div className="flex flex-col w-full h-full">
       <Header homePage={false} />
-      <div className="header-color w-full page-title-height header-margin flex justify-center items-center        flex-col gap-1">
-        <h2 className="text-white page-title-size mb-7">
+      <div className="header-color w-full page-title-height header-margin flex justify-center items-center text-center flex-col gap-5">
+        <h2 className="text-white page-title-size mb-7t mx-10">
           MODERNÍ MYCÍ CENTRUM
         </h2>
-        <p className="">
+        <p className="mx-10 text-ml">
           Zakládáme si na kvalitě a využití inovativních technologií. Spojujeme
           vášeň pro krásná auta s technologiemi, které Vaše auto ošetří
           efektivně a zároveň šetrně.
         </p>
       </div>
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
         <NewsPageContent
           rightSite={false}
           title="O nás"

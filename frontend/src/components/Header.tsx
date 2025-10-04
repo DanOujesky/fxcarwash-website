@@ -36,7 +36,7 @@ function Header({ homePage }: HeaderProps) {
     <header
       className={`absolute top-0 left-0 w-full flex flex-row justify-between items-center ${
         homePage ? "bg-none" : "header-color  border-b-[1px] border-gray-500"
-      }  z-51 p-5`}
+      }  z-51 p-7`}
     >
       <div
         className="flex gap-5 items-center  z-100 cursor-pointer w-60 h-32"
@@ -64,17 +64,21 @@ function Header({ homePage }: HeaderProps) {
         </div>
       </div>
       {!homePage && (
-        <div className="w-32 h-32 hidden sm:block">
+        <div className="absolute right-1/2 translate-x-19 h-38 w-38 md:translate-x-25 md:w-50 md:h-50 hidden sm:block">
           <NavLink to={"/"}>
             <img
               className="w-full h-full object-cover"
-              src="/car-wash-logo.png"
+              src="/logo.svg"
               alt="car-wash-logo"
             />
           </NavLink>
         </div>
       )}
-      <div className="w-60 h-32 flex justify-center items-center gap-5">
+      <div
+        className={`w-60 h-32 flex justify-center items-center gap-5 ${
+          isSideBarOpen ? "hidden sm:flex" : ""
+        }`}
+      >
         <ExternalLink href="https://www.instagram.com/f.x.carwash/">
           <img
             className="w-10 h-10 invert"

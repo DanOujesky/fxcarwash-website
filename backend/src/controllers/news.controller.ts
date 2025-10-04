@@ -48,13 +48,11 @@ export const updateNews = async (req: Request, res: Response) => {
 export const deleteNews = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const news = await News.findByIdAndDelete(id, req.body);
+    const news = await News.findByIdAndDelete(id);
 
     if (!news) {
       return res.status(404).json({ message: "News not found" });
     }
-
-    const updatedNews = await News.findById(id);
     res.status(200).json({ message: "News deleted succesfully" });
   } catch (error: any) {
     res.status(500).json({ message: error.message });

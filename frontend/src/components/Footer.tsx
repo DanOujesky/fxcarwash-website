@@ -2,11 +2,11 @@ import ExternalLink from "./ExternalLink";
 
 function Footer() {
   return (
-    <footer className="w-full h-90 body-bg-color border-t-[1px] border-gray-500">
-      <div className="grid grid-cols-3 justify-items-center items-baseline pt-15">
-        <div className="flex flex-col ">
+    <footer className="w-full pb-20 body-bg-color border-t-[1px] border-gray-500">
+      <div className="grid lg:grid-cols-3 grid-cols-1 justify-items-center items-baseline pt-15 gap-10">
+        <div className="flex flex-col items-center lg:items-baseline">
           <h2 className="text-2xl mb-3">SÍDLO</h2>
-          <div>
+          <div className="flex flex-col items-center lg:items-baseline">
             <p>F.X. CARWASH S.R.O.</p>
             <p>ŽIŽKOVA 1125, 252 62 HOROMĚŘICE</p>
             <p>IČO: 23579102</p>
@@ -20,9 +20,9 @@ function Footer() {
             <p className="font-medium">OTEVÍRACÍ DOBA: NONSTOP</p>
           </div>
         </div>
-        <div className="flex flex-col">
+        <div className="flex flex-col items-center lg:items-baseline">
           <h2 className="text-2xl mb-3">KONTAKT</h2>
-          <div className="flex flex-col ">
+          <div className="flex flex-col items-center lg:items-baseline">
             <a>+420 723 372 912</a>
             <a>SALES@FXCARWASH.CZ</a>
             <a>GOOGLE MAPA</a>

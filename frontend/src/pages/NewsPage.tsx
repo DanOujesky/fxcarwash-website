@@ -25,7 +25,7 @@ function NewsPage() {
       <div className="header-color w-full page-title-height header-margin flex justify-center items-center">
         <h2 className="text-white page-title-size">Novinky</h2>
       </div>
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2">
         {news.map((item, index) => (
           <NewsPageContent
             key={item.id}

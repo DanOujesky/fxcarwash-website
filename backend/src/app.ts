@@ -2,22 +2,24 @@ import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 import newsRoute from "./routes/news.route";
+import authRoute from "./routes/authentication.route";
+import contactRoute from "./routes/contact.route";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
 
-// middleware
 app.use(cors());
 app.use(express.json());
 
-// routes
 app.use("/api/news", newsRoute);
+app.use("/api/auth", authRoute);
+app.use("/api/contact", contactRoute);
 
 const PORT = process.env.PORT || 5000;
 
 mongoose
-  .connect(
-    "mongodb+srv://DanOujesky:551Rk5dUxdFqbD2z@backenddb.usb98bd.mongodb.net/fxcarwash-database?retryWrites=true&w=majority&appName=BackendDB"
-  )
+  .connect(`${process.env.DB_STRING}`)
   .then(() => {
     console.log("Connected to the Database");
     app.listen(PORT, () => {

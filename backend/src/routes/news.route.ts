@@ -1,4 +1,5 @@
 import express from "express";
+import { authMiddleware } from "../middlewares/authentication.middleware";
 import {
   getNews,
   getSingleNews,
@@ -13,10 +14,10 @@ router.get("/", getNews);
 
 router.get("/:id", getSingleNews);
 
-router.post("/", createNews);
+router.post("/", authMiddleware, createNews);
 
-router.put("/:id", updateNews);
+router.put("/:id", authMiddleware, updateNews);
 
-router.delete("/:id", deleteNews);
+router.delete("/:id", authMiddleware, deleteNews);
 
 export default router;
