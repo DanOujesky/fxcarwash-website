@@ -26,8 +26,6 @@ router.post(
       });
     }
 
-    const { email, telephone, message } = req.body;
-
     try {
       await sgMail.send({
         to: process.env.EMAIL_TO as string,
@@ -41,9 +39,15 @@ router.post(
       });
 
       res.json({ message: "Message sent successfully!" });
-    } catch (error) {
-      console.error("❌ Email send failed:", error);
-      res.status(500).json({ message: "Failed to send message" });
+    } catch (error: any) {
+      console.error(
+        "❌ Email send failed:",
+        error.response?.body || error.message || error
+      );
+      res.status(500).json({
+        message: "Failed to send message",
+        error: error.response?.body || error.message || error,
+      });
     }
   }
 );
