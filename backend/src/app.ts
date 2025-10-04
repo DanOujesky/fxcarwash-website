@@ -12,6 +12,7 @@ const app = express();
 const allowedOrigins = [
   "https://fxcarwash-website-frontend.onrender.com",
   "http://localhost:3000",
+  "https://replikant3952.thinline.cz",
 ];
 
 app.use(
