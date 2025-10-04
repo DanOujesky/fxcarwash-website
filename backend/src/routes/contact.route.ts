@@ -31,10 +31,13 @@ router.post(
     try {
       await sgMail.send({
         to: process.env.EMAIL_TO as string,
-        from: process.env.EMAIL_FROM as string,
-        replyTo: email,
+        from: {
+          email: process.env.EMAIL_FROM as string,
+          name: "FX Carwash Website",
+        },
+        replyTo: req.body.email,
         subject: "Message from fxcarwash-website",
-        text: `Email: ${email}\nTelefon: ${telephone}\nMessage: ${message}`,
+        text: `Email: ${req.body.email}\nTelefon: ${req.body.telephone}\nMessage: ${req.body.message}`,
       });
 
       res.json({ message: "Message sent successfully!" });
