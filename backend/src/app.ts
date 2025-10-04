@@ -9,7 +9,10 @@ dotenv.config();
 
 const app = express();
 
-const allowedOrigins = ["https://fxcarwash-website-frontend.onrender.com"];
+const allowedOrigins = [
+  "https://fxcarwash-website-frontend.onrender.com",
+  "http://localhost:3000",
+];
 
 app.use(
   cors({
