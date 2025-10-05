@@ -2,7 +2,10 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 import { useEffect, useState } from "react";
 
-const images = ["/car-home-image-1.webp", "/car-home-image-2.webp"];
+const images = [
+  "/images/car-home-image-1.webp",
+  "/images/car-home-image-2.webp",
+];
 
 function HomePage() {
   const [currentIndex, setCurrentIndex] = useState(0);

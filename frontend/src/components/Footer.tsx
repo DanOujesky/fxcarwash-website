@@ -33,21 +33,21 @@ function Footer() {
         <ExternalLink href="https://www.instagram.com/f.x.carwash/">
           <img
             className="w-6 h-6 invert"
-            src="/instagram-icon.svg"
+            src="/icons/instagram-icon.svg"
             alt="instagram-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://facebook.com">
           <img
             className="w-6 h-6 invert"
-            src="/facebook-icon.svg"
+            src="/icons/facebook-icon.svg"
             alt="facebook-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://youtube.com">
           <img
             className="w-6 h-6 invert"
-            src="/youtube-icon.svg"
+            src="/icons/youtube-icon.svg"
             alt="youtube-icon"
           />
         </ExternalLink>

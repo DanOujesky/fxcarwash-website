@@ -27,7 +27,7 @@ function AboutPage() {
                 regionu. Doufáme, že návštěva našeho mycího centra bude pro Vás příjemným zážitkem.
                 Přijeďte se k nám podívat.
                 Máme otevřeno 24/7."
-          image="/car-about-image-1.jpg"
+          image="/images/car-about-image-1.jpg"
         />
       </div>
       <Footer></Footer>

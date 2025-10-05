@@ -33,7 +33,7 @@ function NewsPage() {
             key={item._id}
             title={item.title}
             text={item.text}
-            image={item.image}
+            image={`/images${item.image}`}
             rightSite={index % 2 == 1 ? true : false}
           />
         ))}

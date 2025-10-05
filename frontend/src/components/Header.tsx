@@ -68,7 +68,7 @@ function Header({ homePage }: HeaderProps) {
           <NavLink to={"/"}>
             <img
               className="w-full h-full object-cover"
-              src="/logo.svg"
+              src="/icons/logo.svg"
               alt="car-wash-logo"
             />
           </NavLink>
@@ -82,21 +82,21 @@ function Header({ homePage }: HeaderProps) {
         <ExternalLink href="https://www.instagram.com/f.x.carwash/">
           <img
             className="w-10 h-10 invert"
-            src="/instagram-icon.svg"
+            src="/icons/instagram-icon.svg"
             alt="instagram-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://facebook.com">
           <img
             className="w-10 h-10 invert"
-            src="/facebook-icon.svg"
+            src="/icons/facebook-icon.svg"
             alt="facebook-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://youtube.com">
           <img
             className="w-10 h-10 invert"
-            src="/youtube-icon.svg"
+            src="/icons/youtube-icon.svg"
             alt="youtube-icon"
           />
         </ExternalLink>
