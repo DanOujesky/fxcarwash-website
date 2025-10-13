@@ -25,7 +25,6 @@ function Footer() {
           <div className="flex flex-col items-center lg:items-baseline">
             <a>+420 723 372 912</a>
             <a>SALES@FXCARWASH.CZ</a>
-            <a>GOOGLE MAPA</a>
           </div>
         </div>
       </div>

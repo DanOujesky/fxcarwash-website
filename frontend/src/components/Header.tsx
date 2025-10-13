@@ -14,7 +14,11 @@ function Header({ homePage }: HeaderProps) {
   };
   useEffect(() => {
     if (!homePage) {
-      document.body.style.paddingTop = "169px";
+      if (window.innerWidth >= 640) {
+        document.body.style.paddingTop = "169px";
+      } else {
+        document.body.style.paddingTop = "121px";
+      }
     } else {
       document.body.style.paddingTop = "0px";
     }
@@ -39,7 +43,7 @@ function Header({ homePage }: HeaderProps) {
       }  z-51 p-7`}
     >
       <div
-        className="flex gap-5 items-center  z-100 cursor-pointer w-60 h-32"
+        className="flex gap-5 items-center  z-100 cursor-pointer w-60 h-16 sm:h-32"
         onClick={toggleSideBar}
       >
         <div className="flex flex-col justify-between w-10 h-6">
@@ -75,7 +79,7 @@ function Header({ homePage }: HeaderProps) {
         </div>
       )}
       <div
-        className={`w-60 h-32 flex justify-center items-center gap-5 ${
+        className={`w-60 h-16 sm:h-32 flex justify-center items-center gap-5 ${
           isSideBarOpen ? "hidden sm:flex" : ""
         }`}
       >
@@ -93,13 +97,12 @@ function Header({ homePage }: HeaderProps) {
             alt="facebook-icon"
           />
         </ExternalLink>
-        <ExternalLink href="https://youtube.com">
-          <img
-            className="w-10 h-10 invert"
-            src="/icons/youtube-icon.svg"
-            alt="youtube-icon"
-          />
-        </ExternalLink>
+
+        <img
+          className="w-10 h-10 invert"
+          src="/icons/youtube-icon.svg"
+          alt="youtube-icon"
+        />
       </div>
       {isSideBarOpen && (
         <div className="fixed top-0 left-0 w-full sm:w-1/2 bottom-0 z-99 bg-black flex justify-center items-center">
@@ -164,6 +167,7 @@ function Header({ homePage }: HeaderProps) {
                 FIRMY
               </NavLink>
             </li>
+
             <li>
               <NavLink
                 className={({ isActive }) =>

@@ -31,9 +31,15 @@ function HomePage() {
           />
         ))}
         <div className="absolute top-[30%] left-[10%] flex flex-col gap-2">
-          <p className="text-3xl">AUTOMYČKA</p>
-          <h2 className="text-6xl font-medium">F.X. CARWASH</h2>
-          <p className="text-3xl">PROFESIONÁLNÍ PÉČE O VÁŠ VŮZ</p>
+          <p className="lg:text-3xl text-2xl lg:text-white text-black">
+            AUTOMYČKA
+          </p>
+          <h2 className="lg:text-6xl lg:text-white text-5xl text-black font-medium">
+            F.X. CARWASH
+          </h2>
+          <p className="lg:text-white lg:text-3xl text-2xl text-black">
+            PROFESIONÁLNÍ PÉČE O VÁŠ VŮZ
+          </p>
         </div>
       </div>
       <Footer></Footer>
