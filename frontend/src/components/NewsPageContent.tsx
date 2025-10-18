@@ -23,10 +23,10 @@ function NewsPageContent({ rightSite, title, text, image }: NewsPageContent) {
   if (rightSite && clientWidth > 1023) {
     return (
       <>
-        <div className="h-70 lg:h-140">
+        <div className="h-70 lg:h-120">
           <img className="h-full w-full object-cover" src={image} alt="image" />
         </div>
-        <div className="h-full py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color">
+        <div className="h-full py-8 lg:py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color">
           <AnimatedDiv rightSite={rightSite} title={title} text={text} />
         </div>
       </>
@@ -34,10 +34,10 @@ function NewsPageContent({ rightSite, title, text, image }: NewsPageContent) {
   } else {
     return (
       <>
-        <div className="h-full py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color ">
+        <div className="h-full py-8 lg:py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color ">
           <AnimatedDiv rightSite={rightSite} title={title} text={text} />
         </div>
-        <div className="h-70 lg:h-140">
+        <div className="h-70 lg:h-120">
           <img className="h-full w-full object-cover" src={image} alt="image" />
         </div>
       </>

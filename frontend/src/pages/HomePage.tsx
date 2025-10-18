@@ -37,7 +37,7 @@ function HomePage() {
           <h2 className="lg:text-6xl lg:text-white text-5xl text-black font-medium">
             F.X. CARWASH
           </h2>
-          <p className="lg:text-white lg:text-3xl text-2xl text-black">
+          <p className="lg:text-white lg:text-3xl text-xl text-black  lg:font-normal">
             PROFESIONÁLNÍ PÉČE O VÁŠ VŮZ
           </p>
         </div>

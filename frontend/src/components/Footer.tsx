@@ -2,33 +2,39 @@ import ExternalLink from "./ExternalLink";
 
 function Footer() {
   return (
-    <footer className="w-full pb-20 body-bg-color border-t-[1px] border-gray-500">
-      <div className="grid lg:grid-cols-3 grid-cols-1 justify-items-center items-baseline pt-15 gap-10">
+    <footer className="w-full pb-10 lg:pb-20 body-bg-color border-t-[1px] border-gray-500">
+      <div className="grid lg:grid-cols-3 grid-cols-1 justify-items-center items-baseline pt-8 lg:pt-15 lg:gap-10 gap-6">
         <div className="flex flex-col items-center lg:items-baseline">
-          <h2 className="text-2xl mb-3">SÍDLO</h2>
+          <h2 className="sm:text-2xl text-xl mb-2 lg:mb-3">SÍDLO</h2>
           <div className="flex flex-col items-center lg:items-baseline">
-            <p>F.X. CARWASH S.R.O.</p>
-            <p>ŽIŽKOVA 1125, 252 62 HOROMĚŘICE</p>
-            <p>IČO: 23579102</p>
-            <p>DIČ: CZ23579102</p>
+            <p className="lg:text-xl text-[13px]">F.X. CARWASH S.R.O.</p>
+            <p className="lg:text-xl text-[13px]">
+              ŽIŽKOVA 1125, 252 62 HOROMĚŘICE
+            </p>
+            <p className="lg:text-xl text-[13px]">IČO: 23579102</p>
+            <p className="lg:text-xl text-[13px]">DIČ: CZ23579102</p>
           </div>
         </div>
         <div className="flex flex-col justify-center items-center">
-          <h2 className="text-2xl mb-3">MYCÍ CENTRUM</h2>
+          <h2 className="sm:text-2xl text-xl mb-2 lg:mb-3">MYCÍ CENTRUM</h2>
           <div className="flex flex-col justify-center items-center">
-            <p>TŘÍDA 1. MÁJE, 330 12 HORNÍ BŘÍZA</p>
-            <p className="font-medium">OTEVÍRACÍ DOBA: NONSTOP</p>
+            <p className="lg:text-xl text-[13px]">
+              TŘÍDA 1. MÁJE, 330 12 HORNÍ BŘÍZA
+            </p>
+            <p className="font-medium lg:text-xl text-[13px]">
+              OTEVÍRACÍ DOBA: NONSTOP
+            </p>
           </div>
         </div>
         <div className="flex flex-col items-center lg:items-baseline">
-          <h2 className="text-2xl mb-3">KONTAKT</h2>
+          <h2 className="sm:text-2xl text-xl mb-2 lg:mb-3">KONTAKT</h2>
           <div className="flex flex-col items-center lg:items-baseline">
-            <a>+420 723 372 912</a>
-            <a>SALES@FXCARWASH.CZ</a>
+            <a className="lg:text-xl text-[13px]">+420 723 372 912</a>
+            <a className="lg:text-xl text-[13px]">SALES@FXCARWASH.CZ</a>
           </div>
         </div>
       </div>
-      <div className="flex justify-center mt-20 gap-4">
+      <div className="flex justify-center mt-10 lg:mt-20 gap-4">
         <ExternalLink href="https://www.instagram.com/f.x.carwash/">
           <img
             className="w-6 h-6 invert"

@@ -9,70 +9,56 @@ function OfferPage() {
         <h2 className="text-white page-title-size mb-7t mx-10">NABÍDKA</h2>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="h-full py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color">
-          <div className="flex flex-col gap-10 items-center justify-center">
+        <div className="h-full py-10 lg:py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color">
+          <div className="flex flex-col gap-6 lg:gap-10 items-center justify-center">
             <h3 className="text-4xl">Naše služby</h3>
             <div>
               <div></div>
               <div className="mt-2">
-                <p className="text-[16px]">Co nabízíme</p>
+                <p className="text-[19px] mb-2">Co nabízíme</p>
                 <ul className="list-disc pl-10">
-                  <li className="text-[14px]">3 samoobslužné mycí boxy</li>
-                  <li className="text-[14px]">2 výkonné vysavače</li>
-                  <li className="text-[14px]">Nonstop provoz</li>
+                  <li className="text-[14px]">3 SAMOOBSLUŽNÉ MYCÍ BOXY</li>
+                  <li className="text-[14px]">2 VÝKONNÉ VYSAVAČE</li>
+                  <li className="text-[14px]">NONSTOP PROVOZ</li>
                 </ul>
               </div>
-              <div className="mt-2">
-                <p className="text-[16px]">Mycí programy</p>
+              <div className="mt-6">
+                <p className="text-[19px] mb-2">Proč právě k nám</p>
                 <ul className="list-disc pl-10">
-                  <li className="text-[14px]">Hlavní mytí</li>
-                  <li className="text-[14px]">Oplach</li>
-                  <li className="text-[14px]">Vosk</li>
-                  <li className="text-[14px]">Lesk</li>
-                  <li className="text-[14px]">Aktivní pěna</li>
-                  <li className="text-[14px]">Předmytí</li>
-                  <li className="text-[14px]">Měkký kartáč</li>
-                  <li className="text-[14px]">Hmyz</li>
-                </ul>
-              </div>
-              <div className="mt-2">
-                <p className="text-[16px]">Proč právě k nám</p>
-                <ul className="list-disc pl-10">
-                  <li className="text-[14px]">
-                    <strong>Bezkontaktní mytí:</strong> Minimalizuje riziko
-                    poškrábání laku a je šetrné k povrchu vozidla.
+                  <li className="text-[14px] mb-2 lg:mb-0">
+                    <strong>BEZKONTAKTNÍ MYTÍ:</strong> Minimalizuje riziko
+                    poškrábání laku a je šetrné k&nbsp;povrchu vozidla.
                   </li>
-                  <li className="text-[14px]">
-                    <strong>Programová flexibilita:</strong> Možnost výběru a
-                    kombinace různých mycích programů podle stupně znečištění
-                    vozu.
+                  <li className="text-[14px] mb-2 lg:mb-0">
+                    <strong>PROGRAMOVÁ FLEXIBILITA:</strong> Kombinace různých
+                    mycích programů podle stupně znečištění vozu.
                   </li>
-                  <li className="text-[14px]">
-                    <strong>Rychlost a úspora času:</strong> Efektivní proces
-                    mytí s použitím kvalitní chemie, který šetří čas ve srovnání
-                    s tradičními mycími linkami.
+                  <li className="text-[14px] mb-2 lg:mb-0">
+                    <strong>RYCHLOST A ÚSPORA ČASU:</strong> Efektivní proces
+                    mytí, který šetří čas ve srovnání s&nbsp;tradičními mycími
+                    linkami.
                   </li>
-                  <li className="text-[14px]">
-                    <strong>Finanční úspora:</strong> Možnost umýt auto za nižší
-                    náklady.
+                  <li className="text-[14px] mb-2 lg:mb-0">
+                    <strong>FINANČNÍ ÚSPORA ČASU:</strong> Možnost umýt auto za
+                    nižší náklady.
                   </li>
-                  <li className="text-[14px]">
-                    <strong>Moderní platební možnosti:</strong> Platební nebo
+                  <li className="text-[14px] mb-2 lg:mb-0">
+                    <strong>MODERNÍ PLATEBNÍ MOŽNOSTI:</strong> Platební nebo
                     předplacené karty pro pohodlné platby.
                   </li>
                   <li className="text-[14px]">
-                    <strong>Hotovostní platby:</strong> Mycí centrum je vybaveno
-                    měničkou.
+                    <strong>HOTOVOSTNÍ PLATBY:</strong> Mycí centrum
+                    je&nbsp;vybaveno měničkou peněz.
                   </li>
                 </ul>
               </div>
             </div>
           </div>
         </div>
-        <div className="h-70 lg:h-full">
+        <div className="h-70 lg:h-135">
           <img
             className="h-full w-full object-cover"
-            src="/images/partners-image.jpg"
+            src="/images/image-offer-page-2.jpeg"
             alt="image"
           />
         </div>

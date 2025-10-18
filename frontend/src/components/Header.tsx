@@ -12,7 +12,7 @@ function Header({ homePage }: HeaderProps) {
   const toggleSideBar = () => {
     setIsSideBarOpen(!isSideBarOpen);
   };
-  useEffect(() => {
+  const paddingTop = () => {
     if (!homePage) {
       if (window.innerWidth >= 640) {
         document.body.style.paddingTop = "169px";
@@ -22,6 +22,12 @@ function Header({ homePage }: HeaderProps) {
     } else {
       document.body.style.paddingTop = "0px";
     }
+  };
+  useEffect(() => {
+    window.addEventListener("resize", paddingTop);
+    paddingTop();
+
+    return () => window.removeEventListener("resize", paddingTop);
   }, []);
 
   useEffect(() => {
@@ -63,7 +69,7 @@ function Header({ homePage }: HeaderProps) {
             }`}
           ></span>
         </div>
-        <div className="text-white text-2xl">
+        <div className="text-white text-xl sm:text-2xl">
           {isSideBarOpen ? "ZAVŘÍT MENU" : "MENU"}
         </div>
       </div>
@@ -85,21 +91,21 @@ function Header({ homePage }: HeaderProps) {
       >
         <ExternalLink href="https://www.instagram.com/f.x.carwash/">
           <img
-            className="w-10 h-10 invert"
+            className="w-8 h-8 sm:w-10 sm:h-10 invert"
             src="/icons/instagram-icon.svg"
             alt="instagram-icon"
           />
         </ExternalLink>
         <ExternalLink href="https://facebook.com">
           <img
-            className="w-10 h-10 invert"
+            className="w-8 h-8 sm:w-10 sm:h-10 invert"
             src="/icons/facebook-icon.svg"
             alt="facebook-icon"
           />
         </ExternalLink>
 
         <img
-          className="w-10 h-10 invert"
+          className="w-8 h-8 sm:w-10 sm:h-10 invert"
           src="/icons/youtube-icon.svg"
           alt="youtube-icon"
         />

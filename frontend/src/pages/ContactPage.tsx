@@ -14,7 +14,7 @@ function ContactPage() {
         </p>
         <p className="text-ml ">TŘÍDA 1. MÁJE, 330 12 HORNÍ BŘÍZA</p>
       </div>
-      <div className="w-full h-90 lg:h-180 relative">
+      <div className="w-full h-60 lg:h-180 relative">
         <img
           className="w-full h-full object-cover"
           src="/images/car-contact-image-1.webp"
@@ -25,14 +25,14 @@ function ContactPage() {
           <p className="text-3xl md:text-5xl lg:text-6xl">SALES@FXCARWASH.CZ</p>
         </div>
       </div>
-      <div className="w-full h-90 lg:h-180 body-bg-color flex flex-col justify-center items-center gap-1">
+      <div className="w-full h-60 lg:h-79 body-bg-color flex flex-col justify-center items-center gap-1">
         <h3 className="text-4xl lg:text-6xl mb-3 text-center">
           NAVŠTIVTE NÁS NA ADRESE
         </h3>
         <p className="text-ml lg:text-xl">TŘÍDA 1. MÁJE, 330 12 HORNÍ BŘÍZA</p>
         <p className="text-ml lg:text-xl font-medium">OTEVŘENO 24/7</p>
       </div>
-      <div className="w-full h-180">
+      <div className="w-full h-60 lg:h-180">
         <MyMap></MyMap>
       </div>
       <div className="w-full h-180 body-bg-color flex flex-col justify-center items-center gap-10">
