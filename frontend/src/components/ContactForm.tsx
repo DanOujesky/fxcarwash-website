@@ -1,16 +1,10 @@
 import { useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
-const API_URL = import.meta.env.VITE_API_URL;
+
 interface FormData {
   email: string;
   telephone: string;
   message: string;
-}
-interface ValidationError {
-  value: string;
-  msg: string;
-  param: string;
-  location: string;
 }
 
 export default function ContactForm() {
@@ -19,6 +13,8 @@ export default function ContactForm() {
     telephone: "",
     message: "",
   });
+
+  const [sending, setSending] = useState(false);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -29,35 +25,53 @@ export default function ContactForm() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch(`${API_URL}/api/contact`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      if (data.errors) {
-        alert(
-          "Please fix the following:\n" +
-            (data.errors as ValidationError[])
-              .map((err) => `- ${err.msg}`)
-              .join("\n")
-        );
-      } else {
-        alert(data.message || "Something went wrong");
-      }
-    } else {
-      alert(data.message);
-      setFormData({ email: "", telephone: "", message: "" });
+    if (!formData.email || !formData.telephone || !formData.message) {
+      alert("Vyplňte prosím všechna pole.");
+      return;
     }
+
+    setSending(true);
+
+    try {
+      const res = await fetch("https://formspree.io/f/mblzejre", {
+        method: "POST",
+        headers: {
+          Accept: "application/json", // DŮLEŽITÉ!
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          telephone: formData.telephone,
+          message: formData.message,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("Zpráva byla úspěšně odeslána!");
+        setFormData({ email: "", telephone: "", message: "" });
+      } else {
+        console.log("Formspree error:", data);
+        alert(
+          "Nastala chyba při odesílání: " +
+            (data?.error || data?.message || "Neznámá chyba.")
+        );
+      }
+    } catch (err) {
+      console.error("Network error:", err);
+      alert(
+        "Chyba při odesílání formuláře. Zkontrolujte připojení k internetu nebo endpoint."
+      );
+    }
+
+    setSending(false);
   };
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="grid grid-cols-2 gap-x-10 gap-y-8 w-5/6 max-w-300 place-items-center "
+      className="grid grid-cols-2 gap-x-10 gap-y-8 w-5/6 max-w-300 place-items-center"
     >
       <input
         name="email"
@@ -91,8 +105,9 @@ export default function ContactForm() {
 
       <input
         type="submit"
-        value="ODESLAT"
-        className="border-1 border-white col-span-2 w-full max-w-80 h-15 font-medium hover:text-black hover:bg-white cursor-pointer"
+        value={sending ? "ODESÍLÁM..." : "ODESLAT"}
+        disabled={sending}
+        className="border-1 border-white col-span-2 w-full max-w-80 h-15 font-medium hover:text-black hover:bg-white cursor-pointer disabled:opacity-50"
       />
     </form>
   );

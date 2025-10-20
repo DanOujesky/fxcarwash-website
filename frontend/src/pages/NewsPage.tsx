@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 const API_URL = import.meta.env.VITE_API_URL;
 
 interface News {
-  _id: string;
+  id: string;
   title: string;
   text: string;
   image: string;
@@ -15,7 +15,7 @@ function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/news`)
+    fetch(`news.json`)
       .then((res) => res.json())
       .then((data) => setNews(data));
     console.log(API_URL);
@@ -30,7 +30,7 @@ function NewsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2">
         {news.map((item, index) => (
           <NewsPageContent
-            key={item._id}
+            key={item.id}
             title={item.title}
             text={item.text}
             image={`/images${item.image}`}

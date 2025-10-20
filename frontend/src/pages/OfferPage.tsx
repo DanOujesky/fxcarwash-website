@@ -55,7 +55,7 @@ function OfferPage() {
             </div>
           </div>
         </div>
-        <div className="h-70 lg:h-135">
+        <div className="h-70 lg:h-full 3xl:h-135">
           <img
             className="h-full w-full object-cover"
             src="/images/image-offer-page-2.jpeg"

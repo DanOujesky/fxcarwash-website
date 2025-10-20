@@ -39,7 +39,7 @@ function AboutPage() {
             </div>
           </div>
         </div>
-        <div className="h-70 lg:h-120">
+        <div className="h-70 lg:h-full 2xl:h-120">
           <img
             className="h-full w-full object-cover"
             src="/images/car-about-image-1.jpg"
