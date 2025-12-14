@@ -1,12 +1,37 @@
-const express = require("express");
+import express from "express";
+import newsRoutes from "./routes/newsRoutes.js";
+import "dotenv/config";
+import { connectDB, disconnectDB } from "./config/db.js";
+
+connectDB();
 
 const app = express();
 
-app.get("/hello", (req, res) => {
-  res.status(201).json({ message: "hello world" });
-});
+app.use("/news", newsRoutes);
 
 const PORT = 5001;
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled Rejection:", err);
+  ServiceWorkerRegistration.close(async () => {
+    await disconnectDB();
+    process.exit(1);
+  });
+});
+
+process.on("uncaughtException", async (err) => {
+  console.error("Uncaught Exception:", err);
+  await disconnectDB();
+  process.exit(1);
+});
+
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, shutting down gracefully");
+  server.close(async () => {
+    await disconnectDB();
+    process.exit(0);
+  });
 });
