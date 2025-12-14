@@ -1,16 +1,25 @@
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
+const connectionString = process.env.DATABASE_URL;
+
+const pool = new Pool({ connectionString });
+
+const adapter = new PrismaPg(pool);
 
 const prisma = new PrismaClient({
+  adapter: adapter,
+
   log:
     process.env.NODE_ENV === "development"
       ? ["query", "error", "warn"]
-      : ["errors"],
+      : ["error"],
 });
 
 const connectDB = async () => {
   try {
     await prisma.$connect();
-    console.log("DB Connected via Prisma");
+    console.log("DB Connected via Prisma (using Postgres adapter)");
   } catch (error) {
     console.error(`Database connection error: ${error.message}`);
     process.exit(1);

@@ -1,5 +1,6 @@
 import express from "express";
 import newsRoutes from "./routes/newsRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import "dotenv/config";
 import { connectDB, disconnectDB } from "./config/db.js";
 
@@ -8,6 +9,7 @@ connectDB();
 const app = express();
 
 app.use("/news", newsRoutes);
+app.use("/auth", authRoutes);
 
 const PORT = 5001;
 app.listen(PORT, () => {
