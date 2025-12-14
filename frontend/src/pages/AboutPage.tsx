@@ -21,12 +21,12 @@ function AboutPage() {
             <h3 className="text-4xl">O nás</h3>
             <div>
               <p className="text-[14px] text-justify">
-                Partnerem našeho projektu je společnost MyWash, která má v
-                oblasti realizace bezkontaktních mycích center dlouholeté
-                zkušenosti. Kvalitní komponenty zajišťují vysokou účinnost
-                umytí, s důrazem na ekologické řešení, úsporu vody a maximální
-                komfort pro zákazníky. Vše doplňuje příjemný a nadčasový design
-                myčky.
+                Partnerem našeho projektu je společnost My Wash Technology
+                s.r.o., která má v oblasti realizace bezkontaktních mycích
+                center dlouholeté zkušenosti. Kvalitní komponenty zajišťují
+                vysokou účinnost umytí, s důrazem na ekologické řešení, úsporu
+                vody a maximální komfort pro zákazníky. Vše&nbsp;doplňuje
+                příjemný a nadčasový design myčky.
               </p>
               <p className="text-[14px] mt-5 text-justify">
                 Máme zájem Vám nabídnout kvalitní službu a přispět tak k lepší
@@ -35,6 +35,10 @@ function AboutPage() {
               </p>
               <p className="mt-5 text-justify text-[14px]">
                 Přijeďte se k nám podívat. Máme otevřeno 24/7.
+              </p>
+              <p className="mt-5 text-justify text-[14px]">
+                Předběžný termín otevření: 17.12.2025. Při změně termínu Vás
+                budeme informovat.
               </p>
             </div>
           </div>

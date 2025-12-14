@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import AnimatedDiv from "./AnimatedDiv";
+import ImageSelector from "./ImageSelector";
 
 type NewsPageContent = {
   rightSite: boolean;
   title: string;
   text: string;
-  image: string;
+  image: string[];
 };
 
 function NewsPageContent({ rightSite, title, text, image }: NewsPageContent) {
@@ -24,7 +25,7 @@ function NewsPageContent({ rightSite, title, text, image }: NewsPageContent) {
     return (
       <>
         <div className="h-70 lg:h-120">
-          <img className="h-full w-full object-cover" src={image} alt="image" />
+          <ImageSelector image={image} />
         </div>
         <div className="h-full py-8 lg:py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color">
           <AnimatedDiv rightSite={rightSite} title={title} text={text} />
@@ -38,7 +39,7 @@ function NewsPageContent({ rightSite, title, text, image }: NewsPageContent) {
           <AnimatedDiv rightSite={rightSite} title={title} text={text} />
         </div>
         <div className="h-70 lg:h-120">
-          <img className="h-full w-full object-cover" src={image} alt="image" />
+          <ImageSelector image={image} />
         </div>
       </>
     );

@@ -8,14 +8,14 @@ interface News {
   id: string;
   title: string;
   text: string;
-  image: string;
+  image: string[];
 }
 
 function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
 
   useEffect(() => {
-    fetch(`news.json`)
+    fetch(`/news.json`)
       .then((res) => res.json())
       .then((data) => setNews(data));
     console.log(API_URL);
@@ -33,7 +33,7 @@ function NewsPage() {
             key={item.id}
             title={item.title}
             text={item.text}
-            image={`/images${item.image}`}
+            image={item.image}
             rightSite={index % 2 == 1 ? true : false}
           />
         ))}

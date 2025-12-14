@@ -1,14 +1,27 @@
 @import "tailwindcss";
 
-@layer base {
-  body {
-    @apply font-sans text-white;
-  }
+body {
+  font-family: "Ethnocentric", sans-serif;
+  color: white;
+}
+p {
+  font-family: "Inter";
+  font-size: 16px;
+}
+li {
+  font-family: "Inter";
+}
+@font-face {
+  font-family: "Ethnocentric";
+  src: url("/fonts/Ethnocentric-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
 }
 
 /* Custom utility classes */
 .header-navlink {
-  @apply hover:text-gray-500 text-4xl md:text-5xl xl:text-6xl;
+  @apply hover:text-gray-500 text-3xl md:text-4xl xl:text-5xl;
+  font-family: "Ethnocentric", sans-serif;
 }
 
 .header-navlink-active {
@@ -21,6 +34,19 @@
 
 .body-bg-color {
   @apply bg-[#252525];
+}
+
+.titleText {
+  font-family: "Ethnocentric", sans-serif;
+}
+.contactText {
+  font-family: "Inter", sans-serif;
+}
+.textUnder {
+  @apply text-[13px] lg:text-[16px];
+}
+.textContact {
+  @apply text-2xl md:text-5xl lg:text-6xl;
 }
 
 .page-title-height {

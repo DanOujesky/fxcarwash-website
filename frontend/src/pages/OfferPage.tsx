@@ -15,7 +15,7 @@ function OfferPage() {
             <div>
               <div></div>
               <div className="mt-2">
-                <p className="text-[19px] mb-2">Co nabízíme</p>
+                <p className="text-[19px] mb-2 titleText">Co nabízíme</p>
                 <ul className="list-disc pl-10">
                   <li className="text-[14px]">3 SAMOOBSLUŽNÉ MYCÍ BOXY</li>
                   <li className="text-[14px]">2 VÝKONNÉ VYSAVAČE</li>
@@ -23,32 +23,42 @@ function OfferPage() {
                 </ul>
               </div>
               <div className="mt-6">
-                <p className="text-[19px] mb-2">Proč právě k nám</p>
+                <p className="text-[19px] mb-2 titleText">Proč právě k nám</p>
                 <ul className="list-disc pl-10">
                   <li className="text-[14px] mb-2 lg:mb-0">
-                    <strong>BEZKONTAKTNÍ MYTÍ:</strong> Minimalizuje riziko
-                    poškrábání laku a je šetrné k&nbsp;povrchu vozidla.
+                    <strong className="font-medium">BEZKONTAKTNÍ MYTÍ:</strong>{" "}
+                    Minimalizuje riziko poškrábání laku a je šetrné
+                    k&nbsp;povrchu vozidla.
                   </li>
                   <li className="text-[14px] mb-2 lg:mb-0">
-                    <strong>PROGRAMOVÁ FLEXIBILITA:</strong> Kombinace různých
-                    mycích programů podle stupně znečištění vozu.
+                    <strong className="font-medium">
+                      PROGRAMOVÁ FLEXIBILITA:
+                    </strong>{" "}
+                    Kombinace různých mycích programů podle stupně znečištění
+                    vozu.
                   </li>
                   <li className="text-[14px] mb-2 lg:mb-0">
-                    <strong>RYCHLOST A ÚSPORA ČASU:</strong> Efektivní proces
-                    mytí, který šetří čas ve srovnání s&nbsp;tradičními mycími
-                    linkami.
+                    <strong className="font-medium">
+                      RYCHLOST A ÚSPORA ČASU:
+                    </strong>{" "}
+                    Efektivní proces mytí, který šetří čas ve srovnání
+                    s&nbsp;tradičními mycími linkami.
                   </li>
                   <li className="text-[14px] mb-2 lg:mb-0">
-                    <strong>FINANČNÍ ÚSPORA ČASU:</strong> Možnost umýt auto za
-                    nižší náklady.
+                    <strong className="font-medium">
+                      FINANČNÍ ÚSPORA ČASU:
+                    </strong>{" "}
+                    Možnost umýt auto za nižší náklady.
                   </li>
                   <li className="text-[14px] mb-2 lg:mb-0">
-                    <strong>MODERNÍ PLATEBNÍ MOŽNOSTI:</strong> Platební nebo
-                    předplacené karty pro pohodlné platby.
+                    <strong className="font-medium">
+                      MODERNÍ PLATEBNÍ MOŽNOSTI:
+                    </strong>{" "}
+                    Platební nebo předplacené karty pro pohodlné platby.
                   </li>
                   <li className="text-[14px]">
-                    <strong>HOTOVOSTNÍ PLATBY:</strong> Mycí centrum
-                    je&nbsp;vybaveno měničkou peněz.
+                    <strong className="font-medium">HOTOVOSTNÍ PLATBY:</strong>{" "}
+                    Mycí centrum je&nbsp;vybaveno měničkou peněz.
                   </li>
                 </ul>
               </div>

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const images = [
   "/images/car-home-image-1.webp",
-  "/images/car-home-image-2.webp",
+  "/images/car-home-image-2.jpg",
 ];
 
 function HomePage() {
@@ -31,17 +31,18 @@ function HomePage() {
           />
         ))}
         <div className="absolute top-[30%] left-[10%] flex flex-col gap-2">
-          <p className="lg:text-3xl text-2xl lg:text-white text-black">
+          <p className="lg:text-3xl text-[18px] lg:text-white lg:font-normal font-bold text-black">
             AUTOMYČKA
           </p>
-          <h2 className="lg:text-6xl  lg:text-white text-5xl text-black font-medium">
+          <h2 className="lg:text-6xl  lg:text-white text-4xl text-black font-medium">
             F.X. CARWASH
           </h2>
-          <p className="lg:text-white lg:text-3xl text-xl text-black  lg:font-normal">
+          <p className="lg:text-white lg:text-3xl text-[18px] text-black  lg:font-normal font-bold">
             PROFESIONÁLNÍ PÉČE O VÁŠ VŮZ
           </p>
         </div>
       </div>
+
       <Footer></Footer>
     </div>
   );

@@ -1,68 +1,45 @@
 import { useState } from "react";
-import type { ChangeEvent, FormEvent } from "react";
-
-interface FormData {
-  email: string;
-  telephone: string;
-  message: string;
-}
+import type { FormEvent } from "react";
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    telephone: "",
-    message: "",
-  });
-
   const [sending, setSending] = useState(false);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSuccess(null);
+    setError(null);
 
-    if (!formData.email || !formData.telephone || !formData.message) {
-      alert("Vyplňte prosím všechna pole.");
-      return;
-    }
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    if (formData.get("website")) return;
 
     setSending(true);
 
     try {
       const res = await fetch("https://formspree.io/f/mblzejre", {
         method: "POST",
-        headers: {
-          Accept: "application/json", // DŮLEŽITÉ!
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          telephone: formData.telephone,
-          message: formData.message,
-        }),
+        body: formData,
+        headers: { Accept: "application/json" },
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        alert("Zpráva byla úspěšně odeslána!");
-        setFormData({ email: "", telephone: "", message: "" });
+        setSuccess("Zpráva byla úspěšně odeslána!");
+        form.reset();
       } else {
-        console.log("Formspree error:", data);
-        alert(
-          "Nastala chyba při odesílání: " +
-            (data?.error || data?.message || "Neznámá chyba.")
-        );
+        setError(data?.error || data?.message || "Nastala neznámá chyba.");
       }
-    } catch (err) {
-      console.error("Network error:", err);
-      alert(
-        "Chyba při odesílání formuláře. Zkontrolujte připojení k internetu nebo endpoint."
-      );
+    } catch (err: unknown) {
+      console.error(err);
+      if (err instanceof Error) {
+        setError("Chyba připojení – " + err.message);
+      } else {
+        setError("Chyba připojení – zkontrolujte internet.");
+      }
     }
 
     setSending(false);
@@ -74,33 +51,35 @@ export default function ContactForm() {
       className="grid grid-cols-2 gap-x-10 gap-y-8 w-5/6 max-w-300 place-items-center"
     >
       <input
+        type="text"
+        name="website"
+        tabIndex={-1}
+        autoComplete="off"
+        style={{ display: "none" }}
+      />
+
+      <input
         name="email"
         type="email"
         required
         placeholder="EMAIL"
-        value={formData.email}
-        onChange={handleChange}
-        className="bg-white placeholder:font-light text-black placeholder:text-black p-6 w-full h-15 rounded-xs text-xl focus:outline-none col-span-2 lg:col-span-1"
+        className="bg-white placeholder:font-light contactText text-black placeholder:text-black p-6 w-full h-15 rounded-xs text-xl focus:outline-none col-span-2 lg:col-span-1"
       />
 
       <input
         name="telephone"
         type="tel"
-        pattern="[0-9+ ]{7,15}"
+        pattern="[\d+() -]{7,20}"
         required
         placeholder="TELEFON"
-        value={formData.telephone}
-        onChange={handleChange}
-        className="bg-white focus:outline-none placeholder:font-light text-black placeholder:text-black p-6 w-full h-15 rounded-xs text-xl col-span-2 lg:col-span-1"
+        className="bg-white focus:outline-none placeholder:font-light text-black contactText placeholder:text-black p-6 w-full h-15 rounded-xs text-xl col-span-2 lg:col-span-1"
       />
 
       <textarea
         name="message"
         required
         placeholder="POZNÁMKA"
-        value={formData.message}
-        onChange={handleChange}
-        className="bg-white focus:outline-none placeholder:font-light text-black placeholder:text-black col-span-2 p-6 w-full h-45 rounded-xs text-xl"
+        className="bg-white focus:outline-none placeholder:font-light text-black contactText placeholder:text-black col-span-2 p-6 w-full h-45 rounded-xs text-xl"
       />
 
       <input
@@ -109,6 +88,10 @@ export default function ContactForm() {
         disabled={sending}
         className="border-1 border-white col-span-2 w-full max-w-80 h-15 font-medium hover:text-black hover:bg-white cursor-pointer disabled:opacity-50"
       />
+      {success && (
+        <p className="col-span-2 text-green-400 text-center">{success}</p>
+      )}
+      {error && <p className="col-span-2 text-red-400 text-center">{error}</p>}
     </form>
   );
 }
