@@ -7,7 +7,7 @@ function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin: React.FormEventHandler<HTMLFormElement> = async (e) => {
+  const handleRegister: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
 
     try {
@@ -27,7 +27,7 @@ function RegisterPage() {
     }
   };
   return (
-    <MyForm handleFunction={handleLogin}>
+    <MyForm handleFunction={handleRegister}>
       <InputTitle text="Registrace" />
       <div className="flex flex-col">
         <Inputlabel text="E-mail" />

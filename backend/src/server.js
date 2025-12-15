@@ -1,8 +1,13 @@
+import "dotenv/config";
 import express from "express";
 import newsRoutes from "./routes/newsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import "dotenv/config";
 import { connectDB, disconnectDB } from "./config/db.js";
+import cors from "cors";
+
+const corsOptions = {
+  origin: process.env.FRONTEND_URL,
+};
 
 connectDB();
 
@@ -10,6 +15,7 @@ const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors(corsOptions));
 
 app.use("/news", newsRoutes);
 app.use("/auth", authRoutes);
