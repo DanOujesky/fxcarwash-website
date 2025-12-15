@@ -56,3 +56,6 @@ li {
 .page-title-size {
   @apply text-4xl md:text-5xl xl:text-7xl;
 }
+.input-button {
+  @apply text-white h-10 mt-6 bg-black hover:text-gray-300;
+}
