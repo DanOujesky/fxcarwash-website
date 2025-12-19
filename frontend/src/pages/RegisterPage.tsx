@@ -3,7 +3,7 @@ import MyForm from "../components/MyForm";
 import InputTitle from "../components/InputTitle";
 import { useState } from "react";
 import { z } from "zod";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const registerSchema = z.object({
   email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
@@ -92,6 +92,12 @@ function RegisterPage() {
           {errors.password}
         </span>
       )}
+      <Link
+        to="/login"
+        className="text-black contactText text-center hover:underline"
+      >
+        Už jste zaregistrovaní? Přihlaste se
+      </Link>
       <button className="input-button" type="submit">
         Registrovat se
       </button>

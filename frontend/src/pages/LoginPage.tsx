@@ -88,7 +88,7 @@ function LoginPage() {
         <div className="flex justify-between">
           <Inputlabel text="Heslo" />
           <Link
-            className="text-black contactText underline  text-[13px] hover:text-blue-500"
+            className="text-black contactText text-[13px] hover:underline"
             to="/forgotPassword"
           >
             Zapomenuté heslo?
@@ -117,6 +117,12 @@ function LoginPage() {
           {response}
         </span>
       )}
+      <Link
+        to="/register"
+        className="text-black contactText text-center hover:underline"
+      >
+        Nemáte účet? Zaregistrujte se
+      </Link>
       <button className="input-button" type="submit">
         Přihlásit se
       </button>

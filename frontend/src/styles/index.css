@@ -57,7 +57,7 @@ li {
   @apply text-4xl md:text-5xl xl:text-7xl;
 }
 .input-button {
-  @apply text-white h-10 mt-6 bg-black hover:text-gray-300;
+  @apply text-white h-10 bg-black hover:text-gray-300;
 }
 .input-field {
   @apply text-white text-[14px] p-5 bg-black h-10;
