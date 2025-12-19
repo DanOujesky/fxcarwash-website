@@ -1,6 +1,49 @@
 import { prisma } from "../config/db.js";
 import { generateToken } from "../utils/generateToken.js";
 import bcrypt from "bcrypt";
+import { sendVerificationEmail } from "../utils/mailer.js";
+
+const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { email: email },
+  });
+
+  if (!user) {
+    return res.status(200).json({
+      error: "Žádný uživatel nebyl nenalezen s tímto emailem",
+      exists: false,
+    });
+  }
+
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+  await prisma.user.update({
+    where: { email: email },
+    data: {
+      resetCode: resetCode,
+      resetCodeExpiration: new Date(Date.now() + 10 * 60 * 1000),
+    },
+  });
+
+  try {
+    await sendVerificationEmail(email, resetCode);
+    console.log("Email byl úspěšně odeslán");
+    res.status(200).json({
+      status: "success",
+      message: "Kód pro obnovení hesla byl odeslán na váš email",
+      exists: true,
+      email: email,
+    });
+  } catch (error) {
+    console.error("DETAL CHYBY EMAILU:", error);
+    res.status(500).json({
+      error: "Failed to send verification email",
+      details: error.message,
+    });
+  }
+};
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -74,4 +117,4 @@ const getMe = (req, res) => {
   res.status(200).json({ status: "success", user: req.user });
 };
 
-export { register, login, logout, getMe };
+export { register, login, logout, getMe, requestPasswordReset };
