@@ -1,15 +1,55 @@
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import Inputlabel from "../components/InputLabel";
 import MyForm from "../components/MyForm";
 import InputTitle from "../components/InputTitle";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { z } from "zod";
+import { useNavigate } from "react-router-dom";
+
+const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
+
+  password: z
+    .string()
+    .min(8, "Heslo musí mít alespoň 8 znaků")
+    .max(50, "Heslo je příliš dlouhé")
+    .regex(/[0-9]/, "Heslo musí obsahovat alespoň jedno číslo"),
+});
 
 function LoginPage() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
+  const [response, setResponse] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (location.state?.email) {
+      setEmail(location.state.email);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, []);
   const handleLogin: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setResponse(null);
+
+    const validation = loginSchema.safeParse({ email, password });
+
+    if (!validation.success) {
+      const formattedErrors: typeof errors = {};
+
+      validation.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof typeof formattedErrors;
+        formattedErrors[field] = issue.message;
+      });
+
+      setErrors(formattedErrors);
+      return;
+    }
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/login`, {
@@ -17,11 +57,15 @@ function LoginPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        credentials: "include",
+        body: JSON.stringify(validation.data),
       });
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.message);
+        setResponse(data.error);
+        return;
+      } else {
+        navigate("/");
       }
     } catch (err) {
       console.error(err);
@@ -58,6 +102,21 @@ function LoginPage() {
           required
         />
       </div>
+      {errors.email && (
+        <span className="text-red-500 text-center text-sm contactText">
+          {errors.email}
+        </span>
+      )}
+      {errors.password && (
+        <span className="text-red-500 text-center text-sm contactText">
+          {errors.password}
+        </span>
+      )}
+      {response && (
+        <span className="text-red-500 text-center text-sm contactText">
+          {response}
+        </span>
+      )}
       <button className="input-button" type="submit">
         Přihlásit se
       </button>

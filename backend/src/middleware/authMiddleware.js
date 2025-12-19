@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import prisma from "../lib/prismaClient.js";
+import { prisma } from "../config/db.js";
 
 export const authMiddleware = async (req, res, next) => {
   let token;
@@ -22,6 +22,10 @@ export const authMiddleware = async (req, res, next) => {
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
+      select: {
+        id: true,
+        email: true,
+      },
     });
 
     if (!user) {
@@ -32,4 +36,27 @@ export const authMiddleware = async (req, res, next) => {
   } catch (error) {
     return res.status(401).json({ error: "Not authorized, token failed" });
   }
+};
+export const softAuth = async (req, res, next) => {
+  let token =
+    req.cookies?.jwt ||
+    (req.headers.authorization?.startsWith("Bearer") &&
+      req.headers.authorization.split(" ")[1]);
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, email: true },
+    });
+    req.user = user || null;
+  } catch (error) {
+    req.user = null;
+  }
+  next();
 };

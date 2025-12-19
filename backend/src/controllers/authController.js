@@ -47,7 +47,7 @@ const login = async (req, res) => {
   }
 
   const token = generateToken(user.id, res);
-  res.status(201).json({
+  res.status(200).json({
     status: "success",
     data: {
       user: {
@@ -70,4 +70,8 @@ const logout = async (req, res) => {
   });
 };
 
-export { register, login, logout };
+const getMe = (req, res) => {
+  res.status(200).json({ status: "success", user: req.user });
+};
+
+export { register, login, logout, getMe };
