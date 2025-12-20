@@ -105,7 +105,7 @@ function RegisterPage() {
         Už jste zaregistrovaní? Přihlaste se
       </Link>
       <button disabled={isLoading} className="input-button" type="submit">
-        Registrovat se
+        {isLoading ? "Registrování..." : "Registrovat se"}
       </button>
     </MyForm>
   );

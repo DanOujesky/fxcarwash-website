@@ -96,7 +96,7 @@ function NewPasswordPage() {
         </span>
       )}
       <button disabled={isLoading} className="input-button" type="submit">
-        Nastavit nové heslo
+        {isLoading ? "Nastavování..." : "Nastavit nové heslo"}
       </button>
     </MyForm>
   );

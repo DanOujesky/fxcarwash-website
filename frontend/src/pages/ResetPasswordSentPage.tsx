@@ -4,6 +4,7 @@ import InputLink from "../components/InputLink";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { OTPInput } from "input-otp";
 
 const resetPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
@@ -80,20 +81,39 @@ function ResetPasswordSentPage() {
         Na váš email byl odeslán kod pro reset hesla. Pokud nedojde do pár
         minut, zkontrolujte také složku se spamem
       </p>
-      <input
-        className="input-field"
-        type="text"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-        required
-      />
+      <div className="flex flex-col items-center gap-4">
+        <OTPInput
+          maxLength={6}
+          value={code}
+          onChange={setCode}
+          render={({ slots }) => (
+            <div className="flex gap-2">
+              {slots.map((slot, idx) => (
+                <div
+                  key={idx}
+                  className={`w-10 h-12 border-2 flex items-center justify-center text-xl font-bold rounded-lg transition-all ${
+                    slot.isActive
+                      ? "border-blue-500 ring-2 ring-blue-200"
+                      : "border-gray-700"
+                  } bg-black text-white`}
+                >
+                  {slot.char || ""}
+                  {slot.hasFakeCaret && (
+                    <div className="animate-caret-blink w-px h-6 bg-white" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        />
+      </div>
       {errors.code && (
         <span className="text-red-500 text-center text-sm contactText">
           {errors.code}
         </span>
       )}
       <button disabled={isLoading} className="input-button" type="submit">
-        Ověřit kód
+        {isLoading ? "Ověřování..." : "Ověřit kód"}
       </button>
       <InputLink text="Zpět na přihlášení" to="/login" />
     </MyForm>

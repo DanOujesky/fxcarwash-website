@@ -8,7 +8,13 @@ import {
   verifyResetCode,
   setNewPassword,
 } from "../controllers/authController.js";
-import { registerSchema } from "../validators/authValidators.js";
+import {
+  registerSchema,
+  loginSchema,
+  newPasswordSchema,
+  forgetPasswordSchema,
+  resetPasswordSchema,
+} from "../validators/authValidators.js";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { authMiddleware, softAuth } from "../middleware/authMiddleware.js";
 import { authLimiter } from "../utils/authLimiter.js";
@@ -16,10 +22,19 @@ import { authLimiter } from "../utils/authLimiter.js";
 const router = express.Router();
 
 router.post("/register", validateRequest(registerSchema), register);
-router.post("/login", login);
+router.post("/login", validateRequest(loginSchema), login);
 router.post("/logout", logout);
 router.get("/me", softAuth, getMe);
-router.post("/email-verification", authLimiter, requestPasswordReset);
-router.post("/verify-reset-code", verifyResetCode);
-router.post("/newPassword", setNewPassword);
+router.post(
+  "/email-verification",
+  authLimiter,
+  validateRequest(forgetPasswordSchema),
+  requestPasswordReset
+);
+router.post(
+  "/verify-reset-code",
+  validateRequest(resetPasswordSchema),
+  verifyResetCode
+);
+router.post("/newPassword", validateRequest(newPasswordSchema), setNewPassword);
 export default router;

@@ -4,6 +4,7 @@ import MyForm from "../components/MyForm";
 import { useState } from "react";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
+import InputLink from "../components/InputLink";
 
 const forgetPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
@@ -85,8 +86,9 @@ function ForgetPasswordPage() {
         </span>
       )}
       <button disabled={isLoading} className="input-button" type="submit">
-        Obnovit heslo
+        {isLoading ? "Odesílám..." : "obnovit heslo"}
       </button>
+      <InputLink text="Zpět na přihlášení" to="/login" />
     </MyForm>
   );
 }

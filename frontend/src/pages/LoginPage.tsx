@@ -129,7 +129,7 @@ function LoginPage() {
         Nemáte účet? Zaregistrujte se
       </Link>
       <button disabled={isLoading} className="input-button" type="submit">
-        Přihlásit se
+        {isLoading ? "Přihlašování..." : "Přihlásit se"}
       </button>
     </MyForm>
   );
