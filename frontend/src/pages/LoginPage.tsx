@@ -25,6 +25,7 @@ function LoginPage() {
     {}
   );
   const [response, setResponse] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (location.state?.email) {
@@ -34,6 +35,7 @@ function LoginPage() {
   }, []);
   const handleLogin: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     setErrors({});
     setResponse(null);
 
@@ -48,6 +50,7 @@ function LoginPage() {
       });
 
       setErrors(formattedErrors);
+      setIsLoading(false);
       return;
     }
 
@@ -69,6 +72,8 @@ function LoginPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -123,7 +128,7 @@ function LoginPage() {
       >
         Nemáte účet? Zaregistrujte se
       </Link>
-      <button className="input-button" type="submit">
+      <button disabled={isLoading} className="input-button" type="submit">
         Přihlásit se
       </button>
     </MyForm>

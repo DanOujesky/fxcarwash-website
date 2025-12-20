@@ -22,9 +22,12 @@ function RegisterPage() {
     {}
   );
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRegister: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+
+    setIsLoading(true);
     setErrors({});
 
     const validation = registerSchema.safeParse({ email, password });
@@ -38,6 +41,7 @@ function RegisterPage() {
       });
 
       setErrors(formattedErrors);
+      setIsLoading(false);
       return;
     }
 
@@ -58,6 +62,8 @@ function RegisterPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -98,7 +104,7 @@ function RegisterPage() {
       >
         Už jste zaregistrovaní? Přihlaste se
       </Link>
-      <button className="input-button" type="submit">
+      <button disabled={isLoading} className="input-button" type="submit">
         Registrovat se
       </button>
     </MyForm>

@@ -1,12 +1,13 @@
 import InputTitle from "../components/InputTitle";
 import MyForm from "../components/MyForm";
 import InputLink from "../components/InputLink";
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
 
 const resetPasswordSchema = z.object({
-  code: z.string().length(6, "Kód musí mít přesně 6 znaků"),
+  email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
+  code: z.string().length(6, "Neplatný ověřovací kód"),
 });
 
 function ResetPasswordSentPage() {
@@ -14,12 +15,26 @@ function ResetPasswordSentPage() {
   const navigate = useNavigate();
   const [errors, setErrors] = useState<{ code?: string }>({});
 
-  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setCode(e.target.value);
+  const location = useLocation();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const email = location.state?.email || "";
+
+  useEffect(() => {
+    if (!email) {
+      navigate("/login");
+    }
+  }, [email, navigate]);
+
+  const handleCodeVerification: React.FormEventHandler<
+    HTMLFormElement
+  > = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
 
     setErrors({});
 
-    const validation = resetPasswordSchema.safeParse({ code });
+    const validation = resetPasswordSchema.safeParse({ email, code });
 
     if (!validation.success) {
       const formattedErrors: typeof errors = {};
@@ -30,35 +45,36 @@ function ResetPasswordSentPage() {
       });
 
       setErrors(formattedErrors);
+      setIsLoading(false);
       return;
     }
 
-    if (e.target.value.length > 5) {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/auth/register`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(validation.data),
-          }
-        );
-
-        const data = await res.json();
-        if (data.valid === false) {
-          setErrors({ code: "Neplatný kód" });
-          return;
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/auth/verify-reset-code`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(validation.data),
         }
-        navigate("/newPassword");
-      } catch (error) {
-        console.error("Error during navigation:", error);
+      );
+
+      const data = await res.json();
+      if (data.valid === false) {
+        setErrors({ code: data.error });
+        return;
       }
+      navigate("/newPassword", { state: { email: email } });
+    } catch (error) {
+      console.error("Error during navigation:", error);
+    } finally {
+      setIsLoading(false);
     }
-  }
+  };
   return (
-    <MyForm>
+    <MyForm handleFunction={handleCodeVerification}>
       <InputTitle text="Zapomenuté heslo" />
       <p className="text-black max-w-110 text-center">
         Na váš email byl odeslán kod pro reset hesla. Pokud nedojde do pár
@@ -68,7 +84,7 @@ function ResetPasswordSentPage() {
         className="input-field"
         type="text"
         value={code}
-        onChange={handleChange}
+        onChange={(e) => setCode(e.target.value)}
         required
       />
       {errors.code && (
@@ -76,6 +92,9 @@ function ResetPasswordSentPage() {
           {errors.code}
         </span>
       )}
+      <button disabled={isLoading} className="input-button" type="submit">
+        Ověřit kód
+      </button>
       <InputLink text="Zpět na přihlášení" to="/login" />
     </MyForm>
   );

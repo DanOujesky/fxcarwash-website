@@ -13,9 +13,11 @@ function ForgetPasswordPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState<{ email?: string }>({});
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const resetPassword: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     setError({});
 
@@ -30,6 +32,7 @@ function ForgetPasswordPage() {
       });
 
       setError(formattedErrors);
+      setIsLoading(false);
       return;
     }
     try {
@@ -44,9 +47,12 @@ function ForgetPasswordPage() {
         }
       );
       const data = await res.json();
+      if (!res.ok) {
+        setError({ email: data.error || "Něco se nepovedlo" });
+        return;
+      }
       if (data.exists === false) {
         setError({ email: "Tento e-mail není registrován" });
-
         return;
       }
 
@@ -55,6 +61,9 @@ function ForgetPasswordPage() {
       });
     } catch (err) {
       console.error(err);
+      setError({ email: "Chyba serveru. Zkuste to prosím později." });
+    } finally {
+      setIsLoading(false);
     }
   };
   return (
@@ -75,7 +84,7 @@ function ForgetPasswordPage() {
           {error.email}
         </span>
       )}
-      <button className="input-button" type="submit">
+      <button disabled={isLoading} className="input-button" type="submit">
         Obnovit heslo
       </button>
     </MyForm>

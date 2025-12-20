@@ -14,6 +14,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import ResetPasswordSentPage from "./pages/ResetPasswordSentPage";
 import AccountPage from "./pages/AccountPage";
+import NewPasswordPage from "./pages/NewPasswordPage";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <Route path="register" element={<RegisterPage />} />
           <Route path="forgotPassword" element={<ForgetPasswordPage />} />
           <Route path="resetPassword" element={<ResetPasswordSentPage />} />
+          <Route path="newPassword" element={<NewPasswordPage />} />
         </Route>
 
         <Route path="account" element={<AccountPage />} />

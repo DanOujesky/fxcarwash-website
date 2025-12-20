@@ -3,6 +3,52 @@ import { generateToken } from "../utils/generateToken.js";
 import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "../utils/mailer.js";
 
+const setNewPassword = async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { email: email },
+  });
+  if (!user) {
+    return res
+      .status(400)
+      .json({ error: "Žádný uživatel nebyl nenalezen s tímto emailem" });
+  }
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+  await prisma.user.update({
+    where: { email: email },
+    data: {
+      password: hashedPassword,
+      resetCode: null,
+      resetCodeExpiration: null,
+    },
+  });
+
+  res.status(200).json({
+    status: "success",
+    message: "Heslo bylo úspěšně změněno",
+  });
+};
+
+const verifyResetCode = async (req, res) => {
+  const { email, code } = req.body;
+  const user = await prisma.user.findUnique({
+    where: { email: email },
+  });
+  if (!user || user.resetCode !== code) {
+    return res
+      .status(400)
+      .json({ error: "Neplatný ověřovací kód", valid: false });
+  }
+
+  if (new Date() > user.resetCodeExpiration) {
+    return res.status(400).json({ error: "Kód již vypršel", valid: false });
+  }
+  res.status(200).json({ status: "success", valid: true });
+};
+
 const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
@@ -117,4 +163,12 @@ const getMe = (req, res) => {
   res.status(200).json({ status: "success", user: req.user });
 };
 
-export { register, login, logout, getMe, requestPasswordReset };
+export {
+  register,
+  login,
+  logout,
+  getMe,
+  requestPasswordReset,
+  verifyResetCode,
+  setNewPassword,
+};
