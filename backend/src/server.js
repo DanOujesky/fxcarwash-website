@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import newsRoutes from "./routes/newsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import paymentRoutes from "./routes/paymentRoutes.js";
+import webhookRoutes from "./routes/webhookRoutes.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 import cors from "cors";
 import cookeParser from "cookie-parser";
@@ -14,11 +16,15 @@ const corsOptions = {
 };
 app.use(cookeParser());
 app.use(cors(corsOptions));
+
+app.use("/api", webhookRoutes);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/news", newsRoutes);
 app.use("/auth", authRoutes);
+app.use("/payment", paymentRoutes);
 
 const PORT = process.env.PORT || 5001;
 
