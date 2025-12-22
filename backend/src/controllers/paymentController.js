@@ -20,8 +20,8 @@ export const payment = async (req, res) => {
         userId: userId,
         creditsAmount: money,
       },
-      success_url: `${process.env.FRONTEND_URL}/success`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      success_url: `${process.env.FRONTEND_URL}/payment/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
     });
 
     res.json({ url: session.url });

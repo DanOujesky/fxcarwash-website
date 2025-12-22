@@ -15,6 +15,8 @@ import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import ResetPasswordSentPage from "./pages/ResetPasswordSentPage";
 import AccountPage from "./pages/AccountPage";
 import NewPasswordPage from "./pages/NewPasswordPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import PaymentCanceledPage from "./pages/PaymentCanceledPage";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
         <Route path="nabidka" element={<OfferPage />} />
         <Route path="firmy" element={<PartnersPage />} />
         <Route path="kontakt" element={<ContactPage />} />
+        <Route path="payment/success" element={<PaymentSuccessPage />} />
+        <Route path="payment/cancel" element={<PaymentCanceledPage />} />
 
         <Route element={<AuthRedirectHandler />}>
           <Route path="login" element={<LoginPage />} />
