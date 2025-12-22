@@ -23,6 +23,7 @@ function RegisterPage() {
   );
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [response, setResponse] = useState<string | null>(null);
 
   const handleRegister: React.FormEventHandler<HTMLFormElement> = async (e) => {
     e.preventDefault();
@@ -56,7 +57,8 @@ function RegisterPage() {
       const data = await res.json();
       console.log(data);
       if (!res.ok) {
-        throw new Error(data.message);
+        setResponse(data.error);
+        return;
       } else {
         navigate("/login", { state: { email: email } });
       }
@@ -96,6 +98,11 @@ function RegisterPage() {
       {errors.password && (
         <span className="text-red-500 text-center text-sm contactText">
           {errors.password}
+        </span>
+      )}
+      {response && (
+        <span className="text-red-500 text-center text-sm contactText">
+          {response}
         </span>
       )}
       <Link

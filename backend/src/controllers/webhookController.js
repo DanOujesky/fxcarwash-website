@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { prisma } from "../config/db.js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const handleStripeWebhook = async (req, res) => {
@@ -18,10 +19,25 @@ export const handleStripeWebhook = async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     const userId = session.metadata.userId;
+    const cardId = session.metadata.cardId;
     const amount = parseInt(session.metadata.creditsAmount);
 
-    // musim to tady zapsat do databaze
-    console.log(`Uživateli ${userId} připsáno ${amount} kreditů.`);
+    if (cardId && amount) {
+      try {
+        const updatedCard = await prisma.card.update({
+          where: {
+            id: cardId,
+          },
+          data: {
+            credit: {
+              increment: amount,
+            },
+          },
+        });
+      } catch (error) {
+        console.error(error.message);
+      }
+    }
   }
 
   res.json({ received: true });

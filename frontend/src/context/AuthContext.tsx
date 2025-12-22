@@ -1,8 +1,14 @@
 import { createContext } from "react";
 
+interface Card {
+  id: string;
+  number: string;
+  credit: number;
+}
 interface User {
   id: string;
   email: string;
+  cards: Card[];
 }
 
 interface AuthContextType {

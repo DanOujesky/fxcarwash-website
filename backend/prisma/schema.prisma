@@ -28,10 +28,12 @@ model User {
 model Card {
   id String @id @default(uuid())
   number String
-  credit Int
+  credit Int @default(0)
   userId String
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model News {

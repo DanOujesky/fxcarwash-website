@@ -5,6 +5,7 @@ import { useState } from "react";
 import { z } from "zod";
 
 const paymentSchema = z.object({
+  number: z.string().min(1, "Číslo karty je povinné"),
   money: z.coerce
     .number()
     .min(10, "Minimální částka je 10 Kč")
@@ -16,7 +17,8 @@ function AccountPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [money, setMoney] = useState("");
-  const [errors, setErrors] = useState<{ money?: string }>({});
+  const [number, setNumber] = useState("");
+  const [errors, setErrors] = useState<{ number?: string; money?: string }>({});
 
   useEffect(() => {
     if (!loading && !user) {
@@ -32,7 +34,7 @@ function AccountPage() {
     setIsLoading(true);
     setErrors({});
 
-    const validation = paymentSchema.safeParse({ money });
+    const validation = paymentSchema.safeParse({ number, money });
 
     if (!validation.success) {
       const formattedErrors: typeof errors = {};
@@ -55,11 +57,15 @@ function AccountPage() {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ money: money }),
+          body: JSON.stringify(validation.data),
           credentials: "include",
         }
       );
       const data = await res.json();
+      if (data.cardNotFound === true) {
+        setErrors({ number: data.error || "Karta nebyla nalezena" });
+        return;
+      }
       if (!res.ok) {
         setErrors({ money: data.error || "Něco se nepovedlo" });
         return;
@@ -84,11 +90,43 @@ function AccountPage() {
           <span className="font-medium">Email:</span> {user.email}
         </p>
       </div>
+      <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray-200">
+        <h2 className="text-lg text-black font-semibold mb-2">Karty</h2>
+        {user.cards.length > 0 ? (
+          user.cards.map((card) => (
+            <div key={card.number}>
+              <p className="text-gray-700">
+                <span className="font-medium">Číslo:</span> {card.number}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-medium">Kredit:</span> {card.credit}
+              </p>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-700">Nemáte žádnou kartu</p>
+        )}
+      </div>
       <div className="flex flex-col my-2">
-        <label className="text-white">Pocet penez</label>
+        <label className="text-white">Zadejte číslo karty</label>
         <input
           className="h-10 bg-white text-black contactText p-5"
-          type="money"
+          type="text"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+          required
+        />
+      </div>
+      {errors.number && (
+        <span className="text-red-500 text-center text-sm contactText">
+          {errors.number}
+        </span>
+      )}
+      <div className="flex flex-col my-2">
+        <label className="text-white">Pocet penez (Kč)</label>
+        <input
+          className="h-10 bg-white text-black contactText p-5"
+          type="text"
           value={money}
           onChange={(e) => setMoney(e.target.value)}
           required
@@ -99,16 +137,18 @@ function AccountPage() {
           {errors.money}
         </span>
       )}
+
       <button
         className="mt-6 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
         onClick={handlePayment}
         disabled={isLoading}
       >
-        Zaplatit
+        {isLoading ? "Přesměrovávám..." : "Zaplatit"}
       </button>
       <button
         className="mt-6 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
         onClick={logout}
+        disabled={isLoading}
       >
         Odhlásit se
       </button>

@@ -25,6 +25,8 @@ export const authMiddleware = async (req, res, next) => {
       select: {
         id: true,
         email: true,
+        role: true,
+        cards: true,
       },
     });
 
@@ -52,7 +54,12 @@ export const softAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
-      select: { id: true, email: true },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        cards: true,
+      },
     });
     req.user = user || null;
   } catch (error) {

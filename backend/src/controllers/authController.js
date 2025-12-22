@@ -110,6 +110,12 @@ const register = async (req, res) => {
     data: {
       email: email,
       password: hashedPassword,
+      cards: {
+        create: {
+          number: "123456789",
+          credit: 0,
+        },
+      },
     },
   });
 
