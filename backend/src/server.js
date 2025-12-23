@@ -9,6 +9,7 @@ import cors from "cors";
 import cookeParser from "cookie-parser";
 
 const app = express();
+app.set("trust proxy", 1);
 
 const corsOptions = {
   origin: process.env.FRONTEND_URL,

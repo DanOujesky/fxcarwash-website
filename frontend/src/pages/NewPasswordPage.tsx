@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 const newPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
+  code: z.string().length(6, "Neplatný ověřovací kód"),
 
   newPassword: z
     .string()
@@ -23,12 +24,13 @@ function NewPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const email = location.state?.email || "";
+  const code = location.state?.code || "";
 
   useEffect(() => {
-    if (!email) {
+    if (!email || !code) {
       navigate("/login");
     }
-  }, [email, navigate]);
+  }, [email, code, navigate]);
 
   const handleNewPassword: React.FormEventHandler<HTMLFormElement> = async (
     e
@@ -37,7 +39,11 @@ function NewPasswordPage() {
     setIsLoading(true);
     setErrors({});
 
-    const validation = newPasswordSchema.safeParse({ email, newPassword });
+    const validation = newPasswordSchema.safeParse({
+      email,
+      code,
+      newPassword,
+    });
 
     if (!validation.success) {
       const formattedErrors: typeof errors = {};
@@ -64,9 +70,9 @@ function NewPasswordPage() {
         }
       );
       const data = await res.json();
-      console.log(data);
       if (!res.ok) {
-        throw new Error(data.message);
+        console.log(data.error);
+        return;
       } else {
         navigate("/login", { state: { email: email } });
       }

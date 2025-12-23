@@ -67,7 +67,7 @@ function ResetPasswordSentPage() {
         setErrors({ code: data.error });
         return;
       }
-      navigate("/newPassword", { state: { email: email } });
+      navigate("/newPassword", { state: { email: email, code: code } });
     } catch (error) {
       console.error("Error during navigation:", error);
     } finally {

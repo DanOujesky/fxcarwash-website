@@ -4,16 +4,21 @@ import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "../utils/mailer.js";
 
 const setNewPassword = async (req, res) => {
-  const { email, newPassword } = req.body;
+  const { email, code, newPassword } = req.body;
 
   const user = await prisma.user.findUnique({
     where: { email: email },
   });
-  if (!user) {
+  if (!user || user.resetCode !== code) {
     return res
       .status(400)
-      .json({ error: "Žádný uživatel nebyl nenalezen s tímto emailem" });
+      .json({ error: "Neplatný ověřovací kód", valid: false });
   }
+
+  if (new Date() > user.resetCodeExpiration) {
+    return res.status(400).json({ error: "Kód již vypršel", valid: false });
+  }
+
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(newPassword, salt);
 
@@ -105,6 +110,9 @@ const register = async (req, res) => {
   }
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
+  const uniqueCardNumber = Math.floor(
+    100000000 + Math.random() * 900000000
+  ).toString();
 
   const newUser = await prisma.user.create({
     data: {
@@ -112,7 +120,7 @@ const register = async (req, res) => {
       password: hashedPassword,
       cards: {
         create: {
-          number: "123456789",
+          number: uniqueCardNumber,
           credit: 0,
         },
       },

@@ -26,7 +26,7 @@ export const forgetPasswordSchema = z.object({
 
 export const newPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
-
+  code: z.string().length(6, "Neplatný ověřovací kód"),
   newPassword: z
     .string()
     .min(8, "Heslo musí mít alespoň 8 znaků")

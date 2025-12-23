@@ -17,22 +17,33 @@ import {
 } from "../validators/authValidators.js";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { authMiddleware, softAuth } from "../middleware/authMiddleware.js";
-import { authLimiter } from "../utils/authLimiter.js";
+import {
+  registerLimiter,
+  loginLimiter,
+  requestResetLimiter,
+  verifyCodeLimiter,
+} from "../utils/authLimiter.js";
 
 const router = express.Router();
 
-router.post("/register", validateRequest(registerSchema), register);
-router.post("/login", validateRequest(loginSchema), login);
+router.post(
+  "/register",
+  registerLimiter,
+  validateRequest(registerSchema),
+  register
+);
+router.post("/login", loginLimiter, validateRequest(loginSchema), login);
 router.post("/logout", logout);
 router.get("/me", softAuth, getMe);
 router.post(
   "/email-verification",
-  authLimiter,
+  requestResetLimiter,
   validateRequest(forgetPasswordSchema),
   requestPasswordReset
 );
 router.post(
   "/verify-reset-code",
+  verifyCodeLimiter,
   validateRequest(resetPasswordSchema),
   verifyResetCode
 );
