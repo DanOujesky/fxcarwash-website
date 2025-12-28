@@ -18,7 +18,6 @@ li {
   font-style: normal;
 }
 
-/* Custom utility classes */
 .header-navlink {
   @apply hover:text-gray-500 text-3xl md:text-4xl xl:text-5xl;
   font-family: "Ethnocentric", sans-serif;

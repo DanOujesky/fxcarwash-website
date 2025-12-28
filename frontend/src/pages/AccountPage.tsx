@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { z } from "zod";
+import CustomCard from "../components/CustomCard";
 
 const paymentSchema = z.object({
   number: z.string().min(1, "Číslo karty je povinné"),
@@ -103,6 +104,14 @@ function AccountPage() {
               </p>
             </div>
           ))
+        ) : (
+          <p className="text-gray-700">Nemáte žádnou kartu</p>
+        )}
+      </div>
+      <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray-200">
+        <h2 className="text-lg text-black font-semibold mb-2">Karty</h2>
+        {user.cards.length > 0 ? (
+          user.cards.map((card) => <CustomCard number={card.number} />)
         ) : (
           <p className="text-gray-700">Nemáte žádnou kartu</p>
         )}

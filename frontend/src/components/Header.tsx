@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import ExternalLink from "./ExternalLink";
 
 type HeaderProps = {
@@ -127,7 +127,8 @@ function Header({ homePage }: HeaderProps) {
       )}
 
       {isSideBarOpen && (
-        <div className="fixed top-0 left-0 w-full sm:w-1/2 bottom-0 z-99 bg-black flex justify-center items-center">
+        <div className="fixed top-0 left-0 w-full sm:w-1/2 bottom-0 z-99 bg-black flex justify-center items-center flex-col">
+          <div className="flex-1"></div>
           <ul className="flex flex-col gap-4">
             <li>
               <NavLink
@@ -203,8 +204,17 @@ function Header({ homePage }: HeaderProps) {
               </NavLink>
             </li>
           </ul>
+          <div className="flex-1 w-full flex justify-center items-center">
+            <Link
+              className="hover:text-gray-500 text-xl md:text-2xl xl:text-3xl contactText border-2 p-2"
+              to="/login"
+            >
+              PŘIHLÁSIT SE
+            </Link>
+          </div>
         </div>
       )}
+
       {isSideBarOpen && (
         <div className="fixed inset-0 bg-black opacity-50 z-98"></div>
       )}
