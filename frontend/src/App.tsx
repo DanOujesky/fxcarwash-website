@@ -38,7 +38,6 @@ function App() {
           <Route path="resetPassword" element={<ResetPasswordSentPage />} />
           <Route path="newPassword" element={<NewPasswordPage />} />
         </Route>
-
         <Route path="account" element={<AccountPage />} />
       </Routes>
     </AuthProvider>

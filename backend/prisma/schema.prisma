@@ -14,8 +14,15 @@ datasource db {
 
 model User {
   id String @id @default(uuid())
+  firstName String
+  lastName String
   email String @unique
   password String
+  phone String
+  street String
+  city String
+  zipCode String
+  country String
   role Role @default(USER)
   resetCode String?
   resetCodeExpiration DateTime? 

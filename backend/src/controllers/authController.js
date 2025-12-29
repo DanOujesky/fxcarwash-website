@@ -97,7 +97,17 @@ const requestPasswordReset = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const { email, password } = req.body;
+  const {
+    firstName,
+    lastName,
+    email,
+    password,
+    phone,
+    street,
+    city,
+    zipCode,
+    country,
+  } = req.body;
 
   const userExists = await prisma.user.findUnique({
     where: { email: email },
@@ -110,20 +120,18 @@ const register = async (req, res) => {
   }
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
-  const uniqueCardNumber = Math.floor(
-    100000000 + Math.random() * 900000000
-  ).toString();
 
   const newUser = await prisma.user.create({
     data: {
+      firstName: firstName,
+      lastName: lastName,
       email: email,
       password: hashedPassword,
-      cards: {
-        create: {
-          number: uniqueCardNumber,
-          credit: 0,
-        },
-      },
+      phone: phone,
+      street: street,
+      city: city,
+      zipCode: zipCode,
+      country: country,
     },
   });
 

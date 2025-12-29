@@ -55,8 +55,14 @@ export const softAuth = async (req, res, next) => {
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
-        id: true,
+        firstName: true,
+        lastName: true,
         email: true,
+        phone: true,
+        street: true,
+        city: true,
+        zipCode: true,
+        country: true,
         role: true,
         cards: true,
       },

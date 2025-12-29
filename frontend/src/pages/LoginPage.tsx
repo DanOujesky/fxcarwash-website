@@ -68,7 +68,7 @@ function LoginPage() {
         setResponse(data.error);
         return;
       } else {
-        navigate("/");
+        window.location.href = "/account";
       }
     } catch (err) {
       console.error(err);

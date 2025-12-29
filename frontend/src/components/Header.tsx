@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import ExternalLink from "./ExternalLink";
+import { useAuth } from "../hooks/useAuth";
 
 type HeaderProps = {
   homePage: boolean;
@@ -9,6 +10,8 @@ type HeaderProps = {
 function Header({ homePage }: HeaderProps) {
   const [isSideBarOpen, setIsSideBarOpen] = useState(false);
   const [mobileScreen, setMobileScreen] = useState(false);
+
+  const { user } = useAuth();
 
   const toggleSideBar = () => {
     setIsSideBarOpen(!isSideBarOpen);
@@ -209,7 +212,7 @@ function Header({ homePage }: HeaderProps) {
               className="hover:text-gray-500 text-xl md:text-2xl xl:text-3xl contactText border-2 p-2"
               to="/login"
             >
-              PŘIHLÁSIT SE
+              {user ? "MŮJ PROFIL" : "PŘIHLÁSIT SE"}
             </Link>
           </div>
         </div>

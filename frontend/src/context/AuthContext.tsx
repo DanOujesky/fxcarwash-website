@@ -3,11 +3,18 @@ import { createContext } from "react";
 interface Card {
   id: string;
   number: string;
+  name: string;
   credit: number;
 }
 interface User {
-  id: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  phone: string;
+  street: string;
+  city: string;
+  zipCode: string;
+  country: string;
   cards: Card[];
 }
 

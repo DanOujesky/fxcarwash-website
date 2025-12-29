@@ -88,33 +88,44 @@ function AccountPage() {
       <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray-200">
         <h2 className="text-lg text-black font-semibold mb-2">Osobní údaje</h2>
         <p className="text-gray-700">
-          <span className="font-medium">Email:</span> {user.email}
+          <span className="font-medium">Jméno:</span> {user.firstName}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Příjmení:</span> {user.lastName}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">E-mail:</span> {user.email}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Telefon:</span> {user.phone}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Ulice a číslo popisné:</span>{" "}
+          {user.street}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">PSČ:</span> {user.zipCode}
+        </p>
+        <p className="text-gray-700">
+          <span className="font-medium">Stát:</span> {user.country}
         </p>
       </div>
       <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray-200">
         <h2 className="text-lg text-black font-semibold mb-2">Karty</h2>
         {user.cards.length > 0 ? (
           user.cards.map((card) => (
-            <div key={card.number}>
-              <p className="text-gray-700">
-                <span className="font-medium">Číslo:</span> {card.number}
-              </p>
-              <p className="text-gray-700">
-                <span className="font-medium">Kredit:</span> {card.credit}
-              </p>
-            </div>
+            <CustomCard
+              credit={card.credit}
+              number={card.number}
+              key={card.id}
+            />
           ))
         ) : (
           <p className="text-gray-700">Nemáte žádnou kartu</p>
         )}
-      </div>
-      <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray-200">
-        <h2 className="text-lg text-black font-semibold mb-2">Karty</h2>
-        {user.cards.length > 0 ? (
-          user.cards.map((card) => <CustomCard number={card.number} />)
-        ) : (
-          <p className="text-gray-700">Nemáte žádnou kartu</p>
-        )}
+        <button className="bg-green-500 p-2 inline-block hover:bg-green-600 rounded-sm mt-5">
+          PŘIDAT KARTU
+        </button>
       </div>
       <div className="flex flex-col my-2">
         <label className="text-white">Zadejte číslo karty</label>
