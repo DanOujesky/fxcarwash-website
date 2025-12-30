@@ -36,9 +36,9 @@ model Card {
   id String @id @default(uuid())
   number String
   credit Int @default(0)
-  userId String
+  userId String? @unique
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([userId])
 }

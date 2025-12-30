@@ -11,14 +11,16 @@ interface MapySuggestion {
 
 interface AddressAutocompleteProps {
   onAddressSelect?: (address: MapySuggestion) => void;
-  error: boolean;
+  error?: boolean;
+  initialValue?: string;
 }
 
 const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   onAddressSelect,
   error,
+  initialValue,
 }) => {
-  const [inputValue, setInputValue] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>(initialValue || "");
   const [suggestions, setSuggestions] = useState<MapySuggestion[]>([]);
 
   const API_KEY = import.meta.env.VITE_MAPY_API_KEY as string;

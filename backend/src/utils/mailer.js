@@ -15,10 +15,20 @@ const transporter = nodemailer.createTransport({
 
 export const sendVerificationEmail = async (email, code) => {
   await transporter.sendMail({
-    from: "onboarding@resend.dev",
+    from: process.env.EMAIL_FROM,
     to: email,
     subject: "Váš ověřovací kód",
     text: `Váš kód pro obnovení hesla je: ${code}`,
     html: `<b>Váš kód pro obnovení hesla je: ${code}</b>`,
+  });
+};
+
+export const sendOrderEmail = async (user) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM,
+    to: user.email,
+    subject: "Potvrzení objednávky",
+    text: `${user.email}`,
+    html: `<b>${user.email}</b>`,
   });
 };

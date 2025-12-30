@@ -11,6 +11,11 @@ export const loginLimiter = rateLimit({
   max: 5,
   message: { error: "Příliš mnoho pokusů, zkuste to prosím za 15 minut." },
 });
+export const orderLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: { error: "Příliš mnoho objednávek, zkuste to prosím za 15 minut." },
+});
 
 export const requestResetLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,

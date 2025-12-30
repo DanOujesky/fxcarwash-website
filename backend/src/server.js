@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import newsRoutes from "./routes/newsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import accountRoutes from "./routes/accountRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
 import { connectDB, disconnectDB } from "./config/db.js";
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/news", newsRoutes);
 app.use("/auth", authRoutes);
 app.use("/payment", paymentRoutes);
+app.use("/account", accountRoutes);
 
 const PORT = process.env.PORT || 5001;
 

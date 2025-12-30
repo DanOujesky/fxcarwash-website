@@ -80,7 +80,6 @@ const requestPasswordReset = async (req, res) => {
 
   try {
     await sendVerificationEmail(email, resetCode);
-    console.log("Email byl úspěšně odeslán");
     res.status(200).json({
       status: "success",
       message: "Kód pro obnovení hesla byl odeslán na váš email",
@@ -88,7 +87,6 @@ const requestPasswordReset = async (req, res) => {
       email: email,
     });
   } catch (error) {
-    console.error("DETAL CHYBY EMAILU:", error);
     res.status(500).json({
       error: "Failed to send verification email",
       details: error.message,
