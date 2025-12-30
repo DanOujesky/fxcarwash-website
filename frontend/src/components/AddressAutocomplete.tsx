@@ -62,7 +62,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        className={`w-full bg-black p-2 text-white contactText border-2 ${
+        className={`w-full bg-black p-2 text-white contactText border-2${
           error ? "border-red-500" : "border-transparent"
         }`}
       />

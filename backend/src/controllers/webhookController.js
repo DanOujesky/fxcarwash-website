@@ -1,5 +1,10 @@
 import Stripe from "stripe";
 import { prisma } from "../config/db.js";
+import {
+  sendOrderEmailToUser,
+  sendOrderEmailToCompany,
+} from "../utils/mailer.js";
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const handleStripeWebhook = async (req, res) => {
@@ -13,32 +18,67 @@ export const handleStripeWebhook = async (req, res) => {
       process.env.STRIPE_WEBHOOK_SECRET
     );
   } catch (error) {
-    return res.status(400).send(`Webhook Error:  ${error.message}`);
+    console.error(`Webhook Error: ${error.message}`);
+    return res.status(400).send(`Webhook Error: ${error.message}`);
   }
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
-    const userId = session.metadata.userId;
-    const cardId = session.metadata.cardId;
-    const amount = parseInt(session.metadata.creditsAmount);
 
-    if (cardId && amount) {
-      try {
-        const updatedCard = await prisma.card.update({
-          where: {
-            id: cardId,
-          },
-          data: {
-            credit: {
-              increment: amount,
-            },
-          },
-        });
-      } catch (error) {
-        console.error(error.message);
+    const {
+      cardId,
+      creditsAmount,
+      action,
+      userId,
+      shipping,
+      street,
+      quantity,
+    } = session.metadata;
+
+    if (!cardId || !creditsAmount) {
+      console.error("Missing metadata in Stripe session");
+      return res.status(400).json({ error: "Missing metadata" });
+    }
+
+    const amount = parseInt(creditsAmount);
+    let updateData = {};
+
+    const user = await prisma.user.findFirst({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        error: "Žádný uživatel nebyl nenalezen s tímto emailem",
+      });
+    }
+
+    if (action === "createCard") {
+      updateData = {
+        userId: userId,
+        credit: { increment: amount },
+      };
+    } else if (action === "addCredit") {
+      updateData = {
+        credit: { increment: amount },
+      };
+    }
+
+    try {
+      await prisma.card.update({
+        where: { id: cardId },
+        data: updateData,
+      });
+
+      if (action === "createCard") {
+        await sendOrderEmailToUser(user);
+        await sendOrderEmailToCompany(user);
+      } else if (action === "addCredit") {
       }
+    } catch (error) {
+      console.error(`Database Error: ${error.message}`);
+      return res.status(500).json({ error: "Database update failed" });
     }
   }
-
-  res.json({ received: true });
+  res.status(200).json({ received: true });
 };

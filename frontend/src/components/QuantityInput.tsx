@@ -39,7 +39,7 @@ const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center border border-white/20 bg-black w-fit">
+      <div className="flex items-center  bg-black w-fit">
         <button
           onClick={decrement}
           disabled={value <= min}

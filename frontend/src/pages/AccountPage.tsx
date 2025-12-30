@@ -6,25 +6,45 @@ import { z } from "zod";
 import CustomCard from "../components/CustomCard";
 import Inputlabel from "../components/InputLabel";
 import AddressAutocomplete from "../components/AddressAutocomplete";
-import QuantityInput from "../components/QuantityInput";
 
-const paymentSchema = z.object({
-  number: z.string().min(1, "Číslo karty je povinné"),
-  money: z.coerce
-    .number()
-    .min(10, "Minimální částka je 10 Kč")
-    .max(50000, "Maximální částka je 50 000 Kč"),
-});
+const paymentSchema = z
+  .object({
+    cardNumber: z.string().min(1, "Číslo karty je povinné"),
+    credit: z.coerce
+      .number()
+      .min(10, "Minimální částka je 10 Kč")
+      .max(50000, "Maximální částka je 50 000 Kč"),
+    action: z.enum(["createCard", "addCredit"], {
+      error: "neplatná akce",
+    }),
+    shipping: z.string().optional(),
+    street: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (
+      data.action === "createCard" &&
+      !["cp", "op"].includes(data.shipping || "")
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Zvolte platný způsob dopravy",
+        path: ["shipping"],
+      });
+    }
+  });
 
 const orderSchema = z
   .object({
-    shipping: z.enum(["cp", "op"] as const, {
+    shipping: z.enum(["cp", "op"], {
       error: "Vyberte způsob doručení",
     }),
-    quantity: z.number().min(1).max(100),
     street: z.string().optional(),
     city: z.string().optional(),
     zipCode: z.string().optional(),
+    credit: z.coerce
+      .number("Kredit musí být číslo")
+      .min(10, "Minimální částka je 10 Kč")
+      .max(50000, "Maximální částka je 50 000 Kč"),
   })
   .superRefine((data, ctx) => {
     if (data.shipping === "cp") {
@@ -55,21 +75,23 @@ interface MapySuggestion {
 function AccountPage() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+  const [number, setNumber] = useState("");
+  const [money, setMoney] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOrdering, setIsOrdering] = useState(false);
-  const [money, setMoney] = useState("");
-  const [number, setNumber] = useState("");
+  const [credit, setCredit] = useState("");
+  const [prize, setPrize] = useState("0");
   const [addCard, setAddCard] = useState(false);
   const [shipping, setShipping] = useState("");
-  const [quantity, setQuantity] = useState(1);
   const [street, setStreet] = useState("");
   const [errors, setErrors] = useState<{
-    number?: string;
-    money?: string;
     shipping?: string;
-    quanity?: string;
+    quantity?: string;
     street?: string;
+    credit?: string;
+    response?: string;
   }>({});
+  const [selectedCardId, setSelectedCardId] = useState("");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -80,7 +102,12 @@ function AccountPage() {
   if (loading || !user) {
     return <div className="h-screen bg-black" />;
   }
-
+  const clearCreditForm = () => {
+    setSelectedCardId("");
+    setNumber("");
+    setMoney("");
+    setErrors({ credit: "" });
+  };
   const handleCardOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
@@ -88,8 +115,8 @@ function AccountPage() {
 
     const validation = orderSchema.safeParse({
       shipping,
-      quantity,
       street,
+      credit,
     });
 
     if (!validation.success) {
@@ -104,24 +131,36 @@ function AccountPage() {
       return;
     }
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/account/create-order`,
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/account/get-card`,
         {
-          method: "POST",
+          method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ orderData: validation.data, user: user }),
           credentials: "include",
         }
       );
-      const data = await res.json();
-      if (data.status === "success") {
-        setIsOrdering(false);
-        setAddCard(false);
+      const cardData = await response.json();
+
+      if (!response.ok) {
+        setErrors({ quantity: cardData.error || "Něco se nepovedlo" });
+        return;
       }
+      const cardNumber = cardData.cardNumber;
+      const action = "createCard";
+
+      await handlePayment({
+        cardNumber,
+        credit,
+        action,
+        shipping,
+        street,
+      });
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsOrdering(false);
     }
   };
 
@@ -129,11 +168,27 @@ function AccountPage() {
     setStreet(address.name);
   };
 
-  const handlePayment = async () => {
-    setIsLoading(true);
-    setErrors({});
-
-    const validation = paymentSchema.safeParse({ number, money });
+  const handlePayment = async ({
+    cardNumber,
+    credit,
+    action,
+    shipping,
+    street,
+  }: {
+    cardNumber: string;
+    credit: string;
+    action: string;
+    shipping?: string;
+    street?: string;
+    quantity?: number;
+  }) => {
+    const validation = paymentSchema.safeParse({
+      cardNumber,
+      credit,
+      action,
+      shipping,
+      street,
+    });
 
     if (!validation.success) {
       const formattedErrors: typeof errors = {};
@@ -147,6 +202,13 @@ function AccountPage() {
       setIsLoading(false);
       return;
     }
+    if (action === "createCard") {
+      setIsOrdering(true);
+    } else if (action === "addCredit") {
+      setIsLoading(true);
+    }
+
+    setErrors({});
 
     try {
       const res = await fetch(
@@ -162,11 +224,11 @@ function AccountPage() {
       );
       const data = await res.json();
       if (data.cardNotFound === true) {
-        setErrors({ number: data.error || "Karta nebyla nalezena" });
+        setErrors({ response: data.error || "Karta nebyla nalezena" });
         return;
       }
       if (!res.ok) {
-        setErrors({ money: data.error || "Něco se nepovedlo" });
+        setErrors({ response: data.error || "Něco se nepovedlo" });
         return;
       }
       if (data.url) {
@@ -180,10 +242,10 @@ function AccountPage() {
   };
 
   return (
-    <div className="p-10 text-white bg-black min-h-screen justify-center align-center flex flex-col">
+    <div className="p-10 text-white bg-black min-h-screen justify-center align-center flex flex-col gap-5">
       <h1 className="text-2xl font-bold mb-4 text-center">Můj Účet</h1>
 
-      <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-gray-100 p-6 ">
         <h2 className="text-lg text-black font-semibold mb-2">Osobní údaje</h2>
         <p className="text-gray-700">
           <span className="font-medium">Jméno:</span> {user.firstName}
@@ -202,27 +264,104 @@ function AccountPage() {
           {user.street}
         </p>
         <p className="text-gray-700">
+          <span className="font-medium">Město:</span> {user.city}
+        </p>
+        <p className="text-gray-700">
           <span className="font-medium">PSČ:</span> {user.zipCode}
         </p>
         <p className="text-gray-700">
           <span className="font-medium">Stát:</span> {user.country}
         </p>
       </div>
-      <div className="bg-gray-100 p-6 rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-gray-100 p-6 ">
         <h2 className="text-lg text-black font-semibold mb-2">Karty</h2>
         {user.cards.length > 0 ? (
           user.cards.map((card) => (
-            <CustomCard
-              credit={card.credit}
-              number={card.number}
+            <div
+              className="cursor-pointer hover:bg-gray-300"
               key={card.id}
-            />
+              onClick={() => {
+                setSelectedCardId(card.id);
+                setNumber(card.number);
+                setAddCard(false);
+                if (!addCard) setShipping("");
+              }}
+            >
+              <CustomCard
+                credit={card.credit}
+                number={card.number}
+                isSelected={selectedCardId === card.id}
+              />
+            </div>
           ))
         ) : (
           <p className="text-gray-700">Nemáte žádnou kartu</p>
         )}
+        {selectedCardId && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handlePayment({
+                cardNumber: number,
+                credit: money,
+                action: "addCredit",
+              });
+            }}
+            className="flex flex-col gap-5"
+          >
+            <h2 className="text-lg text-black font-semibold mb-2 text-center">
+              Dobíjení kreditu
+            </h2>
+            <div className="flex flex-col">
+              <Inputlabel text="Číslo karty" />
+              <input
+                className=" bg-black text-white contactText p-2"
+                type="text"
+                value={number}
+                readOnly
+              />
+            </div>
+            <div className="flex flex-col">
+              <Inputlabel text="Kredit" />
+              <input
+                className=" bg-black text-white contactText p-2"
+                type="text"
+                value={money}
+                onChange={(e) => {
+                  setMoney(e.target.value);
+                }}
+              />
+            </div>
+            {errors.credit && (
+              <span className="text-red-500 text-center text-sm contactText">
+                {errors.credit}
+              </span>
+            )}
+            <div className="flex justify-center">
+              <button
+                className="p-20 bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all my-4"
+                type="submit"
+                disabled={isLoading || isOrdering}
+              >
+                {isLoading ? "Přesměrovávám..." : "Zaplatit"}
+              </button>
+            </div>
+            <div className="flex">
+              <button
+                className="p-2 bg-red-500 hover:bg-red-600 p-2 inline-block  rounded-sm mt-5"
+                disabled={isLoading || isOrdering}
+                onClick={clearCreditForm}
+              >
+                Zrušit
+              </button>
+            </div>
+          </form>
+        )}
         {addCard && (
           <form className="my-5 flex flex-col gap-3" onSubmit={handleCardOrder}>
+            <h2 className="text-lg text-black font-semibold mb-2 text-center">
+              Objednání karty
+            </h2>
             <div className="flex flex-col">
               <Inputlabel text="Vyberte způsob doručení" />
               <select
@@ -247,13 +386,30 @@ function AccountPage() {
                 initialValue={user.street}
               />
             )}
-            {shipping === "op" && <p className="text-black">...........</p>}
-            <div>
-              <Inputlabel text="Množství" />
-              <QuantityInput
-                value={quantity}
-                onChange={(val) => setQuantity(val)}
+            {shipping === "op" && (
+              <p className="text-black">
+                Osobní převzetí na adrese naší provozovny: K černému mostu, 330
+                12 Horní Bříza. Jakmile bude Vaše karta připravena, kontaktujeme
+                Vás telefonicky/mailem.
+              </p>
+            )}
+            <div className="flex flex-col">
+              <Inputlabel text="Zadejte výši Kreditu" />
+              <input
+                className=" bg-black text-white contactText p-2"
+                type="text"
+                value={credit}
+                onChange={(e) => {
+                  setCredit(e.target.value);
+                  setPrize(e.target.value);
+                }}
               />
+            </div>
+            <div className="text-black contactText">
+              Vaše Cena: <span className="">{prize} Kč</span>
+            </div>
+            <div className="text-black contactText">
+              Nahraný Kredit: <span className="">{Number(prize) * 1.1} Kč</span>
             </div>
             {(errors.shipping && (
               <span className="text-red-500 text-center text-sm contactText">
@@ -265,14 +421,25 @@ function AccountPage() {
                   {errors.street}
                 </span>
               )) ||
-              (errors.quanity && (
+              (errors.quantity && (
                 <span className="text-red-500 text-center text-sm contactText">
-                  {errors.quanity}
+                  {errors.quantity}
+                </span>
+              )) ||
+              (errors.credit && (
+                <span className="text-red-500 text-center text-sm contactText">
+                  {errors.credit}
+                </span>
+              )) ||
+              (errors.response && (
+                <span className="text-red-500 text-center text-sm contactText">
+                  {errors.credit}
                 </span>
               ))}
+
             <div className="flex justify-center">
               <button
-                className="p-20 bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all mt-4"
+                className="p-20 bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all my-4"
                 type="submit"
                 disabled={isLoading || isOrdering}
               >
@@ -289,52 +456,15 @@ function AccountPage() {
           } p-2 inline-block  rounded-sm mt-5`}
           onClick={() => {
             setAddCard(!addCard);
+            clearCreditForm();
             if (!addCard) setShipping("");
           }}
         >
           {addCard ? "Zrušit" : "PŘIDAT KARTU"}
         </button>
       </div>
-      <div className="flex flex-col my-2">
-        <label className="text-white">Zadejte číslo karty</label>
-        <input
-          className="h-10 bg-white text-black contactText p-5"
-          type="text"
-          value={number}
-          onChange={(e) => setNumber(e.target.value)}
-          required
-        />
-      </div>
-      {errors.number && (
-        <span className="text-red-500 text-center text-sm contactText">
-          {errors.number}
-        </span>
-      )}
-      <div className="flex flex-col my-2">
-        <label className="text-white">Pocet penez (Kč)</label>
-        <input
-          className="h-10 bg-white text-black contactText p-5"
-          type="text"
-          value={money}
-          onChange={(e) => setMoney(e.target.value)}
-          required
-        />
-      </div>
-      {errors.money && (
-        <span className="text-red-500 text-center text-sm contactText">
-          {errors.money}
-        </span>
-      )}
-
       <button
-        className="mt-6 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
-        onClick={handlePayment}
-        disabled={isLoading || isOrdering}
-      >
-        {isLoading ? "Přesměrovávám..." : "Zaplatit"}
-      </button>
-      <button
-        className="mt-6 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
         onClick={logout}
         disabled={isLoading || isOrdering}
       >

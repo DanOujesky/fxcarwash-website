@@ -23,12 +23,31 @@ export const sendVerificationEmail = async (email, code) => {
   });
 };
 
-export const sendOrderEmail = async (user) => {
+export const sendOrderEmailToUser = async (user) => {
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to: user.email,
     subject: "Potvrzení objednávky",
     text: `${user.email}`,
     html: `<b>${user.email}</b>`,
+  });
+};
+export const sendOrderEmailToCompany = async (user) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM,
+    to: process.env.FXCARWASH_EMAIL,
+    subject: "Potvrzení objednávky",
+    text: `${user.email}`,
+    html: `<b>${user.email}</b>`,
+  });
+};
+
+export const noCardsAvailableEmail = async () => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_FROM,
+    to: process.env.FXCARWASH_EMAIL,
+    subject: "Dosli dostupne karty",
+    text: `Dosli karty`,
+    html: `<b>Dosli karty</b>`,
   });
 };
