@@ -47,7 +47,7 @@ function Footer() {
             alt="instagram-icon"
           />
         </ExternalLink>
-        <ExternalLink href="https://facebook.com">
+        <ExternalLink href="https://facebook.com/61585347136984/">
           <img
             className="w-6 h-6 invert"
             src="/icons/facebook-icon.svg"

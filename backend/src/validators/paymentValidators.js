@@ -11,7 +11,6 @@ export const paymentSchema = z
       error: "neplatná akce",
     }),
     shipping: z.string().optional(),
-    quantity: z.number().min(1).max(100).optional(),
     street: z.string().optional(),
   })
   .superRefine((data, ctx) => {

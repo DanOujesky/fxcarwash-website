@@ -2,7 +2,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 import { prisma } from "../config/db.js";
 export const payment = async (req, res) => {
-  const { cardNumber, credit, action, shipping, quantity, street } = req.body;
+  const { cardNumber, credit, action, shipping, street } = req.body;
   const userId = req.user.id;
 
   const amount = Math.round(parseFloat(credit) * 100);
@@ -43,7 +43,6 @@ export const payment = async (req, res) => {
         userId: userId,
         shipping: shipping,
         street: street,
-        quantity: quantity,
       },
       success_url: `${process.env.FRONTEND_URL}/payment/success`,
       cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,

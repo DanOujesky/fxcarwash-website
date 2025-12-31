@@ -405,11 +405,15 @@ function AccountPage() {
                 }}
               />
             </div>
+            <p className="text-black">
+              Ke zvolené výši kreditu nahrajeme 5% navíc jako bonus pro Vás.
+            </p>
             <div className="text-black contactText">
-              Vaše Cena: <span className="">{prize} Kč</span>
+              Vaše cena: <span className="">{prize} Kč</span>
             </div>
             <div className="text-black contactText">
-              Nahraný Kredit: <span className="">{Number(prize) * 1.1} Kč</span>
+              Nahraný kredit:{" "}
+              <span className="">{Number(prize) * 1.05} Kč</span>
             </div>
             {(errors.shipping && (
               <span className="text-red-500 text-center text-sm contactText">

@@ -25,15 +25,8 @@ export const handleStripeWebhook = async (req, res) => {
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
-    const {
-      cardId,
-      creditsAmount,
-      action,
-      userId,
-      shipping,
-      street,
-      quantity,
-    } = session.metadata;
+    const { cardId, creditsAmount, action, userId, shipping, street } =
+      session.metadata;
 
     if (!cardId || !creditsAmount) {
       console.error("Missing metadata in Stripe session");
