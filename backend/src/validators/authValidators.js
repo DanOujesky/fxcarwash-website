@@ -26,29 +26,6 @@ export const registerSchema = z.object({
     .min(8, "Heslo musí mít alespoň 8 znaků")
     .max(50, "Heslo je příliš dlouhé")
     .regex(/[0-9]/, "Heslo musí obsahovat alespoň jedno číslo"),
-
-  phone: z
-    .string()
-    .regex(
-      /^(\+420|\+421)? ?[1-9][0-9]{2} ?[0-9]{3} ?[0-9]{3}$/,
-      "Zadejte platné tel. číslo (+420 123 456 789)"
-    ),
-
-  street: z
-    .string()
-    .min(3, "Ulice je příliš krátká")
-    .refine((val) => /\d/.test(val), {
-      message: "Nezapomeňte na číslo popisné nebo orientační",
-    }),
-
-  city: z.string().min(2, "Zadejte platné město"),
-
-  zipCode: z
-    .string()
-    .transform((val) => val.replace(/\s+/g, ""))
-    .pipe(z.string().regex(/^[0-9]{5}$/, "PSČ musí mít 5 číslic")),
-
-  country: z.string().min(2, "Vyberte zemi"),
 });
 
 export const loginSchema = z.object({

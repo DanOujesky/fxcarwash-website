@@ -17,6 +17,8 @@ import AccountPage from "./pages/AccountPage";
 import NewPasswordPage from "./pages/NewPasswordPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCanceledPage from "./pages/PaymentCanceledPage";
+import GetCreditPage from "./pages/GetCreditPage";
+import GetCardPage from "./pages/GetCardPage";
 
 function App() {
   return (
@@ -38,7 +40,10 @@ function App() {
           <Route path="resetPassword" element={<ResetPasswordSentPage />} />
           <Route path="newPassword" element={<NewPasswordPage />} />
         </Route>
-        <Route path="account" element={<AccountPage />} />
+
+        <Route path="dobit-kartu" element={<GetCreditPage />} />
+        <Route path="objednat-kartu" element={<GetCardPage />} />
+        <Route path="moje-karty" element={<AccountPage />} />
       </Routes>
     </AuthProvider>
   );

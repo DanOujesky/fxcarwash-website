@@ -95,17 +95,7 @@ const requestPasswordReset = async (req, res) => {
 };
 
 const register = async (req, res) => {
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    phone,
-    street,
-    city,
-    zipCode,
-    country,
-  } = req.body;
+  const { firstName, lastName, email, password } = req.body;
 
   const userExists = await prisma.user.findUnique({
     where: { email: email },
@@ -125,17 +115,12 @@ const register = async (req, res) => {
       lastName: lastName,
       email: email,
       password: hashedPassword,
-      phone: phone,
-      street: street,
-      city: city,
-      zipCode: zipCode,
-      country: country,
     },
   });
 
   res.status(201).json({
     status: "success",
-    data: { user: { id: newUser.id, email: newUser.email } },
+    data: { user: { email: newUser.email } },
   });
 };
 

@@ -13,12 +13,14 @@ interface AddressAutocompleteProps {
   onAddressSelect?: (address: MapySuggestion) => void;
   error?: boolean;
   initialValue?: string;
+  white?: boolean;
 }
 
 const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   onAddressSelect,
   error,
   initialValue,
+  white,
 }) => {
   const [inputValue, setInputValue] = useState<string>(initialValue || "");
   const [suggestions, setSuggestions] = useState<MapySuggestion[]>([]);
@@ -57,12 +59,14 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
 
   return (
     <div className="relative w-full">
-      <Inputlabel text="Ulice a číslo popisné"></Inputlabel>
+      <Inputlabel white={white} text="Ulice a číslo popisné"></Inputlabel>
       <input
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        className={`w-full bg-black p-2 text-white contactText border-2${
+        className={`w-full ${
+          white ? "bg-white" : "bg-black"
+        } p-2 text-black contactText border-2${
           error ? "border-red-500" : "border-transparent"
         }`}
       />

@@ -15,6 +15,7 @@ interface User {
   city: string;
   zipCode: string;
   country: string;
+  discount: number;
   cards: Card[];
 }
 

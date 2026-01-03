@@ -18,15 +18,12 @@ model User {
   lastName String
   email String @unique
   password String
-  phone String
-  street String
-  city String
-  zipCode String
-  country String
   role Role @default(USER)
+  discount Int @default(5)
   resetCode String?
   resetCodeExpiration DateTime? 
   createdAt DateTime @default(now())
+
 
   cards Card[]
   news News[] @relation("NewsCreator")
@@ -36,9 +33,10 @@ model Card {
   id String @id @default(uuid())
   number String
   credit Int @default(0)
-  userId String?
+  name String?
+  userId String
 
-  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }

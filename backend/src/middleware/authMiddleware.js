@@ -23,10 +23,12 @@ export const authMiddleware = async (req, res, next) => {
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {
-        id: true,
+        firstName: true,
+        lastName: true,
         email: true,
         role: true,
         cards: true,
+        discount: true,
       },
     });
 
@@ -58,13 +60,9 @@ export const softAuth = async (req, res, next) => {
         firstName: true,
         lastName: true,
         email: true,
-        phone: true,
-        street: true,
-        city: true,
-        zipCode: true,
-        country: true,
         role: true,
         cards: true,
+        discount: true,
       },
     });
     req.user = user || null;

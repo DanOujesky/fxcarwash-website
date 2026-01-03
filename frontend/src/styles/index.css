@@ -59,6 +59,6 @@ li {
   @apply text-white h-10 bg-black hover:text-gray-300;
 }
 .input-field {
-  @apply text-white text-[14px] p-5 bg-black h-10;
+  @apply text-[14px] p-5 h-10;
   font-family: "Inter", sans-serif;
 }
