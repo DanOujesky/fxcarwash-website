@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import ExternalLink from "./ExternalLink";
+import CartIcon from "./CartIcon";
 
 type HeaderProps = {
   homePage: boolean;
+  account?: boolean;
 };
 
-function Header({ homePage }: HeaderProps) {
+function Header({ homePage, account }: HeaderProps) {
   const [isSideBarOpen, setIsSideBarOpen] = useState(false);
   const [mobileScreen, setMobileScreen] = useState(false);
 
@@ -92,7 +94,8 @@ function Header({ homePage }: HeaderProps) {
           />
         </NavLink>
       </div>
-      {!homePage && !mobileScreen && (
+      {account && <CartIcon />}
+      {!account && !homePage && !mobileScreen && (
         <div
           className={`w-60 h-16 sm:h-32 flex justify-center items-center gap-5 ${
             isSideBarOpen ? "hidden sm:flex" : ""
@@ -128,7 +131,6 @@ function Header({ homePage }: HeaderProps) {
 
       {isSideBarOpen && (
         <div className="fixed top-0 left-0 w-full sm:w-1/2 bottom-0 z-99 bg-black flex justify-center items-center flex-col">
-          <div className="flex-1"></div>
           <ul className="flex flex-col gap-4">
             <li>
               <NavLink
@@ -203,15 +205,20 @@ function Header({ homePage }: HeaderProps) {
                 KONTAKT
               </NavLink>
             </li>
+
+            <li>
+              <NavLink
+                className={({ isActive }) =>
+                  `${
+                    isActive ? "header-navlink-active" : "text-white"
+                  } header-navlink`
+                }
+                to="/moje-karty"
+              >
+                FX KARTY
+              </NavLink>
+            </li>
           </ul>
-          <div className="flex-1 w-full flex justify-center items-center">
-            <Link
-              className="hover:text-gray-500 text-xl md:text-2xl xl:text-3xl contactText border-2 p-2"
-              to="/login"
-            >
-              E-SHOP
-            </Link>
-          </div>
         </div>
       )}
 

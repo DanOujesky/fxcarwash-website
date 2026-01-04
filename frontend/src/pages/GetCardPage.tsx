@@ -1,51 +1,44 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect, useState } from "react";
-import CartIcon from "../components/CartIcon";
 import Inputlabel from "../components/InputLabel";
-import AddressAutocomplete from "../components/AddressAutocomplete";
+import Header from "../components/Header";
+import { z } from "zod";
+import QuantityInput from "../components/QuantityInput";
+import { useCart } from "../context/CartContext";
+import type { OrderItem } from "../types/Order";
 
-interface MapySuggestion {
-  name: string;
-  location?: string;
-  zip?: string;
-}
+const newCardSchema = z.object({
+  shipping: z.enum(["cp", "op"], {
+    error: "Zvojte způsob dopravy",
+  }),
+
+  quantity: z
+    .number()
+    .int("Množství musí být celé číslo")
+    .min(1, "Minimální množství je 1 kus")
+    .max(100, "Maximální množství je 100 kusů"),
+
+  credit: z
+    .number()
+    .min(500, "Minimální výše kreditu je 500 Kč")
+    .max(10000, "Maximální výše kreditu je 10 000 Kč"),
+});
 
 function GetCardPage() {
   const { user, loading } = useAuth();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const [credit, setCredit] = useState(500);
-  const [isLoading, setIsLoading] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [shipping, setShipping] = useState("");
-  const [address, setAddress] = useState("");
-  const [zipCode, setZipCode] = useState("");
-  const [city, setCity] = useState("");
-  const [country, setCountry] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const [errors, setErrors] = useState<{
     shipping?: string;
     quantity?: string;
-    street?: string;
-    zipCode?: string;
-    city?: string;
-    country?: string;
     credit?: string;
-    response?: string;
   }>({});
-
-  const handleAddressSelect = (address: MapySuggestion) => {
-    setAddress(address.name);
-    setZipCode(address.zip || "");
-    if (address.location) {
-      const locationParts = address.location
-        .split(",")
-        .map((part) => part.trim());
-
-      if (locationParts.length > 1) {
-        setCity(locationParts[0]);
-        setCountry(locationParts[1]);
-      }
-    }
-  };
 
   useEffect(() => {
     if (!loading && !user) {
@@ -57,12 +50,49 @@ function GetCardPage() {
     return <div className="h-screen bg-black" />;
   }
 
-  const addCard = () => {};
+  const addCard: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
+
+    const validation = newCardSchema.safeParse({
+      shipping,
+      quantity,
+      credit,
+    });
+
+    if (!validation.success) {
+      const formattedErrors: typeof errors = {};
+
+      validation.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof typeof formattedErrors;
+        formattedErrors[field] = issue.message;
+      });
+
+      setErrors(formattedErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    const newOrderItem: OrderItem = {
+      id: crypto.randomUUID(),
+      name: "Objednání karty",
+      prize: credit,
+      delivery: shipping === "cp",
+      shipping: shipping,
+      quantity: quantity,
+    };
+
+    addToCart(newOrderItem);
+
+    navigate("/kosik");
+    setIsLoading(false);
+  };
   return (
     <div className="min-h-screen bg-[#252525]">
-      <div className="flex justify-center items-center header-color p-20 border-b-1">
-        <h1 className="text-3xl">Objednání Karty</h1>
-        <CartIcon />
+      <Header account={true} homePage={false} />
+      <div className="flex flex-col justify-center items-center body-bg-color pt-15">
+        <h2 className="text-2xl underline">Objednání karty</h2>
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
         <form className="my-5 flex flex-col gap-3" onSubmit={addCard}>
@@ -73,57 +103,13 @@ function GetCardPage() {
                 setShipping(e.target.value);
               }}
               className=" bg-white text-black p-2 cursor-pointer contactText"
+              defaultValue=""
             >
               <option value="" disabled hidden></option>
               <option value="cp">Česká pošta (zdarma)</option>
               <option value="op">Osobní převzetí (zdarma)</option>
             </select>
           </div>
-
-          {shipping === "cp" && (
-            <div className="">
-              <AddressAutocomplete
-                white={true}
-                onAddressSelect={handleAddressSelect}
-              />
-              <div className="grid grid-cols-2 gap-4 w-full">
-                <div className="flex flex-1 flex-col">
-                  <Inputlabel white={true} text="Město" />
-                  <input
-                    className={`input-field bg-white text-black border-2 ${
-                      errors.city ? "border-red-500" : ""
-                    }`}
-                    type="text"
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <Inputlabel white={true} text="PSČ" />
-                  <input
-                    className={`input-field bg-white text-black border-2 ${
-                      errors.zipCode ? "border-red-500" : ""
-                    }`}
-                    type="text"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col">
-                <Inputlabel white={true} text="Stát" />
-                <input
-                  className={`input-field bg-white text-black border-2 ${
-                    errors.country ? "border-red-500" : ""
-                  }`}
-                  type="text"
-                  value={country}
-                  onChange={(e) => setCountry(e.target.value)}
-                />
-              </div>
-            </div>
-          )}
           {shipping === "op" && (
             <p className="text-white">
               Osobní převzetí na adrese naší provozovny: K černému mostu, 330 12
@@ -155,38 +141,26 @@ function GetCardPage() {
               <option value={10000}>10000</option>
             </select>
           </div>
-          <p className="text-white">
-            {`Ke zvolené výši kreditu nahrajeme ${user.discount}% navíc jako
-              bonus pro Vás.`}
-          </p>
-          <div className="text-white contactText">
-            Vaše cena: <span className="">{credit} Kč</span>
-          </div>
-          <div className="text-white contactText">
-            Nahraný kredit:{" "}
-            <span className="">{credit * (1 + user.discount / 100)} Kč</span>
+          <div className="flex flex-col">
+            <Inputlabel white={true} text="Zadejte počet Karet" />
+            <QuantityInput
+              value={quantity}
+              onChange={(e) => {
+                setQuantity(e);
+              }}
+            />
           </div>
           {(errors.shipping && (
             <span className="text-red-500 text-center text-sm contactText">
               {errors.shipping}
             </span>
           )) ||
-            (errors.street && (
-              <span className="text-red-500 text-center text-sm contactText">
-                {errors.street}
-              </span>
-            )) ||
             (errors.quantity && (
               <span className="text-red-500 text-center text-sm contactText">
                 {errors.quantity}
               </span>
             )) ||
             (errors.credit && (
-              <span className="text-red-500 text-center text-sm contactText">
-                {errors.credit}
-              </span>
-            )) ||
-            (errors.response && (
               <span className="text-red-500 text-center text-sm contactText">
                 {errors.credit}
               </span>

@@ -39,11 +39,11 @@ const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange }) => {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex items-center  bg-black w-fit">
+      <div className="flex items-center  bg-white w-fit">
         <button
           onClick={decrement}
           disabled={value <= min}
-          className="px-4 py-2 text-white hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+          className="px-4 py-2 text-black hover:bg-gray-600 bg-gray-500 disabled:opacity-30 transition-colors"
         >
           −
         </button>
@@ -52,13 +52,13 @@ const QuantityInput: React.FC<QuantityInputProps> = ({ value, onChange }) => {
           type="number"
           value={value}
           onChange={handleChange}
-          className="w-16 bg-transparent text-center text-white contactText focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-16 bg-transparent text-center text-black contactText focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
 
         <button
           onClick={increment}
           disabled={value >= max}
-          className="px-4 py-2 text-white hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+          className="px-4 py-2 text-black hover:bg-gray-600 bg-gray-500  disabled:opacity-30 transition-colors"
         >
           +
         </button>

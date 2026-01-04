@@ -9,7 +9,9 @@ function CustomCard({ number, credit, isSelected, hover }: CustomCardProps) {
   return (
     <div
       className={`flex flex-row ${
-        hover ? "hover:bg-[#5f5f5f] bg-[#555555]" : "bg-[#555555]"
+        hover && !isSelected
+          ? "hover:bg-[#5f5f5f] bg-[#555555]"
+          : "bg-[#555555]"
       } ${isSelected ? "bg-green-500" : ""}`}
     >
       <div className="relative w-30 p-5 h-auto">

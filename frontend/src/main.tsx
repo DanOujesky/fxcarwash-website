@@ -10,12 +10,15 @@ import "@fontsource/inter/700.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/700.css";
 import { AuthProvider } from "./context/AuthProvider.tsx";
+import { CartProvider } from "./context/CartProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <CartProvider>
+          <App />
+        </CartProvider>
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>

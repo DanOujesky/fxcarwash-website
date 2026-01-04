@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect } from "react";
 import CustomCard from "../components/CustomCard";
-import CartIcon from "../components/CartIcon";
+import Header from "../components/Header";
 
 function AccountPage() {
   const { user, loading } = useAuth();
@@ -15,21 +15,18 @@ function AccountPage() {
   }, [loading, user, navigate]);
 
   if (loading || !user) {
-    return <div className="h-screen bg-black" />;
+    return <div className={`bg-black min-h-screen]`} />;
   }
   return (
-    <div className="min-h-screen bg-[#252525]">
-      <div className="flex justify-center items-center header-color p-20 border-b-1">
-        <h1 className="text-3xl">Zhýhodněné FX Karty</h1>
-        <CartIcon />
-      </div>
+    <div className={`min-h-screen bg-[#252525]`}>
+      <Header account={true} homePage={false} />
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
         <h2 className="text-2xl underline">Moje Karty</h2>
       </div>
-      <div className="flex flex-col justify-center items-center body-bg-color p-15">
+      <div className="flex flex-col justify-center items-center body-bg-color">
         {user.cards.length > 0 ? (
           user.cards.map((card) => (
-            <div key={card.id}>
+            <div key={card.id} className="my-1">
               <CustomCard credit={card.credit} number={card.number} />
             </div>
           ))

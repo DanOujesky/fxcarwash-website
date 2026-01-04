@@ -1,7 +1,6 @@
 export interface Order {
   id: string;
   items: OrderItem[];
-  count: number;
   createdAt: Date;
   phone?: string;
   address?: string;
@@ -11,8 +10,11 @@ export interface Order {
 }
 
 export interface OrderItem {
+  id: string;
   name: string;
   prize: number;
-  quantity: number;
+  quantity?: number;
+  shipping?: string;
+  cardNumber?: string;
   delivery: boolean;
 }

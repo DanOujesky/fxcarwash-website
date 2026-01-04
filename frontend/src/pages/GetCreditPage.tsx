@@ -1,21 +1,39 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect, useState } from "react";
-import CartIcon from "../components/CartIcon";
 import CustomCard from "../components/CustomCard";
 import Inputlabel from "../components/InputLabel";
+import Header from "../components/Header";
+import type { OrderItem } from "../types/Order";
+import { z } from "zod";
+import { useCart } from "../context/CartContext";
+
+const addCreditSchema = z.object({
+  selectedCardNumber: z.string().min(1, "Musíte vybrat kartu"),
+  credit: z
+    .number()
+    .min(500, "Minimální výše kreditu je 500 Kč")
+    .max(10000, "Maximální výše kreditu je 10 000 Kč"),
+});
 
 function GetCreditPage() {
   const { user, loading } = useAuth();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
-  const [cardNumber, setCardNumber] = useState("");
-  const [selectedCardId, setSelectedCardId] = useState("");
+  const [selectedCardNumber, setSelectedCardNumber] = useState("");
   const [credit, setCredit] = useState(500);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<{
+    selectedCardNumber?: string;
+    credit?: string;
+  }>({});
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/", { replace: true });
+    }
+    if (user && user.cards.length < 1) {
+      navigate("/moje-karty", { replace: true });
     }
   }, [loading, user, navigate]);
 
@@ -23,13 +41,47 @@ function GetCreditPage() {
     return <div className="h-screen bg-black" />;
   }
 
-  const addCredit = () => {};
+  const addCredit: React.FormEventHandler<HTMLFormElement> = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setErrors({});
+
+    const validation = addCreditSchema.safeParse({
+      selectedCardNumber,
+      credit,
+    });
+
+    if (!validation.success) {
+      const formattedErrors: typeof errors = {};
+
+      validation.error.issues.forEach((issue) => {
+        const field = issue.path[0] as keyof typeof formattedErrors;
+        formattedErrors[field] = issue.message;
+      });
+
+      setErrors(formattedErrors);
+      setIsLoading(false);
+      return;
+    }
+
+    const orderItem: OrderItem = {
+      id: crypto.randomUUID(),
+      name: "Dobýt kredit",
+      prize: credit,
+      delivery: false,
+      cardNumber: selectedCardNumber,
+    };
+    addToCart(orderItem);
+    navigate("/kosik");
+
+    setIsLoading(false);
+  };
 
   return (
     <div className="min-h-screen bg-[#252525]">
-      <div className="flex justify-center items-center header-color p-20 border-b-1">
-        <h1 className="text-3xl">Dobití Kreditu</h1>
-        <CartIcon />
+      <Header account={true} homePage={false} />
+      <div className="flex flex-col justify-center items-center body-bg-color pt-15">
+        <h2 className="text-2xl underline">Dobití kreditu</h2>
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
         <form className="my-5 flex flex-col gap-3" onSubmit={addCredit}>
@@ -38,10 +90,14 @@ function GetCreditPage() {
             <div>
               {user.cards.length > 0 ? (
                 user.cards.map((card) => (
-                  <div key={card.id} onClick={() => setSelectedCardId(card.id)}>
+                  <div
+                    className="my-2 cursor-pointer"
+                    key={card.id}
+                    onClick={() => setSelectedCardNumber(card.number)}
+                  >
                     <CustomCard
                       hover={true}
-                      isSelected={selectedCardId === card.id}
+                      isSelected={selectedCardNumber === card.number}
                       credit={card.credit}
                       number={card.number}
                     />
@@ -59,6 +115,7 @@ function GetCreditPage() {
                 setCredit(Number(e.target.value));
               }}
               className=" bg-white text-black p-2 cursor-pointer contactText "
+              defaultValue={500}
             >
               <option value={500}>500</option>
               <option value={1000}>1000</option>
@@ -86,6 +143,16 @@ function GetCreditPage() {
             Nahraný kredit:{" "}
             <span className="">{credit * (1 + user.discount / 100)} Kč</span>
           </div>
+          {errors && (
+            <span className="text-red-500 text-center text-sm contactText">
+              {errors.selectedCardNumber}
+            </span>
+          )}
+          {errors.credit && (
+            <span className="text-red-500 text-center text-sm contactText">
+              {errors.credit}
+            </span>
+          )}
           <div className="flex flex-col justify-center">
             <button
               className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5"

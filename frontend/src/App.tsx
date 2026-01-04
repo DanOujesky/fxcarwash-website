@@ -19,10 +19,15 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCanceledPage from "./pages/PaymentCanceledPage";
 import GetCreditPage from "./pages/GetCreditPage";
 import GetCardPage from "./pages/GetCardPage";
+import CartPage from "./pages/CartPage";
+import DeliveryPage from "./pages/DeliveryPage";
+import OverviewPage from "./pages/OverviewPage";
+import ScrollToTop from "./components/ScrollToTop";
 
 function App() {
   return (
     <AuthProvider>
+      <ScrollToTop />
       <Routes>
         <Route index element={<HomePage />} />
         <Route path="o-nas" element={<AboutPage />} />
@@ -41,6 +46,9 @@ function App() {
           <Route path="newPassword" element={<NewPasswordPage />} />
         </Route>
 
+        <Route path="souhrn" element={<OverviewPage />} />
+        <Route path="doprava" element={<DeliveryPage />} />
+        <Route path="kosik" element={<CartPage />} />
         <Route path="dobit-kartu" element={<GetCreditPage />} />
         <Route path="objednat-kartu" element={<GetCardPage />} />
         <Route path="moje-karty" element={<AccountPage />} />
