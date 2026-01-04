@@ -10,7 +10,7 @@ function AccountPage() {
 
   useEffect(() => {
     if (!loading && !user) {
-      navigate("/", { replace: true });
+      navigate("/login", { replace: true });
     }
   }, [loading, user, navigate]);
 

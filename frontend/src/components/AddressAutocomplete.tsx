@@ -64,7 +64,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        className={`w-full ${
+        className={`w-full input-field ${
           white ? "bg-white" : "bg-black"
         } p-2 text-black contactText border-2${
           error ? "border-red-500" : "border-transparent"
@@ -72,14 +72,14 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       />
 
       {suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full mt-1 bg-black  max-h-60 overflow-y-auto">
+        <ul className="absolute z-50 w-full mt-1 bg-white  max-h-60 overflow-y-auto">
           {suggestions.map((item, index) => (
             <li
               key={index}
               onClick={() => selectAddress(item)}
-              className="p-3 hover:bg-green-700 cursor-pointer border-2 border-white"
+              className="p-3 hover:bg-green-500 cursor-pointer border-y-2 border-black"
             >
-              <div className="font-medium text-sm text-white">{item.name}</div>
+              <div className="font-medium text-sm text-black">{item.name}</div>
               <div className="text-xs text-gray-400">{item.label}</div>
             </li>
           ))}

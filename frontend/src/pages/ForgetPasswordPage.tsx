@@ -73,7 +73,7 @@ function ForgetPasswordPage() {
       <div className="flex flex-col">
         <Inputlabel text="E-mail" />
         <input
-          className="input-field"
+          className="input-field bg-black text-white"
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}

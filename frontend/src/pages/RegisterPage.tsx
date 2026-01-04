@@ -104,7 +104,7 @@ function RegisterPage() {
         <div className="flex flex-col">
           <Inputlabel text="Jméno" />
           <input
-            className={`input-field border-2 ${
+            className={`input-field bg-black text-white border-2 ${
               errors.firstName ? "border-red-500" : ""
             }`}
             type="text"
@@ -115,7 +115,7 @@ function RegisterPage() {
         <div className="flex flex-col">
           <Inputlabel text="Příjmení" />
           <input
-            className={`input-field border-2 ${
+            className={`input-field bg-black text-white border-2 ${
               errors.lastName ? "border-red-500" : ""
             }`}
             type="text"
@@ -127,7 +127,7 @@ function RegisterPage() {
       <div className="flex flex-col">
         <Inputlabel text="E-mail" />
         <input
-          className={`input-field border-2 ${
+          className={`input-field bg-black text-white border-2 ${
             errors.email ? "border-red-500" : ""
           }`}
           type="text"
@@ -138,7 +138,7 @@ function RegisterPage() {
       <div className="flex flex-col">
         <Inputlabel text="Heslo" />
         <input
-          className={`input-field border-2 ${
+          className={`input-field bg-black text-white border-2 ${
             errors.password ? "border-red-500" : ""
           }`}
           type="password"
@@ -153,7 +153,7 @@ function RegisterPage() {
           className="w-7 h-7 accent-green-500 cursor-pointer"
           required
         />
-        <label className="text-black leading-none cursor-pointer flex-1 contactText">
+        <label className="text-black leading-none flex-1 contactText">
           Souhlasím se zpracováním osobních údajů
         </label>
       </div>
@@ -186,7 +186,7 @@ function RegisterPage() {
         to="/login"
         className="text-black contactText text-center hover:underline"
       >
-        Už jste zaregistrovaní? Přihlaste se
+        Už jste zaregistrovaní? Přihlašte se
       </Link>
       <button
         className="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all"

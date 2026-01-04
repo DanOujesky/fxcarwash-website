@@ -4,11 +4,12 @@ import { useEffect } from "react";
 import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import { useCart } from "../context/CartContext";
+import type { Order } from "../types/Order";
 
 function CartPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { cart, hasDelivery } = useCart();
+  const { cart, hasDelivery, totalPrice } = useCart();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -19,6 +20,22 @@ function CartPage() {
   if (loading || !user) {
     return <div className="h-screen bg-black" />;
   }
+
+  const handleContinue = () => {
+    if (hasDelivery) {
+      navigate("/doprava");
+    } else {
+      const newOrder: Order = {
+        id: crypto.randomUUID(),
+        items: cart,
+        createdAt: new Date(),
+        price: totalPrice,
+      };
+      localStorage.setItem("order", JSON.stringify(newOrder));
+
+      navigate("/souhrn", { state: { order: newOrder } });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#252525]">
@@ -39,7 +56,14 @@ function CartPage() {
                     <div className=" flex flex-col">
                       <div className="font-semibold">{item.name}</div>
                     </div>
-                    <div className="">Cena: {item.prize}</div>
+                    <div className="">
+                      Váš požadavek na dobití kreditu: {item.prize} kreditů
+                    </div>
+                    <div className="">Vaše cena: {item.prize} Kč</div>
+                    <div className="mt-3">
+                      Výše kreditu s bonusem {user.discount}% od nás:{" "}
+                      {item.credit} kreditů
+                    </div>
                   </div>
                 ) : (
                   <div>
@@ -47,19 +71,24 @@ function CartPage() {
                       <div className="font-semibold">{item.name}</div>
                       <div className="">Číslo karty: {item.cardNumber}</div>
                     </div>
-                    <div className="">Cena: {item.prize}</div>
+
+                    <div className="">Vaše cena: {item.prize} Kč</div>
+                    <div className="mt-3">
+                      Výše kreditu s bonusem {user.discount}% pro vás:{" "}
+                      {item.credit}
+                    </div>
                   </div>
                 )}
               </div>
             ))}
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
-            <Link
-              to={`${hasDelivery ? "/doprava" : "/souhrn"}`}
-              className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5"
+            <button
+              onClick={handleContinue}
+              className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 cursor-pointer"
             >
               Pokračovat
-            </Link>
+            </button>
             <Link
               to="/moje-karty"
               className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"

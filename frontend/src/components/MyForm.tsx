@@ -6,7 +6,7 @@ function MyForm({
   handleFunction?: React.FormEventHandler<HTMLFormElement>;
 }) {
   return (
-    <div className="bg-black w-full min-h-screen flex justify-center items-center py-20">
+    <div className=" bg-[#252525] w-full min-h-screen flex justify-center items-center py-20">
       <div className="flex justify-center items-center flex-col w-full max-w-[420px]">
         <div className="text-white p-10 text-3xl">F.X. Carwash</div>
 

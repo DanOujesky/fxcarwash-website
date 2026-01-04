@@ -76,11 +76,12 @@ function GetCardPage() {
 
     const newOrderItem: OrderItem = {
       id: crypto.randomUUID(),
-      name: "Objednání karty",
+      name: "Objednání nové FX karty",
       prize: credit,
       delivery: shipping === "cp",
       shipping: shipping,
       quantity: quantity,
+      credit: credit * (1 + user.discount / 100),
     };
 
     addToCart(newOrderItem);

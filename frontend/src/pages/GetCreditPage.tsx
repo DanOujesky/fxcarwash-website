@@ -66,10 +66,11 @@ function GetCreditPage() {
 
     const orderItem: OrderItem = {
       id: crypto.randomUUID(),
-      name: "Dobýt kredit",
+      name: "Dobítí kreditu na předplacenou FX kartu",
       prize: credit,
       delivery: false,
       cardNumber: selectedCardNumber,
+      credit: credit * (1 + user.discount / 100),
     };
     addToCart(orderItem);
     navigate("/kosik");
@@ -131,17 +132,6 @@ function GetCreditPage() {
               <option value={9000}>9000</option>
               <option value={10000}>10000</option>
             </select>
-          </div>
-          <p className="text-white">
-            {`Ke zvolené výši kreditu nahrajeme ${user.discount}% navíc jako
-              bonus pro Vás.`}
-          </p>
-          <div className="text-white contactText">
-            Vaše cena: <span className="">{credit} Kč</span>
-          </div>
-          <div className="text-white contactText">
-            Nahraný kredit:{" "}
-            <span className="">{credit * (1 + user.discount / 100)} Kč</span>
           </div>
           {errors && (
             <span className="text-red-500 text-center text-sm contactText">

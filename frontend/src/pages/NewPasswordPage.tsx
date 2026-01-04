@@ -88,7 +88,7 @@ function NewPasswordPage() {
       <div className="flex flex-col">
         <Inputlabel text="Heslo" />
         <input
-          className={`input-field ${
+          className={`input-field bg-black text-white ${
             errors.newPassword ? "border-red-500" : ""
           }`}
           type="password"

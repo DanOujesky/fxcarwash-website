@@ -68,7 +68,8 @@ function LoginPage() {
         setResponse(data.error);
         return;
       } else {
-        window.location.href = "/account";
+        localStorage.clear();
+        window.location.href = "/moje-karty";
       }
     } catch (err) {
       console.error(err);
@@ -82,7 +83,7 @@ function LoginPage() {
       <div className="flex flex-col">
         <Inputlabel text="E-mail" />
         <input
-          className="input-field"
+          className="input-field bg-black text-white"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -100,7 +101,7 @@ function LoginPage() {
           </Link>
         </div>
         <input
-          className="input-field"
+          className="input-field bg-black text-white"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
