@@ -1,21 +1,28 @@
+import { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import { prisma } from "../config/db.js";
 import { generateToken } from "../utils/generateToken.js";
-import bcrypt from "bcrypt";
 import { sendVerificationEmail } from "../utils/mailer.js";
 
-const setNewPassword = async (req, res) => {
+const isCodeExpired = (expiration: Date | null): boolean => {
+  if (!expiration) return true;
+  return new Date() > expiration;
+};
+
+const setNewPassword = async (req: Request, res: Response) => {
   const { email, code, newPassword } = req.body;
 
   const user = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
   });
+
   if (!user || user.resetCode !== code) {
     return res
       .status(400)
       .json({ error: "Neplatný ověřovací kód", valid: false });
   }
 
-  if (new Date() > user.resetCodeExpiration) {
+  if (isCodeExpired(user.resetCodeExpiration)) {
     return res.status(400).json({ error: "Kód již vypršel", valid: false });
   }
 
@@ -23,7 +30,7 @@ const setNewPassword = async (req, res) => {
   const hashedPassword = await bcrypt.hash(newPassword, salt);
 
   await prisma.user.update({
-    where: { email: email },
+    where: { email },
     data: {
       password: hashedPassword,
       resetCode: null,
@@ -37,28 +44,30 @@ const setNewPassword = async (req, res) => {
   });
 };
 
-const verifyResetCode = async (req, res) => {
+const verifyResetCode = async (req: Request, res: Response) => {
   const { email, code } = req.body;
   const user = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
   });
+
   if (!user || user.resetCode !== code) {
     return res
       .status(400)
       .json({ error: "Neplatný ověřovací kód", valid: false });
   }
 
-  if (new Date() > user.resetCodeExpiration) {
+  if (isCodeExpired(user.resetCodeExpiration)) {
     return res.status(400).json({ error: "Kód již vypršel", valid: false });
   }
+
   res.status(200).json({ status: "success", valid: true });
 };
 
-const requestPasswordReset = async (req, res) => {
+const requestPasswordReset = async (req: Request, res: Response) => {
   const { email } = req.body;
 
   const user = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
   });
 
   if (!user) {
@@ -71,9 +80,9 @@ const requestPasswordReset = async (req, res) => {
   const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
 
   await prisma.user.update({
-    where: { email: email },
+    where: { email },
     data: {
-      resetCode: resetCode,
+      resetCode,
       resetCodeExpiration: new Date(Date.now() + 10 * 60 * 1000),
     },
   });
@@ -84,9 +93,10 @@ const requestPasswordReset = async (req, res) => {
       status: "success",
       message: "Kód pro obnovení hesla byl odeslán na váš email",
       exists: true,
-      email: email,
+      email,
     });
-  } catch (error) {
+  } catch (err) {
+    const error = err as Error;
     res.status(500).json({
       error: "Failed to send verification email",
       details: error.message,
@@ -94,11 +104,11 @@ const requestPasswordReset = async (req, res) => {
   }
 };
 
-const register = async (req, res) => {
+const register = async (req: Request, res: Response) => {
   const { firstName, lastName, email, password } = req.body;
 
   const userExists = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
   });
 
   if (userExists) {
@@ -106,14 +116,15 @@ const register = async (req, res) => {
       .status(400)
       .json({ error: "User already exists with this email" });
   }
+
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
 
   const newUser = await prisma.user.create({
     data: {
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
+      firstName,
+      lastName,
+      email,
       password: hashedPassword,
     },
   });
@@ -124,12 +135,13 @@ const register = async (req, res) => {
   });
 };
 
-const login = async (req, res) => {
+const login = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   const user = await prisma.user.findUnique({
-    where: { email: email },
+    where: { email },
   });
+
   if (!user) {
     return res.status(401).json({ error: "Invalid email or password" });
   }
@@ -148,12 +160,12 @@ const login = async (req, res) => {
         id: user.id,
         email: user.email,
       },
-      token: token,
+      token,
     },
   });
 };
 
-const logout = async (req, res) => {
+const logout = async (req: Request, res: Response) => {
   res.cookie("jwt", "", {
     expires: new Date(0),
     httpOnly: true,
@@ -164,7 +176,7 @@ const logout = async (req, res) => {
   });
 };
 
-const getMe = (req, res) => {
+const getMe = (req: Request, res: Response) => {
   res.status(200).json({ status: "success", user: req.user });
 };
 

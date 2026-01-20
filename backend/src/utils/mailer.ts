@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
@@ -13,7 +14,10 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendVerificationEmail = async (email, code) => {
+export const sendVerificationEmail = async (
+  email: User["email"],
+  code: string,
+) => {
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to: email,
@@ -23,7 +27,7 @@ export const sendVerificationEmail = async (email, code) => {
   });
 };
 
-export const sendOrderEmailToUser = async (user) => {
+export const sendOrderEmailToUser = async (user: User) => {
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to: user.email,
@@ -32,7 +36,7 @@ export const sendOrderEmailToUser = async (user) => {
     html: `<b>${user.email}</b>`,
   });
 };
-export const sendOrderEmailToCompany = async (user) => {
+export const sendOrderEmailToCompany = async (user: User) => {
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
     to: process.env.FXCARWASH_EMAIL,

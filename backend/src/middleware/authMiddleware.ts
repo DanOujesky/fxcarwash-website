@@ -1,7 +1,12 @@
 import jwt from "jsonwebtoken";
 import { prisma } from "../config/db.js";
+import { Request, Response, NextFunction, response } from "express";
 
-export const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   let token;
 
   if (
@@ -18,7 +23,9 @@ export const authMiddleware = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      id: string;
+    };
 
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
@@ -41,7 +48,11 @@ export const authMiddleware = async (req, res, next) => {
     return res.status(401).json({ error: "Not authorized, token failed" });
   }
 };
-export const softAuth = async (req, res, next) => {
+export const softAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   let token =
     req.cookies?.jwt ||
     (req.headers.authorization?.startsWith("Bearer") &&
@@ -53,7 +64,9 @@ export const softAuth = async (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      id: string;
+    };
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
       select: {

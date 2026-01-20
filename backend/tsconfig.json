@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    /* 1. Cesty a struktura */
+    "rootDir": "./src" /* Kde máte zdrojové soubory */,
+    "outDir": "./dist" /* Kam se uloží zkompilovaný JS */,
+    "baseUrl": ".",
+
+    /* 2. Jazykové nastavení a prostředí */
+    "target": "ES2022" /* Moderní JS, který podporuje většina Node.js 18+ */,
+    "module": "NodeNext" /* Správné řešení pro moderní Node.js (ESM) */,
+    "moduleResolution": "NodeNext",
+    "lib": ["ESNext"] /* Knihovny standardních funkcí */,
+    "types": ["node"] /* Definice pro Node.js (vyžaduje @types/node) */,
+
+    /* 3. Postupná migrace z JS */
+    "allowJs": true /* Povolí importovat .js soubory */,
+    "checkJs": false /* Nebude hlásit chyby přímo v .js souborech */,
+
+    /* 4. Striktnost (Doporučeno pro bezpečnost) */
+    "strict": true /* Zapne všechny kontroly (nejlepší praxe) */,
+    "noUncheckedIndexedAccess": true /* Bezpečnější práce s poli/objekty */,
+    "skipLibCheck": true /* Zrychlí kompilaci ignorováním chyb v knihovnách */,
+
+    /* 5. Ostatní užitečné volby */
+    "sourceMap": true /* Pro snadnější debugování ve VS Code */,
+    "declaration": true /* Vytvoří .d.ts soubory (pro dokumentaci) */,
+    "esModuleInterop": true /* Umožní importovat CommonJS moduly jako ES moduly */,
+    "forceConsistentCasingInFileNames": true /* Prevence chyb mezi Windows/Linux servery */,
+    "resolveJsonModule": true /* Umožní importovat .json soubory přímo */
+  },
+  "include": ["src/**/*"] /* Co všechno se má kompilovat */,
+  "exclude": ["node_modules"] /* Co ignorovat */
+}

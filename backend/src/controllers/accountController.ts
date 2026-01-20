@@ -4,32 +4,9 @@ import {
   sendOrderEmailToUser,
 } from "../utils/mailer.js";
 import { prisma } from "../config/db.js";
+import { Request, Response } from "express";
 
-export const getCard = async (req, res) => {
-  try {
-    const availableCard = await prisma.card.findFirst({
-      where: { userId: null },
-    });
-
-    if (!availableCard) {
-      await noCardsAvailableEmail();
-      return res.status(404).json({
-        error: "Bohužel již nemáme žádné volné karty skladem.",
-      });
-    }
-    return res.status(200).json({
-      cardNumber: availableCard.number,
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: "Failed to get card",
-      status: "failed",
-      details: error.message,
-    });
-  }
-};
-
-export const createOrder = async (req, res) => {
+export const createOrder = async (req: Request, res: Response) => {
   const { email, cardNumber, orderData } = req.body;
   const { street, quantity, shipping, credit } = orderData;
 
@@ -43,7 +20,7 @@ export const createOrder = async (req, res) => {
         error: "Žádný uživatel nebyl nenalezen s tímto emailem",
       });
     }
-    const availableCard = await prisma.card.findUnique({
+    const availableCard = await prisma.card.findFirst({
       where: { number: cardNumber },
     });
 
