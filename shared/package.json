@@ -1,0 +1,9 @@
+{
+  "name": "@fxcarwash/shared",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "./index.ts",
+  "dependencies": {
+    "zod": "^4.3.5"
+  }
+}

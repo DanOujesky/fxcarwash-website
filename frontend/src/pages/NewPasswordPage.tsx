@@ -1,27 +1,19 @@
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate, useLocation } from "react-router-dom";
+
+import { newPasswordSchema, type NewPasswordInput } from "@shared/index";
+
 import Inputlabel from "../components/InputLabel";
 import MyForm from "../components/MyForm";
 import InputTitle from "../components/InputTitle";
-import { useEffect, useState } from "react";
-import { z } from "zod";
-import { useNavigate, useLocation } from "react-router-dom";
-
-const newPasswordSchema = z.object({
-  email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
-  code: z.string().length(6, "Neplatný ověřovací kód"),
-
-  newPassword: z
-    .string()
-    .min(8, "Heslo musí mít alespoň 8 znaků")
-    .max(50, "Heslo je příliš dlouhé")
-    .regex(/[0-9]/, "Heslo musí obsahovat alespoň jedno číslo"),
-});
+import ErrorMessage from "../components/ErrorMessage";
 
 function NewPasswordPage() {
-  const [newPassword, setNewPassword] = useState("");
-  const [errors, setErrors] = useState<{ newPassword?: string }>({});
+  const [serverError, setServerError] = useState<string | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
 
   const email = location.state?.email || "";
   const code = location.state?.code || "";
@@ -32,77 +24,70 @@ function NewPasswordPage() {
     }
   }, [email, code, navigate]);
 
-  const handleNewPassword: React.FormEventHandler<HTMLFormElement> = async (
-    e
-  ) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setErrors({});
-
-    const validation = newPasswordSchema.safeParse({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<NewPasswordInput>({
+    resolver: zodResolver(newPasswordSchema),
+    defaultValues: {
       email,
       code,
-      newPassword,
-    });
+      newPassword: "",
+    },
+  });
 
-    if (!validation.success) {
-      const formattedErrors: typeof errors = {};
-
-      validation.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof typeof formattedErrors;
-        formattedErrors[field] = issue.message;
-      });
-
-      setErrors(formattedErrors);
-      setIsLoading(false);
-      return;
-    }
-
+  const onSubmit = async (data: NewPasswordInput) => {
+    setServerError(null);
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/auth/newPassword`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(validation.data),
-        }
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        },
       );
-      const data = await res.json();
+
+      const result = await res.json();
+
       if (!res.ok) {
-        console.log(data.error);
+        setServerError(result.error || "Nepodařilo se změnit heslo");
         return;
-      } else {
-        navigate("/login", { state: { email: email } });
       }
+
+      navigate("/login", { state: { email: data.email } });
     } catch (err) {
       console.error(err);
-    } finally {
-      setIsLoading(false);
+      setServerError("Chyba spojení se serverem");
     }
   };
+
   return (
-    <MyForm handleFunction={handleNewPassword}>
+    <MyForm handleFunction={handleSubmit(onSubmit)}>
       <InputTitle text="Nové heslo" />
+
       <div className="flex flex-col">
         <Inputlabel text="Heslo" />
         <input
-          className={`input-field bg-black text-white ${
-            errors.newPassword ? "border-red-500" : ""
+          {...register("newPassword")}
+          className={`input-field bg-black text-white border-2 ${
+            errors.newPassword ? "border-red-500" : "border-transparent"
           }`}
           type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
         />
       </div>
-      {errors.newPassword && (
-        <span className="text-red-500 text-center text-sm contactText">
-          {errors.newPassword}
-        </span>
-      )}
-      <button disabled={isLoading} className="input-button" type="submit">
-        {isLoading ? "Nastavování..." : "Nastavit nové heslo"}
+
+      <ErrorMessage
+        message={errors.newPassword?.message || serverError || undefined}
+      />
+
+      <button
+        disabled={isSubmitting}
+        className="input-button disabled:bg-gray-400"
+        type="submit"
+      >
+        {isSubmitting ? "Nastavování..." : "Nastavit nové heslo"}
       </button>
     </MyForm>
   );

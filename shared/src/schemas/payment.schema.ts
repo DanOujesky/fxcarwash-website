@@ -25,3 +25,4 @@ export const paymentSchema = z
       });
     }
   });
+export type PaymentInput = z.infer<typeof paymentSchema>;

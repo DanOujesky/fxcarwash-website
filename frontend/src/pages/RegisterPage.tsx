@@ -1,151 +1,103 @@
 import { useState } from "react";
-import Inputlabel from "../components/InputLabel";
-import InputTitle from "../components/InputTitle";
-import MyForm from "../components/MyForm";
-import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router";
 import { Link } from "react-router-dom";
 
-const registerSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, "Jméno musí mít aspoň 2 znaky")
-    .max(50, "Jméno je příliš dlouhé")
-    .trim()
-    .transform(
-      (val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase()
-    ),
+import { registerSchema, type RegisterInput } from "@shared/index";
 
-  lastName: z
-    .string()
-    .min(2, "Příjmení musí mít aspoň 2 znaky")
-    .max(50, "Příjmení je příliš dlouhé")
-    .trim()
-    .transform(
-      (val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase()
-    ),
-
-  email: z.string().email("Zadejte platnou e-mailovou adresu"),
-
-  password: z
-    .string()
-    .min(8, "Heslo musí mít alespoň 8 znaků")
-    .max(50, "Heslo je příliš dlouhé")
-    .regex(/[0-9]/, "Heslo musí obsahovat alespoň jedno číslo"),
-});
+import Inputlabel from "../components/InputLabel";
+import InputTitle from "../components/InputTitle";
+import MyForm from "../components/MyForm";
+import ErrorMessage from "../components/ErrorMessage";
 
 function RegisterPage() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [response, setResponse] = useState<string | null>(null);
-
-  const [errors, setErrors] = useState<{
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    password?: string;
-  }>({});
-
-  const [isLoading, setIsLoading] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleRegister: React.FormEventHandler<HTMLFormElement> = async (e) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterInput>({
+    resolver: zodResolver(registerSchema),
+    mode: "onBlur",
+  });
 
-    setIsLoading(true);
-    setErrors({});
-
-    const validation = registerSchema.safeParse({
-      firstName,
-      lastName,
-      email,
-      password,
-    });
-
-    if (!validation.success) {
-      const formattedErrors: typeof errors = {};
-
-      validation.error.issues.forEach((issue) => {
-        const field = issue.path[0] as keyof typeof formattedErrors;
-        formattedErrors[field] = issue.message;
-      });
-
-      setErrors(formattedErrors);
-      setIsLoading(false);
-      return;
-    }
+  const onSubmit = async (data: RegisterInput) => {
+    setServerError(null);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(validation.data),
+        body: JSON.stringify(data),
       });
-      const data = await res.json();
+
+      const result = await res.json();
+
       if (!res.ok) {
-        setResponse(data.error);
+        setServerError(result.error || "Registrace se nezdařila");
         return;
-      } else {
-        navigate("/login", { state: { email: email } });
       }
+
+      navigate("/login", { state: { email: data.email } });
     } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoading(false);
+      console.error("Chyba při registraci:", err);
+      setServerError("Nepodařilo se navázat spojení se serverem");
     }
   };
+
   return (
-    <MyForm handleFunction={handleRegister}>
+    <MyForm handleFunction={handleSubmit(onSubmit)}>
       <InputTitle text="Registrace účtu" />
+
       <div className="grid grid-cols-2 gap-4 w-full max-w-2xl mx-auto">
         <div className="flex flex-col">
           <Inputlabel text="Jméno" />
           <input
+            {...register("firstName")}
             className={`input-field bg-black text-white border-2 ${
-              errors.firstName ? "border-red-500" : ""
+              errors.firstName ? "border-red-500" : "border-transparent"
             }`}
             type="text"
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
           />
         </div>
         <div className="flex flex-col">
           <Inputlabel text="Příjmení" />
           <input
+            {...register("lastName")}
             className={`input-field bg-black text-white border-2 ${
-              errors.lastName ? "border-red-500" : ""
+              errors.lastName ? "border-red-500" : "border-transparent"
             }`}
             type="text"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
           />
         </div>
       </div>
+
       <div className="flex flex-col">
         <Inputlabel text="E-mail" />
         <input
+          {...register("email")}
           className={`input-field bg-black text-white border-2 ${
-            errors.email ? "border-red-500" : ""
+            errors.email ? "border-red-500" : "border-transparent"
           }`}
-          type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="email"
         />
       </div>
+
       <div className="flex flex-col">
         <Inputlabel text="Heslo" />
         <input
+          {...register("password")}
           className={`input-field bg-black text-white border-2 ${
-            errors.password ? "border-red-500" : ""
+            errors.password ? "border-red-500" : "border-transparent"
           }`}
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
         />
       </div>
+
       <div className="flex items-center justify-center gap-5 text-sm text-gray-400 w-full">
         <input
           type="checkbox"
@@ -153,47 +105,40 @@ function RegisterPage() {
           className="w-7 h-7 accent-green-500 cursor-pointer"
           required
         />
-        <label className="text-black leading-none flex-1 contactText">
+        <label
+          htmlFor="gdpr"
+          className="text-black leading-none flex-1 contactText cursor-pointer"
+        >
           Souhlasím se zpracováním osobních údajů
         </label>
       </div>
-      {(errors.firstName && (
-        <span className="text-red-500 text-center text-sm contactText">
-          {errors.firstName}
-        </span>
-      )) ||
-        (errors.lastName && (
-          <span className="text-red-500 text-center text-sm contactText">
-            {errors.lastName}
-          </span>
-        )) ||
-        (errors.email && (
-          <span className="text-red-500 text-center text-sm contactText">
-            {errors.email}
-          </span>
-        )) ||
-        (errors.password && (
-          <span className="text-red-500 text-center text-sm contactText">
-            {errors.password}
-          </span>
-        ))}
-      {response && (
-        <span className="text-red-500 text-center text-sm contactText">
-          {response}
-        </span>
-      )}
+
+      <div className="flex flex-col gap-1 min-h-[20px]">
+        <ErrorMessage
+          message={
+            errors.firstName?.message ||
+            errors.lastName?.message ||
+            errors.email?.message ||
+            errors.password?.message ||
+            serverError ||
+            undefined
+          }
+        />
+      </div>
+
       <Link
         to="/login"
         className="text-black contactText text-center hover:underline"
       >
         Už jste zaregistrovaní? Přihlašte se
       </Link>
+
       <button
-        className="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all"
+        className="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
         type="submit"
-        disabled={isLoading}
+        disabled={isSubmitting}
       >
-        {isLoading ? "Registrování..." : "Registrace"}
+        {isSubmitting ? "Registrování..." : "Registrace"}
       </button>
     </MyForm>
   );

@@ -1,5 +1,5 @@
 import express from "express";
-import { paymentSchema } from "../validators/paymentValidators.js";
+import { paymentSchema } from "@shared/index";
 import { payment } from "../controllers/paymentController.js";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
@@ -10,7 +10,7 @@ router.post(
   "/create-checkout-session",
   authMiddleware,
   validateRequest(paymentSchema),
-  payment
+  payment,
 );
 
 export default router;

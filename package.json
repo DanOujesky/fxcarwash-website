@@ -1,0 +1,9 @@
+{
+  "name": "fxcarwash-website",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "shared"
+  ]
+}

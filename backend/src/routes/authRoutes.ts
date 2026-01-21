@@ -14,7 +14,7 @@ import {
   newPasswordSchema,
   forgetPasswordSchema,
   resetPasswordSchema,
-} from "../validators/authValidators.js";
+} from "@shared/index";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { authMiddleware, softAuth } from "../middleware/authMiddleware.js";
 import {
@@ -30,7 +30,7 @@ router.post(
   "/register",
   registerLimiter,
   validateRequest(registerSchema),
-  register
+  register,
 );
 router.post("/login", loginLimiter, validateRequest(loginSchema), login);
 router.post("/logout", logout);
@@ -39,13 +39,13 @@ router.post(
   "/email-verification",
   requestResetLimiter,
   validateRequest(forgetPasswordSchema),
-  requestPasswordReset
+  requestPasswordReset,
 );
 router.post(
   "/verify-reset-code",
   verifyCodeLimiter,
   validateRequest(resetPasswordSchema),
-  verifyResetCode
+  verifyResetCode,
 );
 router.post("/newPassword", validateRequest(newPasswordSchema), setNewPassword);
 export default router;

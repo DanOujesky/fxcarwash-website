@@ -7,7 +7,7 @@ export const registerSchema = z.object({
     .max(50, "Jméno je příliš dlouhé")
     .trim()
     .transform(
-      (val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase()
+      (val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase(),
     ),
 
   lastName: z
@@ -16,7 +16,7 @@ export const registerSchema = z.object({
     .max(50, "Příjmení je příliš dlouhé")
     .trim()
     .transform(
-      (val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase()
+      (val) => val.charAt(0).toUpperCase() + val.slice(1).toLowerCase(),
     ),
 
   email: z.string().email("Zadejte platnou e-mailovou adresu"),
@@ -56,3 +56,9 @@ export const resetPasswordSchema = z.object({
   email: z.string().trim().toLowerCase().email("Neplatná emailová adresa"),
   code: z.string().length(6, "Neplatný ověřovací kód"),
 });
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+export type LoginInput = z.infer<typeof loginSchema>;
+export type ForgetPasswordInput = z.infer<typeof forgetPasswordSchema>;
+export type NewPasswordInput = z.infer<typeof newPasswordSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
