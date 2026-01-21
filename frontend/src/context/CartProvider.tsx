@@ -42,7 +42,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     updateCart([]);
   };
 
-  const hasDelivery = cart.some((item) => item.delivery === true);
+  const hasDelivery = cart.some((item) => item.shipping == "cp");
   const totalPrice = cart.reduce((sum, item) => sum + (item.prize || 0), 0);
 
   return (

@@ -75,7 +75,7 @@ function CartPhaseDisplay({ phaseNumber, delivery }: CartPhaseDisplayProps) {
       <div className="grid grid-cols-3 w-full justify-items-center items-center">
         <div
           className={`flex flex-row gap-2 items-center justify-center relative justify-self-end ${
-            phaseNumber === 1 ? "bg-green-500" : "bg-white"
+            phaseNumber >= 1 ? "bg-green-500" : "bg-white"
           } text-black rounded-xl p-4`}
         >
           <div className="bg-[#1d1d1b] text-white rounded-full w-8 h-8 flex justify-center items-center p-2 contactText font-medium text-[20px]">
@@ -87,13 +87,13 @@ function CartPhaseDisplay({ phaseNumber, delivery }: CartPhaseDisplayProps) {
           <span className="bg-green-500 w-1/2 h-2 block"></span>
           <span
             className={`${
-              phaseNumber > 1 ? "bg-green-500" : "bg-white"
+              phaseNumber > 2 ? "bg-green-500" : "bg-white"
             } flex-1 h-2 block`}
           ></span>
         </div>
         <div
           className={`flex flex-row gap-2 items-center justify-center relative justify-self-start ${
-            phaseNumber === 2 ? "bg-green-500" : "bg-white"
+            phaseNumber > 2 ? "bg-green-500" : "bg-white"
           } text-black rounded-xl p-4`}
         >
           <div className="bg-[#1d1d1b] text-white rounded-full w-8 h-8 flex justify-center items-center p-2 contactText font-medium text-[20px]">

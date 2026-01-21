@@ -41,12 +41,19 @@ function AccountPage() {
         >
           Chci FX kartu
         </Link>
-        <Link
-          to="/dobit-kartu"
+        <button
+          onClick={() => {
+            if (user.cards.length < 1) {
+              alert("Nejdříve si musíte objednat FX kartu");
+              return;
+            }
+
+            navigate("/dobit-kredit");
+          }}
           className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"
         >
           Dobít kredit
-        </Link>
+        </button>
       </div>
     </div>
   );

@@ -70,7 +70,7 @@ function GetCreditPage() {
 
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
         <form
-          className="my-5 flex flex-col gap-3"
+          className="my-5 flex flex-col gap-3 w-full md:w-120"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="flex flex-col">
