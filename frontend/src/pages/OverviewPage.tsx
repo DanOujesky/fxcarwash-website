@@ -1,6 +1,6 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import { Order } from "../types/Order";
@@ -9,6 +9,7 @@ function OverviewPage() {
   const { user, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const order: Order = location.state?.order;
 
@@ -21,7 +22,34 @@ function OverviewPage() {
   if (loading || !user) {
     return <div className="h-screen bg-black" />;
   }
-  const handlePayment = () => {};
+  const handlePayment = async () => {
+    setIsLoading(true);
+
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/payment/create-checkout-session`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ order: order }),
+          credentials: "include",
+        },
+      );
+      const data = await res.json();
+
+      if (res.ok) {
+        window.location.href = data.url;
+      } else {
+        console.error("Chyba při vytváření platební relace:", data.errors);
+      }
+    } catch (error) {
+      console.error("Chyba při platbě:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#252525]">
@@ -49,9 +77,9 @@ function OverviewPage() {
                       <div className="font-semibold">{item.name}</div>
                     </div>
                     <div className="">
-                      Váš požadavek na dobití kreditu: {item.prize} kreditů
+                      Váš požadavek na dobití kreditu: {item.price} kreditů
                     </div>
-                    <div className="">Vaše cena: {item.prize} Kč</div>
+                    <div className="">Vaše cena: {item.price} Kč</div>
                     <div className="mt-3">
                       Výše kreditu s bonusem {user.discount}% od nás:{" "}
                       {item.credit} kreditů
@@ -66,7 +94,7 @@ function OverviewPage() {
                       )}
                     </div>
 
-                    <div className="">Vaše cena: {item.prize} Kč</div>
+                    <div className="">Vaše cena: {item.price} Kč</div>
                     <div className="mt-3">
                       Výše kreditu s bonusem {user.discount}% pro vás:{" "}
                       {item.credit} Kreditů
@@ -81,9 +109,9 @@ function OverviewPage() {
               <h2 className="text-2xl underline">Údaje</h2>
               <div className="border-2 flex flex-row border-white p-5 justify-between w-150 mt-15">
                 <div className="flex flex-col justify-baseline self-start">
-                  <p>Jméno: {order.firstName}</p>
-                  <p>Příjmení: {order.lastName}</p>
-                  <p>Email: {order.email}</p>
+                  <p>Jméno: {user.firstName}</p>
+                  <p>Příjmení: {user.lastName}</p>
+                  <p>Email: {user.email}</p>
                   <p>Telefon: {order.phone}</p>
                 </div>
                 <div className="flex flex-col justify-baseline">
@@ -94,7 +122,7 @@ function OverviewPage() {
                 </div>
               </div>
               <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
-                <div className="underline underline-offset-8">
+                <div className="underline underline-offset-8 contactText font-bold">
                   Celková cena: {order.price} Kč
                 </div>
               </div>
@@ -104,9 +132,9 @@ function OverviewPage() {
               <h2 className="text-2xl underline">Údaje</h2>
               <div className="border-2 flex flex-row border-white p-5 justify-center gap-10 w-150 mt-15">
                 <div className="flex flex-col justify-baseline self-start w-full">
-                  <p>Jméno: {order.firstName}</p>
-                  <p>Příjmení: {order.lastName}</p>
-                  <p>Email: {order.email}</p>
+                  <p>Jméno: {user.firstName}</p>
+                  <p>Příjmení: {user.lastName}</p>
+                  <p>Email: {user.email}</p>
                   <p>Telefon: {order.phone}</p>
                 </div>
               </div>
@@ -136,8 +164,9 @@ function OverviewPage() {
             <button
               onClick={handlePayment}
               className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 cursor-pointer"
+              disabled={isLoading}
             >
-              ZAPLATIT
+              {isLoading ? "přesměrování..." : "Zaplatit"}
             </button>
             <Link
               to="/moje-karty"

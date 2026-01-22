@@ -1,28 +1,32 @@
 import { z } from "zod";
 
-export const paymentSchema = z
-  .object({
-    cardNumber: z.string().min(1, "Číslo karty je povinné"),
-    credit: z.coerce
-      .number()
-      .min(10, "Minimální částka je 10 Kč")
-      .max(50000, "Maximální částka je 50 000 Kč"),
-    action: z.enum(["createCard", "addCredit"], {
-      error: "neplatná akce",
-    }),
-    shipping: z.string().optional(),
-    street: z.string().optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (
-      data.action === "createCard" &&
-      !["cp", "op"].includes(data.shipping || "")
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "Zvolte platný způsob dopravy",
-        path: ["shipping"],
-      });
-    }
-  });
-export type PaymentInput = z.infer<typeof paymentSchema>;
+const orderItemSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  price: z.coerce.number().positive(),
+  credit: z.coerce.number().positive(),
+  quantity: z.coerce.number().int().positive().optional().default(1),
+  delivery: z.boolean(),
+  shipping: z.string().optional().nullable(),
+  cardNumber: z.string().optional().nullable(),
+});
+
+export const orderSchema = z.object({
+  id: z.string().uuid().optional(),
+  items: z.array(orderItemSchema).min(1, "Košík nesmí být prázdný"),
+  createdAt: z.coerce.date().optional(),
+  price: z.coerce.number().positive(),
+  email: z.string().email("Neplatný formát e-mailu"),
+  phone: z.string().min(9, "Telefon musí mít alespoň 9 čísel"),
+
+  address: z.string().optional().nullable(),
+  zipCode: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
+});
+
+export const paymentSchema = z.object({
+  order: orderSchema,
+});
+
+export type OrderInput = z.infer<typeof orderSchema>;

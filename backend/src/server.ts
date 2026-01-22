@@ -2,32 +2,31 @@ import "dotenv/config";
 import express from "express";
 import newsRoutes from "./routes/newsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
-import accountRoutes from "./routes/accountRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 import cors from "cors";
-import cookeParser from "cookie-parser";
+import cookieParser from "cookie-parser";
 
 const app = express();
 app.set("trust proxy", 1);
 
-const corsOptions = {
-  origin: process.env.FRONTEND_URL,
-  credentials: true,
-};
-app.use(cookeParser());
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    credentials: true,
+  }),
+);
 
 app.use("/api", webhookRoutes);
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/news", newsRoutes);
 app.use("/auth", authRoutes);
 app.use("/payment", paymentRoutes);
-app.use("/account", accountRoutes);
 
 const PORT = process.env.PORT || 5001;
 

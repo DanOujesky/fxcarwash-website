@@ -45,14 +45,17 @@ function GetCardPage() {
   }
 
   const onSubmit = (data: NewCardInput) => {
+    const creditValue = Number(data.credit);
+    const quanityValue = Number(data.quantity);
+
     const newOrderItem: OrderItem = {
       id: crypto.randomUUID(),
       name: "Objednání nové FX karty",
-      prize: data.credit,
+      price: creditValue,
       delivery: data.shipping === "cp",
       shipping: data.shipping,
-      quantity: data.quantity,
-      credit: data.credit * (1 + user.discount / 100),
+      quantity: quanityValue,
+      credit: creditValue * (1 + user.discount / 100),
     };
 
     addToCart(newOrderItem);
@@ -98,7 +101,7 @@ function GetCardPage() {
           <div className="flex flex-col">
             <Inputlabel white={true} text="Vyberte výši kreditu" />
             <select
-              {...register("credit")}
+              {...register("credit", { valueAsNumber: true })}
               className="bg-white text-black p-2 cursor-pointer contactText rounded-sm outline-none"
             >
               {[

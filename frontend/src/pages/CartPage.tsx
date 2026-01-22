@@ -30,11 +30,8 @@ function CartPage() {
       const newOrder: Order = {
         id: crypto.randomUUID(),
         items: cart,
-        createdAt: new Date(),
         price: totalPrice,
         email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
       };
       localStorage.setItem("order", JSON.stringify(newOrder));
 
@@ -64,9 +61,9 @@ function CartPage() {
                         <div className="font-semibold">{item.name}</div>
                       </div>
                       <div className="">
-                        Váš požadavek na dobití kreditu: {item.prize} kreditů
+                        Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
-                      <div className="">Vaše cena: {item.prize} Kč</div>
+                      <div className="">Vaše cena: {item.price} Kč</div>
                       <div className="mt-3">
                         Výše kreditu s bonusem {user.discount}% od nás:{" "}
                         {item.credit} kreditů
@@ -105,9 +102,9 @@ function CartPage() {
                         )}
                       </div>
                       <div className="">
-                        Váš požadavek na dobití kreditu: {item.prize} kreditů
+                        Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
-                      <div className="">Vaše cena: {item.prize} Kč</div>
+                      <div className="">Vaše cena: {item.price} Kč</div>
                       <div className="mt-3">
                         Výše kreditu s bonusem {user.discount}% pro vás:{" "}
                         {item.credit} Kreditů

@@ -47,13 +47,15 @@ function GetCreditPage() {
   }
 
   const onSubmit = (data: AddCreditInput) => {
+    const creditValue = Number(data.credit);
+
     const orderItem: OrderItem = {
       id: crypto.randomUUID(),
       name: "Dobítí kreditu na předplacenou FX kartu",
-      prize: data.credit,
+      price: creditValue,
       delivery: false,
       cardNumber: data.selectedCardNumber,
-      credit: data.credit * (1 + user.discount / 100),
+      credit: creditValue * (1 + user.discount / 100),
     };
 
     addToCart(orderItem);

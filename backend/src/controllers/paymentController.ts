@@ -1,68 +1,73 @@
 import Stripe from "stripe";
-import { prisma } from "../config/db.js";
 import { Request, Response } from "express";
+import { prisma } from "../config/db.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
 export const payment = async (req: Request, res: Response) => {
-  const { cardNumber, credit, action, shipping, street } = req.body;
+  const { order } = req.body;
 
   if (!req.user) {
     return res.status(401).json({ error: "Uživatel není autentizován" });
   }
 
   const userId = req.user.id;
-  const amount = Math.round(parseFloat(credit) * 100);
-
-  if (isNaN(amount) || amount <= 0) {
-    return res.status(400).json({ error: "Neplatná částka" });
-  }
 
   try {
-    const card = await prisma.card.findFirst({
-      where: { number: cardNumber },
-    });
-
-    if (!card) {
-      return res.status(404).json({
-        error: "Karta s tímto číslem nebyla nalezena",
-        cardNotFound: true,
+    const result = await prisma.$transaction(async (tx) => {
+      const newOrder = await tx.order.create({
+        data: {
+          userId: userId as string,
+          totalPrice: Number(order.price),
+          address: order.address,
+          city: order.city,
+          zipCode: order.zipCode,
+          country: order.country,
+          phone: order.phone,
+          status: "PENDING",
+          items: {
+            create: order.items.map((item: any) => ({
+              productId: item.id,
+              quantity: Number(item.quantity),
+            })),
+          },
+        },
       });
-    }
 
-    const frontendUrl = process.env.FRONTEND_URL;
-    if (!frontendUrl) {
-      throw new Error("FRONTEND_URL není definován v .env");
-    }
-
-    const session = await stripe.checkout.sessions.create({
-      line_items: [
-        {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        customer_email: order.email,
+        line_items: order.items.map((item: any) => ({
           price_data: {
             currency: "czk",
-            product_data: { name: `Číslo karty: ${card.number}` },
-            unit_amount: amount,
+            unit_amount: Math.round(Number(item.price) * 100),
+            product_data: {
+              name: item.name,
+              description: item.cardNumber ? `Karta: ${item.cardNumber}` : "",
+            },
           },
-          quantity: 1,
+          quantity: Number(item.quantity || 1),
+        })),
+        mode: "payment",
+        metadata: {
+          orderId: newOrder.id,
+          userId: String(userId),
         },
-      ],
-      mode: "payment",
-      metadata: {
-        cardId: card.id,
-        creditsAmount: String(credit),
-        action: String(action),
-        userId: String(userId),
-        shipping: shipping ? String(shipping) : "",
-        street: street ? String(street) : "",
-      },
-      success_url: `${frontendUrl}/payment/success`,
-      cancel_url: `${frontendUrl}/payment/cancel`,
+        success_url: `${process.env.FRONTEND_URL}/success?id=${newOrder.id}`,
+        cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      });
+
+      await tx.order.update({
+        where: { id: newOrder.id },
+        data: { stripeId: session.id },
+      });
+
+      return session.url;
     });
 
-    res.json({ url: session.url });
+    res.json({ url: result });
   } catch (error) {
-    const err = error as Error;
-    console.error("Stripe Error:", err.message);
-    res.status(500).json({ error: "Nepodařilo se vytvořit platební relaci" });
+    console.error("Stripe/DB Error:", error);
+    res.status(500).json({ error: "Chyba při inicializaci platby" });
   }
 };

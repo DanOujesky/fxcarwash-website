@@ -26,7 +26,56 @@ model User {
 
 
   cards Card[]
+  orders Order[]
   news News[] @relation("NewsCreator")
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+model Order {
+  id         String      @id @default(uuid())
+  userId     String
+  totalPrice Int
+  phone      String
+  address    String
+  zipCode    String
+  city       String
+  country    String
+  status     OrderStatus @default(PENDING)
+  stripeId   String?      @unique
+  createdAt  DateTime    @default(now())
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items      OrderItem[]
+
+  @@index([userId])
+}
+
+model Product {
+  id       String      @id @default(uuid())
+  name     String
+  price    Int
+  credit   Int?
+  quantity Int         @default(1)
+  delivery Boolean     @default(false)
+  
+  orders   OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int     @default(1)
+
+  order     Order   @relation(fields: [orderId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }
 
 model Card {

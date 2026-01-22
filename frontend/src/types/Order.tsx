@@ -1,22 +1,19 @@
 export interface Order {
   id: string;
   items: OrderItem[];
-  createdAt: Date;
   price: number;
   phone?: string;
-  email: string;
-  firstName: string;
-  lastName: string;
   address?: string;
   zipCode?: string;
   city?: string;
   country?: string;
+  email: string;
 }
 
 export interface OrderItem {
   id: string;
   name: string;
-  prize: number;
+  price: number;
   credit: number;
   quantity?: number;
   shipping?: string;

@@ -83,7 +83,6 @@ function DeliveryPage() {
     const newOrder: Order = {
       id: crypto.randomUUID(),
       items: cart,
-      createdAt: new Date(),
       address: data.address,
       zipCode: data.zipCode,
       city: data.city,
@@ -91,8 +90,6 @@ function DeliveryPage() {
       phone: data.phone,
       price: totalPrice,
       email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
     };
 
     localStorage.setItem("order", JSON.stringify(newOrder));

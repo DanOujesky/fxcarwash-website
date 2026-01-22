@@ -5,17 +5,10 @@ import {
   sendOrderEmailToCompany,
 } from "../utils/mailer.js";
 import { Request, Response } from "express";
+import { z } from "zod";
+import { getRandomValues } from "node:crypto";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-
-interface SessionMetadata {
-  cardId?: string;
-  creditsAmount?: string;
-  action?: "createCard" | "addCredit";
-  userId?: string;
-  shipping?: string;
-  street?: string;
-}
 
 export const handleStripeWebhook = async (req: Request, res: Response) => {
   const sig = req.headers["stripe-signature"];
@@ -37,55 +30,67 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object as Stripe.Checkout.Session;
+    const orderId = session.metadata?.orderId;
 
-    const metadata = session.metadata as unknown as SessionMetadata;
-
-    const { cardId, creditsAmount, action, userId } = metadata;
-
-    if (!cardId || !creditsAmount || !userId) {
-      console.error("Missing metadata in Stripe session");
-      return res.status(400).json({ error: "Missing metadata" });
-    }
-
-    const amount = parseInt(creditsAmount, 10);
-
-    let updateData: any = {};
-
-    const user = await prisma.user.findFirst({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      return res.status(400).json({
-        error: "Žádný uživatel nebyl nenalezen",
-      });
-    }
-
-    if (action === "createCard") {
-      updateData = {
-        userId: userId,
-        credit: { increment: amount },
-      };
-    } else if (action === "addCredit") {
-      updateData = {
-        credit: { increment: amount },
-      };
-    }
+    if (!orderId) return res.status(400).send("No orderId in metadata");
 
     try {
-      await prisma.card.update({
-        where: { id: cardId },
-        data: updateData,
-      });
+      await prisma.$transaction(async (tx) => {
+        const order = await tx.order.findUnique({
+          where: { id: orderId },
+          include: {
+            items: true,
+          },
+        });
+        if (!order || order.status === "PAID") return;
 
-      if (action === "createCard") {
-        await sendOrderEmailToUser(user);
-        await sendOrderEmailToCompany(user);
-      }
+        await tx.order.update({
+          where: { id: orderId },
+          data: { status: "PAID" },
+        });
+
+        // credit mechanism can be added here if needed
+
+        const getRandomInt = (min = 10, max = 100000): number => {
+          return Math.floor(Math.random() * (max - min + 1)) + min;
+        };
+
+        order.items.forEach(async (orderItem) => {
+          const item = await tx.product.findUnique({
+            where: { id: orderItem.productId },
+          });
+
+          if (!item || !item.credit) return;
+
+          if (item.delivery) {
+            await tx.card.create({
+              data: {
+                userId: order.userId,
+                number: getRandomInt().toString(),
+                credit: item.credit,
+              },
+            });
+          } else {
+            await tx.card.update({
+              where: { id: orderItem.productId },
+              data: {
+                credit: { increment: item.credit },
+              },
+            });
+          }
+        });
+
+        //end
+
+        const user = await tx.user.findUnique({ where: { id: order.userId } });
+        if (user) {
+          await sendOrderEmailToUser(user, order);
+          await sendOrderEmailToCompany(user, order);
+        }
+      });
     } catch (err) {
-      const error = err as Error;
-      console.error(`Database Error: ${error.message}`);
-      return res.status(500).json({ error: "Database update failed" });
+      console.error("Webhook DB Error:", err);
+      return res.status(500).send("Internal Server Error");
     }
   }
 
