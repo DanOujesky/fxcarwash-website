@@ -2,10 +2,9 @@ import { Link } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 
 function CartIcon() {
-  const { cart } = useCart();
-  const displayCount = cart?.length || 0;
+  const { totalCount } = useCart();
 
-  if (displayCount === 0) {
+  if (totalCount === 0) {
     return (
       <div className="relative w-10 h-10 cursor-pointer">
         <Link to="/kosik">
@@ -37,7 +36,7 @@ function CartIcon() {
                       text-[10px] font-bold 
                       rounded-full contactText"
       >
-        {displayCount}
+        {totalCount}
       </div>
     </div>
   );

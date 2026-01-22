@@ -5,6 +5,8 @@ export interface Order {
   price: number;
   phone?: string;
   email: string;
+  firstName: string;
+  lastName: string;
   address?: string;
   zipCode?: string;
   city?: string;

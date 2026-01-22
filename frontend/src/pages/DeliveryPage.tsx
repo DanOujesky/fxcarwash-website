@@ -5,13 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../context/CartContext";
 import { deliverySchema, type DeliveryInput } from "@shared/index";
+import type { Order } from "../types/Order";
 
 import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import AddressAutocomplete from "../components/AddressAutocomplete";
 import Inputlabel from "../components/InputLabel";
 import ErrorMessage from "../components/ErrorMessage";
-import type { Order } from "../types/Order";
 
 interface MapySuggestion {
   name: string;
@@ -23,22 +23,33 @@ function DeliveryPage() {
   const { user, loading } = useAuth();
   const { cart, totalPrice } = useCart();
   const navigate = useNavigate();
+  const savedOrderString = localStorage.getItem("order");
+
+  let savedOrder = null;
+  try {
+    savedOrder = savedOrderString ? JSON.parse(savedOrderString) : null;
+  } catch (e) {
+    console.error("Chyba při parsování objednávky:", e);
+  }
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<DeliveryInput>({
     resolver: zodResolver(deliverySchema),
     defaultValues: {
-      phone: "",
-      address: "",
-      zipCode: "",
-      city: "",
-      country: "",
+      phone: savedOrder?.phone || "",
+      address: savedOrder?.address || "",
+      zipCode: savedOrder?.zipCode || "",
+      city: savedOrder?.city || "",
+      country: savedOrder?.country || "",
     },
   });
+
+  const address = watch("address");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -80,6 +91,8 @@ function DeliveryPage() {
       phone: data.phone,
       price: totalPrice,
       email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
     };
 
     localStorage.setItem("order", JSON.stringify(newOrder));
@@ -88,7 +101,7 @@ function DeliveryPage() {
 
   return (
     <div className="min-h-screen bg-[#252525]">
-      <Header account={true} homePage={false} />
+      <Header account={true} homePage={false} logo={false} />
 
       <div className="flex flex-col justify-center items-center body-bg-color pt-15">
         <CartPhaseDisplay delivery={true} phaseNumber={2} />
@@ -113,7 +126,7 @@ function DeliveryPage() {
 
           <AddressAutocomplete
             onAddressSelect={handleAddressSelect}
-            initialValue={user.street}
+            initialValue={address}
             white={true}
           />
           <input type="hidden" {...register("address")} />

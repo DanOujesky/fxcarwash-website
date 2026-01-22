@@ -5,11 +5,13 @@ import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import { useCart } from "../context/CartContext";
 import type { Order } from "../types/Order";
+import QuantityInput from "../components/QuantityInput";
 
 function CartPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
-  const { cart, hasDelivery, totalPrice } = useCart();
+  const { cart, hasDelivery, totalPrice, updateCartQuantity, removeFromCart } =
+    useCart();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -31,6 +33,8 @@ function CartPage() {
         createdAt: new Date(),
         price: totalPrice,
         email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
       };
       localStorage.setItem("order", JSON.stringify(newOrder));
 
@@ -40,7 +44,7 @@ function CartPage() {
 
   return (
     <div className="min-h-screen bg-[#252525]">
-      <Header account={true} homePage={false} />
+      <Header account={true} homePage={false} logo={false} />
       {cart && cart.length > 0 ? (
         <div>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">
@@ -49,44 +53,98 @@ function CartPage() {
           <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
             {cart.map((item) => (
               <div
-                className="border-2 flex flex-row border-white p-5 justify-between w-150"
+                className="border-2 border-white p-5 justify-between w-150"
                 key={item.id}
               >
                 {item.delivery ? (
-                  <div>
+                  <div className="flex flex-row justify-between ">
                     <div className=" flex flex-col">
-                      <div className="font-semibold">{item.name}</div>
+                      {" "}
+                      <div className=" flex flex-col">
+                        <div className="font-semibold">{item.name}</div>
+                      </div>
+                      <div className="">
+                        Váš požadavek na dobití kreditu: {item.prize} kreditů
+                      </div>
+                      <div className="">Vaše cena: {item.prize} Kč</div>
+                      <div className="mt-3">
+                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
+                        {item.credit} kreditů
+                      </div>
                     </div>
-                    <div className="">
-                      Váš požadavek na dobití kreditu: {item.prize} kreditů
-                    </div>
-                    <div className="">Vaše cena: {item.prize} Kč</div>
-                    <div className="mt-3">
-                      Výše kreditu s bonusem {user.discount}% od nás:{" "}
-                      {item.credit} kreditů
+
+                    <div className=" flex flex-col items-center justify-center gap-2">
+                      <div
+                        onClick={() => removeFromCart(item.id)}
+                        className={`w-15 flex flex-col items-center justify-center ${item.shipping ? "" : "mr-[24.5px]"}`}
+                      >
+                        <img
+                          className="self-center invert w-full h-full object-cover cursor-pointer"
+                          src="/icons/trash-icon.svg"
+                        ></img>
+                      </div>
+                      {item.shipping && (
+                        <QuantityInput
+                          value={item.quantity || 1}
+                          onChange={(newQuantity) => {
+                            updateCartQuantity(item.id, newQuantity);
+                          }}
+                          size={30}
+                        />
+                      )}
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="flex flex-row justify-between ">
                     <div className=" flex flex-col">
-                      <div className="font-semibold">{item.name}</div>
-                      {!item.shipping && (
-                        <div className="">Číslo karty: {item.cardNumber}</div>
+                      {" "}
+                      <div className=" flex flex-col">
+                        <div className="font-semibold">{item.name}</div>
+                        {!item.shipping && (
+                          <div className="">Číslo karty: {item.cardNumber}</div>
+                        )}
+                      </div>
+                      <div className="">
+                        Váš požadavek na dobití kreditu: {item.prize} kreditů
+                      </div>
+                      <div className="">Vaše cena: {item.prize} Kč</div>
+                      <div className="mt-3">
+                        Výše kreditu s bonusem {user.discount}% pro vás:{" "}
+                        {item.credit} Kreditů
+                      </div>
+                    </div>
+                    <div className=" flex flex-col items-center justify-center gap-2">
+                      <div
+                        onClick={() => removeFromCart(item.id)}
+                        className={`w-15 flex flex-col items-center justify-center ${item.shipping ? "" : "mr-[24.5px]"}`}
+                      >
+                        <img
+                          className="self-center invert w-full h-full object-cover cursor-pointer"
+                          src="/icons/trash-icon.svg"
+                        ></img>
+                      </div>
+                      {item.shipping && (
+                        <QuantityInput
+                          value={item.quantity || 1}
+                          onChange={(newQuantity) => {
+                            updateCartQuantity(item.id, newQuantity);
+                          }}
+                          size={30}
+                        />
                       )}
-                    </div>
-                    <div className="">
-                      Váš požadavek na dobití kreditu: {item.prize} kreditů
-                    </div>
-                    <div className="">Vaše cena: {item.prize} Kč</div>
-                    <div className="mt-3">
-                      Výše kreditu s bonusem {user.discount}% pro vás:{" "}
-                      {item.credit} Kreditů
                     </div>
                   </div>
                 )}
               </div>
             ))}
+
+            <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
+              <div className="font-bold underline underline-offset-8">
+                Celková cena: {totalPrice} Kč
+              </div>
+            </div>
           </div>
+
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
             <button
               onClick={handleContinue}

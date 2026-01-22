@@ -25,7 +25,7 @@ function OverviewPage() {
 
   return (
     <div className="min-h-screen bg-[#252525]">
-      <Header account={true} homePage={false} />
+      <Header account={true} homePage={false} logo={false} />
       {order && order.items.length > 0 ? (
         <div>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">
@@ -76,23 +76,48 @@ function OverviewPage() {
               </div>
             ))}
           </div>
-          {order.address && (
+          {order.address ? (
             <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-              <h2 className="text-2xl underline">Doprava</h2>
-              <div className="border-2 flex flex-row border-white p-5 justify-center gap-10 w-150 mt-15">
-                <div className="flex flex-col justify-baseline self-start w-full">
+              <h2 className="text-2xl underline">Údaje</h2>
+              <div className="border-2 flex flex-row border-white p-5 justify-between w-150 mt-15">
+                <div className="flex flex-col justify-baseline self-start">
+                  <p>Jméno: {order.firstName}</p>
+                  <p>Příjmení: {order.lastName}</p>
                   <p>Email: {order.email}</p>
                   <p>Telefon: {order.phone}</p>
                 </div>
-                <div className="flex flex-col justify-baseline w-full">
+                <div className="flex flex-col justify-baseline">
                   <p>Adresa: {order.address}</p>
                   <p>PSČ: {order.zipCode}</p>
                   <p>Město: {order.city}</p>
                   <p>Stát: {order.country}</p>
                 </div>
               </div>
+              <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
+                <div className="underline underline-offset-8">
+                  Celková cena: {order.price} Kč
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col justify-center items-center body-bg-color pt-15">
+              <h2 className="text-2xl underline">Údaje</h2>
+              <div className="border-2 flex flex-row border-white p-5 justify-center gap-10 w-150 mt-15">
+                <div className="flex flex-col justify-baseline self-start w-full">
+                  <p>Jméno: {order.firstName}</p>
+                  <p>Příjmení: {order.lastName}</p>
+                  <p>Email: {order.email}</p>
+                  <p>Telefon: {order.phone}</p>
+                </div>
+              </div>
+              <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
+                <div className="underline underline-offset-8">
+                  Celková cena: {order.price} Kč
+                </div>
+              </div>
             </div>
           )}
+
           <div className="flex flex-row justify-center items-center gap-5 body-bg-color pt-15">
             <input
               type="checkbox"

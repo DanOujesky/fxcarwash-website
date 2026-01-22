@@ -42,8 +42,26 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     updateCart([]);
   };
 
+  const updateCartQuantity = (id: string, newQuantity: number) => {
+    setCart((prevCart) =>
+      prevCart.map((item) =>
+        item.id === id ? { ...item, quantity: newQuantity } : item,
+      ),
+    );
+  };
+
   const hasDelivery = cart.some((item) => item.shipping == "cp");
-  const totalPrice = cart.reduce((sum, item) => sum + (item.prize || 0), 0);
+  const totalPrice = cart.reduce((sum, item) => {
+    const price = item.prize || 0;
+    const quantity = item.quantity || 1;
+
+    return sum + price * quantity;
+  }, 0);
+
+  const totalCount = cart.reduce(
+    (count, item) => count + (item.quantity || 1),
+    0,
+  );
 
   return (
     <CartContext.Provider
@@ -54,6 +72,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         clearCart,
         hasDelivery,
         totalPrice,
+        updateCartQuantity,
+        totalCount,
       }}
     >
       {children}

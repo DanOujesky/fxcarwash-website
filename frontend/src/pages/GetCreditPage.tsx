@@ -62,7 +62,7 @@ function GetCreditPage() {
 
   return (
     <div className="min-h-screen bg-[#252525]">
-      <Header account={true} homePage={false} />
+      <Header account={true} homePage={false} logo={false} />
 
       <div className="flex flex-col justify-center items-center body-bg-color pt-15 text-white">
         <h2 className="text-2xl underline">Dobití kreditu</h2>

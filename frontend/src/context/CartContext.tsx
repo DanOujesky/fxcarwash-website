@@ -8,10 +8,12 @@ export interface CartContextType {
   clearCart: () => void;
   hasDelivery: boolean;
   totalPrice: number;
+  updateCartQuantity: (id: string, newQuantity: number) => void;
+  totalCount: number;
 }
 
 export const CartContext = createContext<CartContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export const useCart = () => {
