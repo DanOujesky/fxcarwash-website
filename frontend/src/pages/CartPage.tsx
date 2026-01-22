@@ -30,6 +30,7 @@ function CartPage() {
         items: cart,
         createdAt: new Date(),
         price: totalPrice,
+        email: user.email,
       };
       localStorage.setItem("order", JSON.stringify(newOrder));
 
@@ -69,13 +70,17 @@ function CartPage() {
                   <div>
                     <div className=" flex flex-col">
                       <div className="font-semibold">{item.name}</div>
-                      <div className="">Číslo karty: {item.cardNumber}</div>
+                      {!item.shipping && (
+                        <div className="">Číslo karty: {item.cardNumber}</div>
+                      )}
                     </div>
-
+                    <div className="">
+                      Váš požadavek na dobití kreditu: {item.prize} kreditů
+                    </div>
                     <div className="">Vaše cena: {item.prize} Kč</div>
                     <div className="mt-3">
                       Výše kreditu s bonusem {user.discount}% pro vás:{" "}
-                      {item.credit}
+                      {item.credit} Kreditů
                     </div>
                   </div>
                 )}

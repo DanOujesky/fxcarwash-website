@@ -79,6 +79,7 @@ function DeliveryPage() {
       country: data.country,
       phone: data.phone,
       price: totalPrice,
+      email: user.email,
     };
 
     localStorage.setItem("order", JSON.stringify(newOrder));
@@ -106,7 +107,6 @@ function DeliveryPage() {
                 errors.phone ? "border-red-500" : "border-transparent"
               }`}
               type="tel"
-              placeholder="+420 123 456 789"
             />
             <ErrorMessage message={errors.phone?.message} />
           </div>
@@ -140,7 +140,9 @@ function DeliveryPage() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div
+            className={`grid grid-cols-${errors.city?.message ? 2 : 1} gap-4`}
+          >
             <ErrorMessage message={errors.city?.message} />
             <ErrorMessage message={errors.zipCode?.message} />
           </div>

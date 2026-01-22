@@ -7,7 +7,7 @@ export const AuthRedirectHandler = () => {
   if (loading) return <div>Loading...</div>;
 
   if (user) {
-    return <Navigate to="/account" replace />;
+    return <Navigate to="/moje-karty" replace />;
   }
 
   return <Outlet />;

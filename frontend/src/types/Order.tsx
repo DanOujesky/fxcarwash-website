@@ -4,7 +4,7 @@ export interface Order {
   createdAt: Date;
   price: number;
   phone?: string;
-  email?: string;
+  email: string;
   address?: string;
   zipCode?: string;
   city?: string;
