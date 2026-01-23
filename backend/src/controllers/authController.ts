@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { prisma } from "../config/db.js";
 import { generateToken } from "../utils/generateToken.js";
-import { sendVerificationEmail } from "../utils/mailer.js";
+import { sendVerificationEmail } from "../mails/verificationCodeMail.js";
 
 const isCodeExpired = (expiration: Date | null): boolean => {
   if (!expiration) return true;

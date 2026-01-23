@@ -3,7 +3,7 @@ import { prisma } from "../config/db.js";
 import {
   sendOrderEmailToUser,
   sendOrderEmailToCompany,
-} from "../utils/mailer.js";
+} from "../mails/orderMail.js";
 import { Request, Response } from "express";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);

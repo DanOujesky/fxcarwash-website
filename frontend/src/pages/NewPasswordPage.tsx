@@ -71,7 +71,7 @@ function NewPasswordPage() {
         <Inputlabel text="Heslo" />
         <input
           {...register("newPassword")}
-          className={`input-field input-black-field${
+          className={`input-field input-black-field ${
             errors.newPassword ? "border-red-500" : "border-transparent"
           }`}
           type="password"

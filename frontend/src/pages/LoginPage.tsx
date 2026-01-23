@@ -19,6 +19,7 @@ function LoginPage() {
     register,
     handleSubmit,
     setValue,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
@@ -81,12 +82,16 @@ function LoginPage() {
       <div className="flex flex-col">
         <div className="flex justify-between">
           <Inputlabel text="Heslo" />
-          <Link
-            className="text-black contactText text-[13px] hover:underline"
-            to="/forgotPassword"
+          <button
+            type="button"
+            className="text-black contactText text-[13px] hover:underline cursor-pointer"
+            onClick={() => {
+              const currentEmail = getValues("email");
+              navigate("/forgotPassword", { state: { email: currentEmail } });
+            }}
           >
             Zapomenuté heslo?
-          </Link>
+          </button>
         </div>
         <input
           {...register("password")}

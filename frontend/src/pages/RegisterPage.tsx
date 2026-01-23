@@ -14,6 +14,7 @@ import ErrorMessage from "../components/ErrorMessage";
 function RegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const {
     register,
@@ -103,7 +104,8 @@ function RegisterPage() {
           type="checkbox"
           id="gdpr"
           className="w-7 h-7 accent-green-500 cursor-pointer"
-          required
+          checked={isAgreed}
+          onChange={() => setIsAgreed(!isAgreed)}
         />
         <label
           htmlFor="gdpr"
@@ -136,7 +138,7 @@ function RegisterPage() {
       <button
         className="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
         type="submit"
-        disabled={isSubmitting}
+        disabled={isSubmitting || !isAgreed}
       >
         {isSubmitting ? "Registrování..." : "Registrace"}
       </button>

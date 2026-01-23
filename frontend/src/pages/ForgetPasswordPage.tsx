@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { forgetPasswordSchema, type ForgetPasswordInput } from "@shared/index";
 
@@ -14,10 +14,12 @@ import ErrorMessage from "../components/ErrorMessage";
 function ForgetPasswordPage() {
   const [serverError, setServerError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ForgetPasswordInput>({
     resolver: zodResolver(forgetPasswordSchema),
@@ -25,6 +27,13 @@ function ForgetPasswordPage() {
       email: "",
     },
   });
+
+  useEffect(() => {
+    if (location.state?.email) {
+      setValue("email", location.state.email);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate, setValue]);
 
   const onSubmit = async (data: ForgetPasswordInput) => {
     setServerError(null);

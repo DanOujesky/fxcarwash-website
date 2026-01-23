@@ -56,7 +56,7 @@ li {
   @apply text-4xl md:text-5xl xl:text-7xl;
 }
 .input-button {
-  @apply text-white h-10 bg-black hover:text-gray-300;
+  @apply text-white h-10 cursor-pointer bg-black hover:text-gray-300;
 }
 @layer components {
   .input-field {
