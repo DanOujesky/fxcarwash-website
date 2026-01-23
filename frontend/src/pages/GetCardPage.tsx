@@ -51,6 +51,7 @@ function GetCardPage() {
 
     const newOrderItem: OrderItem = {
       id: PRODUCT_ID.NEW_CARD,
+      temp_id: crypto.randomUUID(),
       name: "Objednání nové FX karty",
       price: creditValue,
       delivery: data.shipping === "cp",

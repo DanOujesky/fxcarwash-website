@@ -27,12 +27,12 @@ function GetCreditPage() {
   } = useForm<AddCreditInput>({
     resolver: zodResolver(addCreditSchema),
     defaultValues: {
-      selectedCardNumber: "",
+      cardNumber: "",
       credit: 500,
     },
   });
 
-  const selectedCardNumber = watch("selectedCardNumber");
+  const selectedCardNumber = watch("cardNumber");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,10 +52,11 @@ function GetCreditPage() {
 
     const orderItem: OrderItem = {
       id: PRODUCT_ID.ADD_CREDIT,
+      temp_id: crypto.randomUUID(),
       name: "Dobítí kreditu na předplacenou FX kartu",
       price: creditValue,
       delivery: false,
-      cardNumber: data.selectedCardNumber,
+      cardNumber: data.cardNumber,
       credit: creditValue * (1 + user.discount / 100),
     };
 
@@ -84,7 +85,7 @@ function GetCreditPage() {
                   className="my-2 cursor-pointer"
                   key={card.id}
                   onClick={() =>
-                    setValue("selectedCardNumber", card.number, {
+                    setValue("cardNumber", card.number, {
                       shouldValidate: true,
                     })
                   }
@@ -97,14 +98,14 @@ function GetCreditPage() {
                   />
                 </div>
               ))}
-              <input type="hidden" {...register("selectedCardNumber")} />
+              <input type="hidden" {...register("cardNumber")} />
             </div>
           </div>
 
           <div className="flex flex-col">
             <Inputlabel white={true} text="Vyberte výši kreditu" />
             <select
-              {...register("credit")}
+              {...register("credit", { valueAsNumber: true })}
               className="bg-white text-black p-2 cursor-pointer contactText outline-none rounded-sm"
             >
               {[
@@ -121,7 +122,7 @@ function GetCreditPage() {
           <div className="flex flex-col gap-1 min-h-[20px] text-center">
             <ErrorMessage
               message={
-                errors.selectedCardNumber?.message ||
+                errors.cardNumber?.message ||
                 errors.credit?.message ||
                 undefined
               }

@@ -1,17 +1,11 @@
-import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-
 function PaymentSuccessPage() {
   localStorage.removeItem("order");
   localStorage.removeItem("cart");
 
-  const { checkAuth } = useAuth();
-  const navigate = useNavigate();
-
-  const handleReturn = async () => {
-    await checkAuth();
-    navigate("/moje-karty");
+  const handleReturn = () => {
+    window.location.href = "/moje-karty";
   };
+
   return (
     <div className="bg-black h-screen w-full flex justify-center items-center flex-col gap-2 text-center">
       <div className="text-[15px] sm:text-[20px]">Platba probehla úspěšně</div>

@@ -37,7 +37,7 @@ export const orderSchema = z
   });
 
 export const addCreditSchema = z.object({
-  selectedCardNumber: z.string().min(1, "Musíte vybrat kartu"),
+  cardNumber: z.string().min(1, "Musíte vybrat kartu"),
   credit: z
     .number()
     .min(500, "Minimální výše kreditu je 500 Kč")

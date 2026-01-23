@@ -69,36 +69,59 @@ function OverviewPage() {
           <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
             {order.items.map((item) => (
               <div
-                className="border-2 flex flex-row border-white p-5 justify-between w-150"
+                className="border-2 border-white p-5 justify-between w-150"
                 key={item.id}
               >
                 {item.delivery ? (
-                  <div>
+                  <div className="flex flex-row justify-between ">
                     <div className=" flex flex-col">
-                      <div className="font-semibold">{item.name}</div>
+                      {" "}
+                      <div className=" flex flex-col">
+                        <div className="font-semibold">{item.name}</div>
+                      </div>
+                      <div className="">
+                        Váš požadavek na dobití kreditu: {item.price} kreditů
+                      </div>
+                      <div className="">Vaše cena: {item.price} Kč</div>
+                      <div className="mt-3">
+                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
+                        {item.credit} kreditů
+                      </div>
                     </div>
-                    <div className="">
-                      Váš požadavek na dobití kreditu: {item.price} kreditů
-                    </div>
-                    <div className="">Vaše cena: {item.price} Kč</div>
-                    <div className="mt-3">
-                      Výše kreditu s bonusem {user.discount}% od nás:{" "}
-                      {item.credit} kreditů
+
+                    <div className=" flex flex-col items-center justify-center gap-2">
+                      {item.shipping && (
+                        <div className="flex flex-col items-center justify-center text-3xl">
+                          {item.quantity} ks
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (
-                  <div>
+                  <div className="flex flex-row justify-between ">
                     <div className=" flex flex-col">
-                      <div className="font-semibold">{item.name}</div>
-                      {!item.shipping && (
-                        <div className="">Číslo karty: {item.cardNumber}</div>
-                      )}
+                      {" "}
+                      <div className=" flex flex-col">
+                        <div className="font-semibold">{item.name}</div>
+                        {!item.shipping && (
+                          <div className="">Číslo karty: {item.cardNumber}</div>
+                        )}
+                      </div>
+                      <div className="">
+                        Váš požadavek na dobití kreditu: {item.price} kreditů
+                      </div>
+                      <div className="">Vaše cena: {item.price} Kč</div>
+                      <div className="mt-3">
+                        Výše kreditu s bonusem {user.discount}% pro vás:{" "}
+                        {item.credit} Kreditů
+                      </div>
                     </div>
-
-                    <div className="">Vaše cena: {item.price} Kč</div>
-                    <div className="mt-3">
-                      Výše kreditu s bonusem {user.discount}% pro vás:{" "}
-                      {item.credit} Kreditů
+                    <div className=" flex flex-col items-center justify-center gap-2">
+                      {item.shipping && (
+                        <div className="flex flex-col items-center justify-center text-3xl">
+                          {item.quantity} ks
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -139,7 +162,7 @@ function OverviewPage() {
                 </div>
               </div>
               <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
-                <div className="underline underline-offset-8">
+                <div className="underline underline-offset-8 contactText font-bold">
                   Celková cena: {order.price} Kč
                 </div>
               </div>

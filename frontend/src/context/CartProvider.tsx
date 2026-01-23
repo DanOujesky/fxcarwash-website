@@ -33,8 +33,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     updateCart([...cart, itemWithId]);
   };
 
-  const removeFromCart = (id: string) => {
-    const updated = cart.filter((item) => item.id !== id);
+  const removeFromCart = (temp_id: string) => {
+    const updated = cart.filter((item) => item.temp_id !== temp_id);
     updateCart(updated);
   };
 
@@ -42,10 +42,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     updateCart([]);
   };
 
-  const updateCartQuantity = (id: string, newQuantity: number) => {
+  const updateCartQuantity = (temp_id: string, newQuantity: number) => {
     setCart((prevCart) =>
       prevCart.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item,
+        item.temp_id === temp_id ? { ...item, quantity: newQuantity } : item,
       ),
     );
   };

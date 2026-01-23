@@ -12,6 +12,7 @@ export interface Order {
 
 export interface OrderItem {
   id: string;
+  temp_id: string;
   name: string;
   price: number;
   credit: number;

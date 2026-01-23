@@ -72,7 +72,7 @@ function CartPage() {
 
                     <div className=" flex flex-col items-center justify-center gap-2">
                       <div
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.temp_id)}
                         className={`w-15 flex flex-col items-center justify-center ${item.shipping ? "" : "mr-[24.5px]"}`}
                       >
                         <img
@@ -84,7 +84,7 @@ function CartPage() {
                         <QuantityInput
                           value={item.quantity || 1}
                           onChange={(newQuantity) => {
-                            updateCartQuantity(item.id, newQuantity);
+                            updateCartQuantity(item.temp_id, newQuantity);
                           }}
                           size={30}
                         />
@@ -112,7 +112,7 @@ function CartPage() {
                     </div>
                     <div className=" flex flex-col items-center justify-center gap-2">
                       <div
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.temp_id)}
                         className={`w-15 flex flex-col items-center justify-center ${item.shipping ? "" : "mr-[24.5px]"}`}
                       >
                         <img
@@ -124,7 +124,7 @@ function CartPage() {
                         <QuantityInput
                           value={item.quantity || 1}
                           onChange={(newQuantity) => {
-                            updateCartQuantity(item.id, newQuantity);
+                            updateCartQuantity(item.temp_id, newQuantity);
                           }}
                           size={30}
                         />
