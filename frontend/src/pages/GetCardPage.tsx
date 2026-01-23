@@ -148,7 +148,7 @@ function GetCardPage() {
 
           <div className="flex flex-col justify-center">
             <button
-              className="bg-green-500 hover:bg-green-600 p-2 inline-block rounded-sm mt-5 font-bold disabled:bg-gray-500 transition-colors"
+              className="bg-green-500 hover:bg-green-600 p-2 inline-block rounded-sm mt-5 disabled:bg-gray-500 transition-colors"
               type="submit"
               disabled={isSubmitting}
             >
