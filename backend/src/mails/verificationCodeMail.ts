@@ -6,13 +6,13 @@ export const sendVerificationEmail = async (email: string, code: string) => {
   const darkBg = "#252525";
 
   await transporter.sendMail({
-    from: `"FX CarWash" <${process.env.EMAIL_FROM}>`,
+    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "Ověřovací kód",
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #eeeeee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
         <div style="background-color: ${darkBg}; padding: 30px; text-align: center;">
-          <h2 style="color: white; margin: 0; letter-spacing: 2px;">FX CarWash</h2>
+          <h2 style="color: white; margin: 0; letter-spacing: 2px;">FX CARWASH</h2>
         </div>
 
         <div style="padding: 40px 30px; text-align: center; background-color: #ffffff;">

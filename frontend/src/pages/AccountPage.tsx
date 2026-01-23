@@ -21,14 +21,14 @@ function AccountPage() {
     <div className={`min-h-screen bg-[#252525]`}>
       <Header account={true} homePage={false} logo={false} />
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
-        <h2 className="text-2xl underline">Moje Karty</h2>
+        <h2 className="text-2xl underline text-center">Moje Karty</h2>
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color">
         {user.cards.length > 0 ? (
           [...user.cards]
             .sort((a, b) => Number(a.number) - Number(b.number))
             .map((card) => (
-              <div key={card.id} className="my-1">
+              <div key={card.id} className="my-1 w-[80%] max-w-100">
                 <CustomCard credit={card.credit} number={card.number} />
               </div>
             ))

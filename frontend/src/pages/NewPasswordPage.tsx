@@ -87,7 +87,7 @@ function NewPasswordPage() {
         className="input-button disabled:bg-gray-400"
         type="submit"
       >
-        {isSubmitting ? "Nastavování..." : "Nastavit nové heslo"}
+        {isSubmitting ? "Nastavování..." : "Nastavit heslo"}
       </button>
     </MyForm>
   );

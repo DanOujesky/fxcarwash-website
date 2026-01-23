@@ -69,7 +69,9 @@ function GetCardPage() {
       <Header account={true} homePage={false} logo={false} />
 
       <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-        <h2 className="text-2xl underline text-white">Objednání karty</h2>
+        <h2 className="text-2xl underline text-white text-center">
+          Objednání karty
+        </h2>
       </div>
 
       <div className="flex flex-col justify-center items-center body-bg-color p-15">

@@ -50,11 +50,11 @@ function CartPage() {
           <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
             {cart.map((item) => (
               <div
-                className="border-2 border-white p-5 justify-between w-150"
+                className="border-2 border-white p-5 justify-between w-[80%] sm:w-150"
                 key={item.id}
               >
                 {item.delivery ? (
-                  <div className="flex flex-row justify-between ">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
@@ -92,7 +92,7 @@ function CartPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-row justify-between ">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
@@ -135,7 +135,7 @@ function CartPage() {
               </div>
             ))}
 
-            <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
+            <div className="w-[80%] sm:w-150 flex justify-between items-center text-white text-xl pt-5">
               <div className="font-bold underline underline-offset-8">
                 Celková cena: {totalPrice} Kč
               </div>
@@ -159,8 +159,8 @@ function CartPage() {
         </div>
       ) : (
         <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-          <div className="text-white">
-            <h2>V košíku dosud nemáte žádné zboží</h2>
+          <div className="text-white text-center">
+            <h2>V košíku nemáte žádné zboží</h2>
             <p>
               Pokračujte prosím na{" "}
               <Link to="/moje-karty" className="underline">

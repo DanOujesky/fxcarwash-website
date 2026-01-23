@@ -79,7 +79,7 @@ function GetCreditPage() {
         >
           <div className="flex flex-col">
             <Inputlabel white={true} text="Vyberte Kartu" />
-            <div className="mt-2">
+            <div className="">
               {user.cards.map((card) => (
                 <div
                   className="my-2 cursor-pointer"

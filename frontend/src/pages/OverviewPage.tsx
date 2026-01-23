@@ -69,11 +69,11 @@ function OverviewPage() {
           <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
             {order.items.map((item) => (
               <div
-                className="border-2 border-white p-5 justify-between w-150"
+                className="border-2 border-white p-5 justify-between w-[80%] sm:w-150"
                 key={item.id}
               >
                 {item.delivery ? (
-                  <div className="flex flex-row justify-between ">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
@@ -98,7 +98,7 @@ function OverviewPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-row justify-between ">
+                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
@@ -131,7 +131,7 @@ function OverviewPage() {
           {order.address ? (
             <div className="flex flex-col justify-center items-center body-bg-color pt-15">
               <h2 className="text-2xl underline">Údaje</h2>
-              <div className="border-2 flex flex-row border-white p-5 justify-between w-150 mt-15">
+              <div className="border-2 flex flex-col sm:flex-row border-white p-5 justify-between sm:w-150 w-[80%] mt-15 ">
                 <div className="flex flex-col justify-baseline self-start">
                   <p>Jméno: {user.firstName}</p>
                   <p>Příjmení: {user.lastName}</p>
@@ -145,7 +145,7 @@ function OverviewPage() {
                   <p>Stát: {order.country}</p>
                 </div>
               </div>
-              <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
+              <div className="sm:w-150 w-[80%] flex justify-between items-center text-white text-xl pt-5">
                 <div className="underline underline-offset-8 contactText font-bold">
                   Celková cena: {order.price} Kč
                 </div>
@@ -169,11 +169,11 @@ function OverviewPage() {
             </div>
           )}
 
-          <div className="flex flex-row justify-center items-center gap-5 body-bg-color pt-15">
+          <div className="flex flex-row justify-center items-center gap-5 body-bg-color pt-15 mx-10">
             <input
               type="checkbox"
               id="gdpr"
-              className="w-7 h-7 accent-green-500 cursor-pointer"
+              className="w-7 h-7 shrink-0 accent-green-500 cursor-pointer"
               checked={isAgreed}
               onChange={() => setIsAgreed(!isAgreed)}
             />
