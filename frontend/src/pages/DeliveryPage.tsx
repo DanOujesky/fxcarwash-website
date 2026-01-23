@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../context/CartContext";
@@ -36,7 +36,7 @@ function DeliveryPage() {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<DeliveryInput>({
     resolver: zodResolver(deliverySchema),
@@ -48,8 +48,6 @@ function DeliveryPage() {
       country: savedOrder?.country || "",
     },
   });
-
-  const address = watch("address");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -118,14 +116,26 @@ function DeliveryPage() {
               }`}
               type="tel"
             />
-            <ErrorMessage message={errors.phone?.message} />
+            <ErrorMessage marginOn={true} message={errors.phone?.message} />
           </div>
 
-          <AddressAutocomplete
-            onAddressSelect={handleAddressSelect}
-            initialValue={address}
-            white={true}
+          <Controller
+            control={control}
+            name="address"
+            render={({ field: { onChange, value } }) => (
+              <AddressAutocomplete
+                onAddressSelect={(fullAddress) => {
+                  handleAddressSelect(fullAddress);
+                  onChange(fullAddress.name);
+                }}
+                onChange={onChange}
+                initialValue={value}
+                error={errors.address}
+                white={true}
+              />
+            )}
           />
+          <ErrorMessage message={errors.address?.message} />
           <input type="hidden" {...register("address")} />
 
           <div className="grid grid-cols-2 gap-4 w-full">
@@ -150,10 +160,13 @@ function DeliveryPage() {
               />
             </div>
           </div>
-          <div
-            className={`grid grid-cols-${errors.city?.message ? 2 : 1} gap-4`}
-          >
-            <ErrorMessage message={errors.city?.message} />
+          <div className="grid grid-cols-2 gap-4">
+            {errors.city?.message ? (
+              <ErrorMessage message={errors.city.message} />
+            ) : (
+              <div></div>
+            )}
+
             <ErrorMessage message={errors.zipCode?.message} />
           </div>
 
@@ -166,7 +179,7 @@ function DeliveryPage() {
               }`}
               type="text"
             />
-            <ErrorMessage message={errors.country?.message} />
+            <ErrorMessage marginOn={true} message={errors.country?.message} />
           </div>
 
           <div className="flex flex-col justify-center items-center gap-4 mt-5">

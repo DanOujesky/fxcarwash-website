@@ -35,6 +35,7 @@ export const payment = async (req: Request, res: Response) => {
               quantity: Number(item.quantity),
               delivery: item.shipping ? true : false,
               cardNumber: item.cardNumber || null,
+              shipping: item.shipping || null,
             })),
           },
         },

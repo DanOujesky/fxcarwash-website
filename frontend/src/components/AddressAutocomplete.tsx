@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import type { ChangeEvent } from "react";
 import Inputlabel from "./InputLabel";
+import { FieldError } from "react-hook-form";
 
 interface MapySuggestion {
   name: string;
@@ -11,7 +12,8 @@ interface MapySuggestion {
 
 interface AddressAutocompleteProps {
   onAddressSelect?: (address: MapySuggestion) => void;
-  error?: boolean;
+  onChange?: (value: string) => void;
+  error?: FieldError;
   initialValue?: string;
   white?: boolean;
 }
@@ -21,6 +23,7 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   error,
   initialValue,
   white,
+  onChange,
 }) => {
   const [inputValue, setInputValue] = useState<string>(initialValue || "");
   const [suggestions, setSuggestions] = useState<MapySuggestion[]>([]);
@@ -30,6 +33,9 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setInputValue(value);
+    if (onChange) {
+      onChange(value);
+    }
 
     if (value.length > 2) {
       try {

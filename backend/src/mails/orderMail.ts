@@ -18,7 +18,7 @@ export const sendOrderEmailToUser = async (
   <tr>
     <td style="padding: 12px; border-bottom: 1px solid #eee;">
       <strong style="color: #333;">${item.name}</strong>
-    ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small>` : ""}
+    ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small> <br><small style="color: #666;">Způsob dopravy: ${item.shipping === "cp" ? "Česká pošta" : "Osobní převzetí"}</small>` : ""}
     ${item.cardNumber ? `<br><small style="color: #666;">Karta: ${item.cardNumber}</small>` : ""}
     </td>
     <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; white-space: nowrap;">
@@ -48,13 +48,13 @@ export const sendOrderEmailToUser = async (
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
         <div style="background: ${darkBg}; color: white; padding: 40px 20px; text-align: center;">
-          <h1 style="margin: 0;">FX Carwash</h1>
+          <h1 style="margin: 0;">FX CARWASH</h1>
           <p style="margin: 10px 0 0; opacity: 0.7;">Objednávka byla úspěšně přijata</p>
         </div>
 
         <div style="padding: 30px;">
           <p>Dobrý den, ${user.firstName},</p>
-          <p>děkujeme za Vaši důvěru. Zde je přehled Vaší objednávky:</p>
+          <p>děkujeme za Vaši objednávku. Zde je přehled Vaší objednávky:</p>
           
           <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
             ${itemsHtml}
@@ -77,7 +77,7 @@ export const sendOrderEmailToUser = async (
         </div>
 
         <div style="background: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888;">
-          <p>FX Carwash s.r.o. | Podpora: sales@fxcarwash.cz</p>
+          <p>F.X. Carwash s.r.o. | Podpora: sales@fxcarwash.cz</p>
         </div>
       </div>
     `,
@@ -96,7 +96,7 @@ export const sendOrderEmailToCompany = async (
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #eee;">
         <strong style="color: #333;">${item.name}</strong>
-        ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small>` : ""}
+        ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small> <br><small style="color: #666;">Způsob dopravy: ${item.shipping === "cp" ? "Česká pošta" : "Osobní převzetí"}</small>` : ""}
         ${item.cardNumber ? `<br><small style="color: #666;">Karta: ${item.cardNumber}</small>` : ""}
       </td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
