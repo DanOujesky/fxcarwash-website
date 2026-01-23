@@ -22,17 +22,13 @@ function CustomCard({ number, credit, isSelected, hover }: CustomCardProps) {
       </div>
       <div
         className={`flex-1 flex flex-col justify-center ${
-          hover ? "text-white" : "text-black"
+          hover ? "text-white" : "text-white"
         } sm:px-10 pr-2`}
       >
-        <div
-          className={`${hover ? "" : "font-bold"}  text-[12px] sm:text-[16px]`}
-        >
+        <div className={`  text-[12px] sm:text-[16px]`}>
           ČÍSLO KARTY: <span className="font-normal ">{number}</span>
         </div>
-        <div
-          className={`${hover ? "" : "font-bold"}  text-[12px] sm:text-[16px]`}
-        >
+        <div className={`  text-[12px] sm:text-[16px]`}>
           KREDIT: <span className="font-normal">{credit}</span>
         </div>
       </div>

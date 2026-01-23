@@ -33,7 +33,7 @@ function AccountPage() {
           [...user.cards]
             .sort((a, b) => Number(a.number) - Number(b.number))
             .map((card) => (
-              <div key={card.id} className="my-1 w-[80%] max-w-100">
+              <div key={card.id} className="my-1 w-[80%] sm:w-120">
                 <CustomCard credit={card.credit} number={card.number} />
               </div>
             ))
@@ -42,25 +42,27 @@ function AccountPage() {
         )}
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
-        <Link
-          to="/objednat-kartu"
-          className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5"
-        >
-          Chci FX kartu
-        </Link>
-        <button
-          onClick={() => {
-            if (user.cards.length < 1) {
-              alert("Nejdříve si musíte objednat FX kartu");
-              return;
-            }
+        <div className="flex flex-col w-55 sm:w-80">
+          <Link
+            to="/objednat-kartu"
+            className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 text-center"
+          >
+            Chci FX kartu
+          </Link>
+          <button
+            onClick={() => {
+              if (user.cards.length < 1) {
+                alert("Nejdříve si musíte objednat FX kartu");
+                return;
+              }
 
-            navigate("/dobit-kartu");
-          }}
-          className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"
-        >
-          Dobít kredit
-        </button>
+              navigate("/dobit-kartu");
+            }}
+            className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"
+          >
+            Dobít kredit
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -190,16 +190,16 @@ function DeliveryPage() {
           <div className="flex flex-col justify-center items-center gap-4 mt-5">
             <button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white font-bold p-3 w-full rounded-sm transition-colors disabled:bg-gray-500"
+              className="bg-green-500 hover:bg-green-600 text-white p-3 w-55 sm:w-80 rounded-sm transition-colors disabled:bg-gray-500"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Zpracovávám..." : "Pokračovat"}
             </button>
             <Link
-              to="/moje-karty"
-              className="text-white border-2 border-white hover:bg-[#1b1b1b] p-2 w-full text-center rounded-sm transition-colors"
+              to="/kosik"
+              className="text-white border-2 border-white hover:bg-[#1b1b1b] p-2 w-55 sm:w-80 text-center rounded-sm transition-colors"
             >
-              Zpět k nákupu
+              Zpět
             </Link>
           </div>
         </form>

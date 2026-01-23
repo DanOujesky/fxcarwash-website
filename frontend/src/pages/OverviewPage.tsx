@@ -190,23 +190,25 @@ function OverviewPage() {
             </label>
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
-            <button
-              onClick={handlePayment}
-              className={`${
-                !isAgreed
-                  ? "bg-gray-500 cursor-not-allowed"
-                  : "bg-green-500 hover:bg-green-600"
-              } p-2 inline-block rounded-sm mt-5 text-white`}
-              disabled={isLoading || !isAgreed}
-            >
-              {isLoading ? "přesměrování..." : "Zaplatit"}
-            </button>
-            <Link
-              to="/moje-karty"
-              className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"
-            >
-              Zpět k nákupu
-            </Link>
+            <div className="flex flex-col w-55 sm:w-80">
+              <button
+                onClick={handlePayment}
+                className={`${
+                  !isAgreed
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-green-500 hover:bg-green-600"
+                } p-2 inline-block rounded-sm mt-5 text-white`}
+                disabled={isLoading || !isAgreed}
+              >
+                {isLoading ? "přesměrování..." : "Zaplatit"}
+              </button>
+              <Link
+                to={`${order.address ? "/doprava" : "/kosik"}`}
+                className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5 text-center"
+              >
+                Zpět
+              </Link>
+            </div>
           </div>
         </form>
       ) : (

@@ -118,7 +118,7 @@ function CartPage() {
                     <div className=" flex flex-col items-center justify-center gap-2">
                       <div
                         onClick={() => removeFromCart(item.temp_id)}
-                        className={`w-15 flex flex-col items-center justify-center ${item.shipping ? "" : "mr-[24.5px]"}`}
+                        className={`w-15 flex flex-col items-center justify-center  ${item.shipping ? "" : "sm:mr-[24.5px]"}`}
                       >
                         <img
                           className="self-center invert w-full h-full object-cover cursor-pointer"
@@ -148,18 +148,20 @@ function CartPage() {
           </div>
 
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
-            <button
-              onClick={handleContinue}
-              className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 cursor-pointer"
-            >
-              Pokračovat
-            </button>
-            <Link
-              to="/moje-karty"
-              className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"
-            >
-              Zpět k nákupu
-            </Link>
+            <div className="flex flex-col w-55 sm:w-80">
+              <button
+                onClick={handleContinue}
+                className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 cursor-pointer"
+              >
+                Pokračovat
+              </button>
+              <Link
+                to="/moje-karty"
+                className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5 text-center"
+              >
+                Zpět k nákupu
+              </Link>
+            </div>
           </div>
         </div>
       ) : (

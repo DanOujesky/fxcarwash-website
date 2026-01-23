@@ -55,7 +55,7 @@ const QuantityInput: React.FC<QuantityInputProps> = ({
           onClick={decrement}
           disabled={value <= min}
           style={size ? { width: `${size}px` } : {}}
-          className="px-4 py-2 h-full text-black hover:bg-gray-600 bg-gray-500 disabled:opacity-30 transition-colors flex items-center justify-center text-xl"
+          className="px-4 py-2 h-full text-black hover:bg-gray-600 bg-gray-500 disabled:opacity-30 transition-colors flex items-center justify-center text-xl cursor-pointer"
         >
           −
         </button>
@@ -72,7 +72,7 @@ const QuantityInput: React.FC<QuantityInputProps> = ({
           onClick={increment}
           disabled={value >= max}
           style={size ? { width: `${size}px` } : {}}
-          className="px-4 py-2 h-full text-black hover:bg-gray-600 bg-gray-500 disabled:opacity-30 transition-colors flex items-center justify-center text-xl"
+          className="px-4 py-2 h-full text-black hover:bg-gray-600 bg-gray-500 disabled:opacity-30 transition-colors flex items-center justify-center text-xl cursor-pointer"
         >
           +
         </button>
