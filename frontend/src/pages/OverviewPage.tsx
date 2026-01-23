@@ -10,6 +10,7 @@ function OverviewPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const [isAgreed, setIsAgreed] = useState(false);
 
   const order: Order = location.state?.order;
 
@@ -55,7 +56,7 @@ function OverviewPage() {
     <div className="min-h-screen bg-[#252525]">
       <Header account={true} homePage={false} logo={false} />
       {order && order.items.length > 0 ? (
-        <div>
+        <form onSubmit={(e) => e.preventDefault()}>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">
             <CartPhaseDisplay
               delivery={order.address ? true : false}
@@ -135,7 +136,6 @@ function OverviewPage() {
                   <p>Jméno: {user.firstName}</p>
                   <p>Příjmení: {user.lastName}</p>
                   <p>Email: {user.email}</p>
-                  <p>Telefon: {order.phone}</p>
                 </div>
               </div>
               <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
@@ -151,7 +151,8 @@ function OverviewPage() {
               type="checkbox"
               id="gdpr"
               className="w-7 h-7 accent-green-500 cursor-pointer"
-              required
+              checked={isAgreed}
+              onChange={() => setIsAgreed(!isAgreed)}
             />
             <label
               htmlFor="gdpr"
@@ -163,8 +164,12 @@ function OverviewPage() {
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
             <button
               onClick={handlePayment}
-              className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 cursor-pointer"
-              disabled={isLoading}
+              className={`${
+                !isAgreed
+                  ? "bg-gray-500 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600"
+              } p-2 inline-block rounded-sm mt-5 text-white`}
+              disabled={isLoading || !isAgreed}
             >
               {isLoading ? "přesměrování..." : "Zaplatit"}
             </button>
@@ -175,7 +180,7 @@ function OverviewPage() {
               Zpět k nákupu
             </Link>
           </div>
-        </div>
+        </form>
       ) : (
         <div className="flex flex-col justify-center items-center body-bg-color pt-15">
           <div className="text-white">

@@ -10,7 +10,7 @@ function PaymentCanceledPage() {
         <img src="/icons/cancel_icon.svg" alt="successful-icon" />
       </div>
       <Link
-        to="/account"
+        to="/moje-karty"
         className="mt-10 bg-white text-black p-2 hover:bg-gray-300"
       >
         Vrátit se zpět

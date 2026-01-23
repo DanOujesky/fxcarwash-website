@@ -11,6 +11,7 @@ import Header from "../components/Header";
 import QuantityInput from "../components/QuantityInput";
 import ErrorMessage from "../components/ErrorMessage";
 import type { OrderItem } from "../types/Order";
+import { PRODUCT_ID } from "../constants/products";
 
 function GetCardPage() {
   const { user, loading } = useAuth();
@@ -49,7 +50,7 @@ function GetCardPage() {
     const quanityValue = Number(data.quantity);
 
     const newOrderItem: OrderItem = {
-      id: crypto.randomUUID(),
+      id: PRODUCT_ID.NEW_CARD,
       name: "Objednání nové FX karty",
       price: creditValue,
       delivery: data.shipping === "cp",

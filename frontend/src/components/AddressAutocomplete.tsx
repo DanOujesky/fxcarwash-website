@@ -35,8 +35,8 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
       try {
         const response = await fetch(
           `https://api.mapy.cz/v1/suggest?query=${encodeURIComponent(
-            value
-          )}&lang=cs&apikey=${API_KEY}`
+            value,
+          )}&lang=cs&apikey=${API_KEY}`,
         );
         const data = await response.json();
         setSuggestions(data.items || []);
@@ -58,29 +58,29 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
   };
 
   return (
-    <div className="relative w-full">
-      <Inputlabel white={white} text="Ulice a číslo popisné"></Inputlabel>
+    <div className="relative w-full flex flex-col">
+      <Inputlabel white={white} text="Ulice a číslo popisné" />
       <input
         type="text"
         value={inputValue}
         onChange={handleInputChange}
-        className={`w-full input-field ${
-          white ? "bg-white" : "bg-black"
-        } p-2 text-black contactText border-2${
+        className={`input-field input-white-field ${
           error ? "border-red-500" : "border-transparent"
         }`}
       />
 
       {suggestions.length > 0 && (
-        <ul className="absolute z-50 w-full mt-1 bg-white  max-h-60 overflow-y-auto">
+        <ul className="absolute z-50 w-full top-full mt-1 bg-white shadow-xl rounded-md max-h-60 overflow-y-auto border border-gray-200">
           {suggestions.map((item, index) => (
             <li
               key={index}
               onClick={() => selectAddress(item)}
-              className="p-3 hover:bg-green-500 cursor-pointer border-y-2 border-black"
+              className="p-3 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-none transition-colors"
             >
               <div className="font-medium text-sm text-black">{item.name}</div>
-              <div className="text-xs text-gray-400">{item.label}</div>
+              {item.label && (
+                <div className="text-xs text-gray-500">{item.label}</div>
+              )}
             </li>
           ))}
         </ul>
@@ -88,5 +88,4 @@ const AddressAutocomplete: React.FC<AddressAutocompleteProps> = ({
     </div>
   );
 };
-
 export default AddressAutocomplete;

@@ -30,49 +30,63 @@ model User {
   news News[] @relation("NewsCreator")
 }
 
+
 enum OrderStatus {
   PENDING
   PAID
-  CANCELED
+  CANCELLED
+  REFUNDED
+  SHIPPED
 }
-model Order {
-  id         String      @id @default(uuid())
-  userId     String
-  totalPrice Int
-  phone      String
-  address    String
-  zipCode    String
-  city       String
-  country    String
-  status     OrderStatus @default(PENDING)
-  stripeId   String?      @unique
-  createdAt  DateTime    @default(now())
 
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items      OrderItem[]
+model Order {
+  id           String      @id @default(uuid())
+  userId       String
+  
+  totalPrice   Int         
+  currency     String      @default("CZK")
+  
+  phone        String?
+  address      String?
+  zipCode      String?
+  city         String?
+  country      String?
+  
+  status       OrderStatus @default(PENDING)
+  stripeId     String?     @unique
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  user         User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items        OrderItem[]
 
   @@index([userId])
+  @@index([stripeId])
 }
 
 model Product {
-  id       String      @id @default(uuid())
-  name     String
-  price    Int
-  credit   Int?
-  quantity Int         @default(1)
-  delivery Boolean     @default(false)
+  id          String      @id @default(uuid())
+  name        String    
+  isActive    Boolean     @default(true) 
   
-  orders   OrderItem[]
+  createdAt   DateTime    @default(now())
+  orders      OrderItem[]
 }
 
 model OrderItem {
-  id        String  @id @default(uuid())
-  orderId   String
-  productId String
-  quantity  Int     @default(1)
+  id          String  @id @default(uuid())
+  orderId     String
+  productId   String?
+  name        String 
+  price       Int
+  quantity    Int     @default(1)
+  credit      Int?
+  cardNumber  String? 
+  delivery    Boolean @default(false)
 
-  order     Order   @relation(fields: [orderId], references: [id])
-  product   Product @relation(fields: [productId], references: [id])
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
   @@index([productId])
@@ -80,10 +94,11 @@ model OrderItem {
 
 model Card {
   id String @id @default(uuid())
-  number String
+  number String @unique
   credit Int @default(0)
   name String?
   userId String
+  createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

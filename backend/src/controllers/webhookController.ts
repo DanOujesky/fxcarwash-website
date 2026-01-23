@@ -5,8 +5,6 @@ import {
   sendOrderEmailToCompany,
 } from "../utils/mailer.js";
 import { Request, Response } from "express";
-import { z } from "zod";
-import { getRandomValues } from "node:crypto";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -15,7 +13,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (!sig || !webhookSecret) {
-    return res.status(400).send("Missing stripe-signature or webhook secret");
+    return res.status(400).send("Webhook Error: Missing signature/secret");
   }
 
   let event: Stripe.Event;
@@ -23,9 +21,8 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
   try {
     event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
   } catch (err) {
-    const error = err as Error;
-    console.error(`Webhook Error: ${error.message}`);
-    return res.status(400).send(`Webhook Error: ${error.message}`);
+    console.error(`Webhook Signature failure: ${(err as Error).message}`);
+    return res.status(400).send(`Webhook Error: ${(err as Error).message}`);
   }
 
   if (event.type === "checkout.session.completed") {
@@ -35,62 +32,71 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     if (!orderId) return res.status(400).send("No orderId in metadata");
 
     try {
-      await prisma.$transaction(async (tx) => {
-        const order = await tx.order.findUnique({
-          where: { id: orderId },
-          include: {
-            items: true,
-          },
-        });
-        if (!order || order.status === "PAID") return;
-
-        await tx.order.update({
-          where: { id: orderId },
-          data: { status: "PAID" },
-        });
-
-        // credit mechanism can be added here if needed
-
-        const getRandomInt = (min = 10, max = 100000): number => {
-          return Math.floor(Math.random() * (max - min + 1)) + min;
-        };
-
-        order.items.forEach(async (orderItem) => {
-          const item = await tx.product.findUnique({
-            where: { id: orderItem.productId },
+      await prisma.$transaction(
+        async (tx) => {
+          const order = await tx.order.findUnique({
+            where: { id: orderId },
+            include: { items: true, user: true },
           });
 
-          if (!item || !item.credit) return;
+          if (!order || order.status === "PAID") return;
 
-          if (item.delivery) {
-            await tx.card.create({
-              data: {
-                userId: order.userId,
-                number: getRandomInt().toString(),
-                credit: item.credit,
-              },
-            });
-          } else {
-            await tx.card.update({
-              where: { id: orderItem.productId },
-              data: {
-                credit: { increment: item.credit },
-              },
-            });
+          await tx.order.update({
+            where: { id: orderId },
+            data: { status: "PAID" },
+          });
+
+          for (const item of order.items) {
+            if (!item.credit) continue;
+
+            if (item.delivery) {
+              const quantity = item.quantity || 1;
+              const lastCard = await tx.card.findFirst({
+                orderBy: { createdAt: "desc" },
+              });
+
+              let nextNumber = lastCard ? parseInt(lastCard.number) + 1 : 10;
+
+              for (let i = 0; i < quantity; i++) {
+                if (nextNumber > 10000) {
+                  console.error("Dosáhli jsme maximálního limitu čísel karet!");
+                  break;
+                }
+                await tx.card.create({
+                  data: {
+                    userId: order.userId,
+                    number: String(nextNumber),
+                    credit: item.credit,
+                  },
+                });
+                nextNumber++;
+              }
+            } else {
+              if (!item.cardNumber) {
+                console.error("Missing cardNumber for credit item");
+                continue;
+              }
+              await tx.card.update({
+                where: { number: item.cardNumber },
+                data: { credit: { increment: item.credit } },
+              });
+            }
           }
-        });
 
-        //end
-
-        const user = await tx.user.findUnique({ where: { id: order.userId } });
-        if (user) {
-          await sendOrderEmailToUser(user, order);
-          await sendOrderEmailToCompany(user, order);
-        }
-      });
+          if (order.user) {
+            try {
+              await sendOrderEmailToUser(order.user, order);
+              await sendOrderEmailToCompany(order.user, order);
+            } catch (e) {
+              console.error("Email failed but payment is saved:", e);
+            }
+          }
+        },
+        { timeout: 15000 },
+      );
     } catch (err) {
-      console.error("Webhook DB Error:", err);
-      return res.status(500).send("Internal Server Error");
+      console.error("Webhook Database Error:", err);
+      return res.status(500).send("Database Update Failed");
     }
   }
 

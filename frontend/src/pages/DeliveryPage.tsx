@@ -113,7 +113,7 @@ function DeliveryPage() {
             <Inputlabel white={true} text="Telefon" />
             <input
               {...register("phone")}
-              className={`input-field bg-white text-black border-2 ${
+              className={`input-field input-white-field ${
                 errors.phone ? "border-red-500" : "border-transparent"
               }`}
               type="tel"
@@ -133,7 +133,7 @@ function DeliveryPage() {
               <Inputlabel white={true} text="Město" />
               <input
                 {...register("city")}
-                className={`input-field bg-white text-black border-2 ${
+                className={`input-field input-white-field ${
                   errors.city ? "border-red-500" : "border-transparent"
                 }`}
                 type="text"
@@ -143,7 +143,7 @@ function DeliveryPage() {
               <Inputlabel white={true} text="PSČ" />
               <input
                 {...register("zipCode")}
-                className={`input-field bg-white text-black border-2 ${
+                className={`input-field input-white-field ${
                   errors.zipCode ? "border-red-500" : "border-transparent"
                 }`}
                 type="text"
@@ -161,7 +161,7 @@ function DeliveryPage() {
             <Inputlabel white={true} text="Stát" />
             <input
               {...register("country")}
-              className={`input-field bg-white text-black border-2 ${
+              className={`input-field input-white-field ${
                 errors.country ? "border-red-500" : "border-transparent"
               }`}
               type="text"

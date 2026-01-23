@@ -71,7 +71,7 @@ function LoginPage() {
         <Inputlabel text="E-mail" />
         <input
           {...register("email")}
-          className={`input-field bg-black text-white border-2 ${
+          className={`input-field input-black-field ${
             errors.email ? "border-red-500" : "border-transparent"
           }`}
           type="email"
@@ -90,7 +90,7 @@ function LoginPage() {
         </div>
         <input
           {...register("password")}
-          className={`input-field bg-black text-white border-2 ${
+          className={`input-field input-black-field ${
             errors.password ? "border-red-500" : "border-transparent"
           }`}
           type="password"

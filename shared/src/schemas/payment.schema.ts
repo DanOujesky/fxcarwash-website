@@ -14,11 +14,10 @@ const orderItemSchema = z.object({
 export const orderSchema = z.object({
   id: z.string().uuid().optional(),
   items: z.array(orderItemSchema).min(1, "Košík nesmí být prázdný"),
-  createdAt: z.coerce.date().optional(),
   price: z.coerce.number().positive(),
   email: z.string().email("Neplatný formát e-mailu"),
-  phone: z.string().min(9, "Telefon musí mít alespoň 9 čísel"),
 
+  phone: z.string().optional().nullable(),
   address: z.string().optional().nullable(),
   zipCode: z.string().optional().nullable(),
   city: z.string().optional().nullable(),

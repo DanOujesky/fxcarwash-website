@@ -58,7 +58,35 @@ li {
 .input-button {
   @apply text-white h-10 bg-black hover:text-gray-300;
 }
-.input-field {
-  @apply text-[14px] p-5 h-10;
-  font-family: "Inter", sans-serif;
+@layer components {
+  .input-field {
+    @apply h-10 border-2 p-5 text-[14px] font-sans;
+    font-family: "Inter", sans-serif;
+  }
+}
+@layer components {
+  .input-black-field {
+    @apply bg-black text-white;
+  }
+
+  .input-white-field {
+    @apply bg-white text-black;
+  }
+}
+@layer utilities {
+  .input-black-field:-webkit-autofill,
+  .input-black-field:-webkit-autofill:hover,
+  .input-black-field:-webkit-autofill:focus {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0px 1000px black inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
+
+  .input-white-field:-webkit-autofill,
+  .input-white-field:-webkit-autofill:hover,
+  .input-white-field:-webkit-autofill:focus {
+    -webkit-text-fill-color: black;
+    -webkit-box-shadow: 0 0 0px 1000px white inset;
+    transition: background-color 9999s ease-in-out 0s;
+  }
 }

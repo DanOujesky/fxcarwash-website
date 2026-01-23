@@ -58,7 +58,7 @@ function RegisterPage() {
           <Inputlabel text="Jméno" />
           <input
             {...register("firstName")}
-            className={`input-field bg-black text-white border-2 ${
+            className={`input-field input-black-field ${
               errors.firstName ? "border-red-500" : "border-transparent"
             }`}
             type="text"
@@ -68,7 +68,7 @@ function RegisterPage() {
           <Inputlabel text="Příjmení" />
           <input
             {...register("lastName")}
-            className={`input-field bg-black text-white border-2 ${
+            className={`input-field input-black-field ${
               errors.lastName ? "border-red-500" : "border-transparent"
             }`}
             type="text"
@@ -80,7 +80,7 @@ function RegisterPage() {
         <Inputlabel text="E-mail" />
         <input
           {...register("email")}
-          className={`input-field bg-black text-white border-2 ${
+          className={`input-field input-black-field ${
             errors.email ? "border-red-500" : "border-transparent"
           }`}
           type="email"
@@ -91,7 +91,7 @@ function RegisterPage() {
         <Inputlabel text="Heslo" />
         <input
           {...register("password")}
-          className={`input-field bg-black text-white border-2 ${
+          className={`input-field input-black-field ${
             errors.password ? "border-red-500" : "border-transparent"
           }`}
           type="password"

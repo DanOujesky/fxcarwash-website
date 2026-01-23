@@ -11,6 +11,7 @@ import Inputlabel from "../components/InputLabel";
 import Header from "../components/Header";
 import ErrorMessage from "../components/ErrorMessage";
 import type { OrderItem } from "../types/Order";
+import { PRODUCT_ID } from "../constants/products";
 
 function GetCreditPage() {
   const { user, loading } = useAuth();
@@ -50,7 +51,7 @@ function GetCreditPage() {
     const creditValue = Number(data.credit);
 
     const orderItem: OrderItem = {
-      id: crypto.randomUUID(),
+      id: PRODUCT_ID.ADD_CREDIT,
       name: "Dobítí kreditu na předplacenou FX kartu",
       price: creditValue,
       delivery: false,

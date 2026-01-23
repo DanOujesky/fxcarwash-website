@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
+import { ca, de } from "zod/locales";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -28,7 +29,12 @@ export const payment = async (req: Request, res: Response) => {
           items: {
             create: order.items.map((item: any) => ({
               productId: item.id,
+              name: item.name,
+              price: Number(item.price),
+              credit: item.credit ? Number(item.credit) : null,
               quantity: Number(item.quantity),
+              delivery: item.shipping ? true : false,
+              cardNumber: item.cardNumber || null,
             })),
           },
         },
@@ -43,7 +49,6 @@ export const payment = async (req: Request, res: Response) => {
             unit_amount: Math.round(Number(item.price) * 100),
             product_data: {
               name: item.name,
-              description: item.cardNumber ? `Karta: ${item.cardNumber}` : "",
             },
           },
           quantity: Number(item.quantity || 1),
@@ -53,8 +58,8 @@ export const payment = async (req: Request, res: Response) => {
           orderId: newOrder.id,
           userId: String(userId),
         },
-        success_url: `${process.env.FRONTEND_URL}/success?id=${newOrder.id}`,
-        cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+        success_url: `${process.env.FRONTEND_URL}/payment/success?id=${newOrder.id}`,
+        cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
       });
 
       await tx.order.update({

@@ -25,13 +25,15 @@ function AccountPage() {
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color">
         {user.cards.length > 0 ? (
-          user.cards.map((card) => (
-            <div key={card.id} className="my-1">
-              <CustomCard credit={card.credit} number={card.number} />
-            </div>
-          ))
+          [...user.cards]
+            .sort((a, b) => Number(a.number) - Number(b.number))
+            .map((card) => (
+              <div key={card.id} className="my-1">
+                <CustomCard credit={card.credit} number={card.number} />
+              </div>
+            ))
         ) : (
-          <p className="">Zatím nemáte žádnou FX kartu</p>
+          <p>Zatím nemáte žádnou FX kartu</p>
         )}
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
@@ -48,7 +50,7 @@ function AccountPage() {
               return;
             }
 
-            navigate("/dobit-kredit");
+            navigate("/dobit-kartu");
           }}
           className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"
         >
