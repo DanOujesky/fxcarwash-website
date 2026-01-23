@@ -40,8 +40,13 @@ function CartPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#252525]">
-      <Header account={true} homePage={false} logo={false} />
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525]">
+      <Header
+        account={true}
+        homePage={false}
+        logo={false}
+        withoutPadding={true}
+      />
       {cart && cart.length > 0 ? (
         <div>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">

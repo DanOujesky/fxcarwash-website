@@ -7,9 +7,15 @@ type HeaderProps = {
   homePage: boolean;
   account?: boolean;
   logo?: boolean;
+  withoutPadding?: boolean;
 };
 
-function Header({ homePage, account, logo = true }: HeaderProps) {
+function Header({
+  homePage,
+  account,
+  logo = true,
+  withoutPadding,
+}: HeaderProps) {
   const [isSideBarOpen, setIsSideBarOpen] = useState(false);
   const [mobileScreen, setMobileScreen] = useState(false);
 
@@ -26,7 +32,7 @@ function Header({ homePage, account, logo = true }: HeaderProps) {
         setMobileScreen(true);
         document.body.style.paddingTop = "121px";
       }
-      if (homePage) {
+      if (homePage || withoutPadding) {
         document.body.style.paddingTop = "0px";
       }
     };

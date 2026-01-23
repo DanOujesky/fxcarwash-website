@@ -53,8 +53,13 @@ function OverviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#252525]">
-      <Header account={true} homePage={false} logo={false} />
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525]">
+      <Header
+        withoutPadding={true}
+        account={true}
+        homePage={false}
+        logo={false}
+      />
       {order && order.items.length > 0 ? (
         <form onSubmit={(e) => e.preventDefault()}>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">
