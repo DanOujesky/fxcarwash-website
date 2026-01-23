@@ -18,7 +18,7 @@ function HomePage() {
   }, []);
   return (
     <div className="relative flex flex-col w-full h-full">
-      <Header homePage={true} />
+      <Header homePage={true} logo={true} />
       <div className="relative w-full h-screen overflow-hidden">
         {images.map((src, index) => (
           <img

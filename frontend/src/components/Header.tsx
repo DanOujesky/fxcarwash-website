@@ -80,8 +80,8 @@ function Header({ homePage, account, logo = true }: HeaderProps) {
           {isSideBarOpen ? "ZAVŘÍT MENU" : "MENU"}
         </div>
       </div>
-      {logo ||
-        (!logo && !mobileScreen && (
+      {(!logo && !mobileScreen) ||
+        (logo && (
           <div
             className={`absolute ${
               mobileScreen || homePage
