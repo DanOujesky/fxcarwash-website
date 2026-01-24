@@ -23,6 +23,7 @@ import CartPage from "./pages/CartPage";
 import DeliveryPage from "./pages/DeliveryPage";
 import OverviewPage from "./pages/OverviewPage";
 import ScrollToTop from "./components/ScrollToTop";
+import BussinessConditions from "./pages/BussinessConditions";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="kontakt" element={<ContactPage />} />
         <Route path="payment/success" element={<PaymentSuccessPage />} />
         <Route path="payment/cancel" element={<PaymentCanceledPage />} />
+        <Route path="obchodni-podminky" element={<BussinessConditions />} />
 
         <Route element={<AuthRedirectHandler />}>
           <Route path="login" element={<LoginPage />} />

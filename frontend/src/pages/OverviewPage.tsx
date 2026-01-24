@@ -182,11 +182,12 @@ function OverviewPage() {
               checked={isAgreed}
               onChange={() => setIsAgreed(!isAgreed)}
             />
-            <label
-              htmlFor="gdpr"
-              className="text-white leading-none contactText cursor-pointer"
-            >
-              Souhlasím s obchodními podmínkami a se zpracováním osobních údajů
+            <label className="text-white leading-none contactText">
+              Souhlasím s{" "}
+              <Link className="underline" to="/obchodni-podminky">
+                obchodními podmínkami
+              </Link>{" "}
+              a se zpracováním osobních údajů
             </label>
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
