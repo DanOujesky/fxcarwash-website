@@ -9,6 +9,7 @@ import Inputlabel from "../components/InputLabel";
 import MyForm from "../components/MyForm";
 import InputTitle from "../components/InputTitle";
 import ErrorMessage from "../components/ErrorMessage";
+import Header from "../components/Header";
 
 function NewPasswordPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -64,32 +65,35 @@ function NewPasswordPage() {
   };
 
   return (
-    <MyForm handleFunction={handleSubmit(onSubmit)}>
-      <InputTitle text="Nové heslo" />
+    <div className="min-h-screen bg-[#252525]">
+      <Header takePosition={true} homePage={false} withoutPadding={true} />{" "}
+      <MyForm handleFunction={handleSubmit(onSubmit)}>
+        <InputTitle text="Nové heslo" />
 
-      <div className="flex flex-col">
-        <Inputlabel text="Heslo" />
-        <input
-          {...register("newPassword")}
-          className={`input-field input-black-field ${
-            errors.newPassword ? "border-red-500" : "border-transparent"
-          }`}
-          type="password"
+        <div className="flex flex-col">
+          <Inputlabel text="Heslo" />
+          <input
+            {...register("newPassword")}
+            className={`input-field input-black-field ${
+              errors.newPassword ? "border-red-500" : "border-transparent"
+            }`}
+            type="password"
+          />
+        </div>
+
+        <ErrorMessage
+          message={errors.newPassword?.message || serverError || undefined}
         />
-      </div>
 
-      <ErrorMessage
-        message={errors.newPassword?.message || serverError || undefined}
-      />
-
-      <button
-        disabled={isSubmitting}
-        className="input-button disabled:bg-gray-400"
-        type="submit"
-      >
-        {isSubmitting ? "Nastavování..." : "Nastavit heslo"}
-      </button>
-    </MyForm>
+        <button
+          disabled={isSubmitting}
+          className="input-button disabled:bg-gray-400"
+          type="submit"
+        >
+          {isSubmitting ? "Nastavování..." : "Nastavit heslo"}
+        </button>
+      </MyForm>{" "}
+    </div>
   );
 }
 

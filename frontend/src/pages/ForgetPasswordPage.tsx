@@ -10,6 +10,7 @@ import Inputlabel from "../components/InputLabel";
 import MyForm from "../components/MyForm";
 import InputLink from "../components/InputLink";
 import ErrorMessage from "../components/ErrorMessage";
+import Header from "../components/Header";
 
 function ForgetPasswordPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -72,34 +73,37 @@ function ForgetPasswordPage() {
   };
 
   return (
-    <MyForm handleFunction={handleSubmit(onSubmit)}>
-      <InputTitle text="Obnovení hesla" />
+    <div className="min-h-screen bg-[#252525]">
+      <Header takePosition={true} homePage={false} withoutPadding={true} />{" "}
+      <MyForm handleFunction={handleSubmit(onSubmit)}>
+        <InputTitle text="Obnovení hesla" />
 
-      <div className="flex flex-col">
-        <Inputlabel text="E-mail" />
-        <input
-          {...register("email")}
-          className={`input-field input-black-field ${
-            errors.email ? "border-red-500" : "border-transparent"
-          }`}
-          type="email"
+        <div className="flex flex-col">
+          <Inputlabel text="E-mail" />
+          <input
+            {...register("email")}
+            className={`input-field input-black-field ${
+              errors.email ? "border-red-500" : "border-transparent"
+            }`}
+            type="email"
+          />
+        </div>
+
+        <ErrorMessage
+          message={errors.email?.message || serverError || undefined}
         />
-      </div>
 
-      <ErrorMessage
-        message={errors.email?.message || serverError || undefined}
-      />
+        <button
+          disabled={isSubmitting}
+          className="input-button disabled:bg-gray-400 disabled:cursor-not-allowed"
+          type="submit"
+        >
+          {isSubmitting ? "Odesílám..." : "obnovit heslo"}
+        </button>
 
-      <button
-        disabled={isSubmitting}
-        className="input-button disabled:bg-gray-400 disabled:cursor-not-allowed"
-        type="submit"
-      >
-        {isSubmitting ? "Odesílám..." : "obnovit heslo"}
-      </button>
-
-      <InputLink text="Zpět na přihlášení" to="/login" />
-    </MyForm>
+        <InputLink text="Zpět na přihlášení" to="/login" />
+      </MyForm>{" "}
+    </div>
   );
 }
 

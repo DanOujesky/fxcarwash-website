@@ -9,6 +9,7 @@ import Inputlabel from "../components/InputLabel";
 import MyForm from "../components/MyForm";
 import InputTitle from "../components/InputTitle";
 import ErrorMessage from "../components/ErrorMessage";
+import Header from "../components/Header";
 
 function LoginPage() {
   const location = useLocation();
@@ -65,67 +66,73 @@ function LoginPage() {
   };
 
   return (
-    <MyForm handleFunction={handleSubmit(onSubmit)}>
-      <InputTitle text="Přihlášení" />
+    <div className="min-h-screen bg-[#252525]">
+      <Header takePosition={true} homePage={false} withoutPadding={true} />
 
-      <div className="flex flex-col">
-        <Inputlabel text="E-mail" />
-        <input
-          {...register("email")}
-          className={`input-field input-black-field ${
-            errors.email ? "border-red-500" : "border-transparent"
-          }`}
-          type="email"
-        />
-      </div>
+      <MyForm handleFunction={handleSubmit(onSubmit)}>
+        <InputTitle text="Přihlášení" />
 
-      <div className="flex flex-col">
-        <div className="flex justify-between">
-          <Inputlabel text="Heslo" />
-          <button
-            type="button"
-            className="text-black contactText text-[13px] hover:underline cursor-pointer"
-            onClick={() => {
-              const currentEmail = getValues("email");
-              navigate("/forgotPassword", { state: { email: currentEmail } });
-            }}
-          >
-            Zapomenuté heslo?
-          </button>
+        <div className="flex flex-col">
+          <Inputlabel text="E-mail" />
+          <input
+            {...register("email")}
+            className={`input-field input-black-field ${
+              errors.email ? "border-red-500" : "border-transparent"
+            }`}
+            type="email"
+          />
         </div>
-        <input
-          {...register("password")}
-          className={`input-field input-black-field ${
-            errors.password ? "border-red-500" : "border-transparent"
-          }`}
-          type="password"
+
+        <div className="flex flex-col">
+          <div className="flex justify-between">
+            <Inputlabel text="Heslo" />
+            <button
+              type="button"
+              className="text-black contactText text-[13px] hover:underline cursor-pointer"
+              onClick={() => {
+                const currentEmail = getValues("email");
+                navigate("/forgotPassword", {
+                  state: { email: currentEmail },
+                });
+              }}
+            >
+              Zapomenuté heslo?
+            </button>
+          </div>
+          <input
+            {...register("password")}
+            className={`input-field input-black-field ${
+              errors.password ? "border-red-500" : "border-transparent"
+            }`}
+            type="password"
+          />
+        </div>
+
+        <ErrorMessage
+          message={
+            errors.email?.message ||
+            errors.password?.message ||
+            serverError ||
+            undefined
+          }
         />
-      </div>
 
-      <ErrorMessage
-        message={
-          errors.email?.message ||
-          errors.password?.message ||
-          serverError ||
-          undefined
-        }
-      />
+        <Link
+          to="/register"
+          className="text-black contactText text-center hover:underline"
+        >
+          Nemáte účet? Zaregistrujte se
+        </Link>
 
-      <Link
-        to="/register"
-        className="text-black contactText text-center hover:underline"
-      >
-        Nemáte účet? Zaregistrujte se
-      </Link>
-
-      <button
-        disabled={isSubmitting}
-        className="input-button disabled:bg-gray-400 disabled:cursor-not-allowed"
-        type="submit"
-      >
-        {isSubmitting ? "Přihlašování..." : "Přihlásit se"}
-      </button>
-    </MyForm>
+        <button
+          disabled={isSubmitting}
+          className="input-button disabled:bg-gray-400 disabled:cursor-not-allowed"
+          type="submit"
+        >
+          {isSubmitting ? "Přihlašování..." : "Přihlásit se"}
+        </button>
+      </MyForm>
+    </div>
   );
 }
 

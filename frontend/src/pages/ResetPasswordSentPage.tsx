@@ -10,6 +10,7 @@ import InputTitle from "../components/InputTitle";
 import MyForm from "../components/MyForm";
 import InputLink from "../components/InputLink";
 import ErrorMessage from "../components/ErrorMessage";
+import Header from "../components/Header";
 
 function ResetPasswordSentPage() {
   const navigate = useNavigate();
@@ -66,63 +67,66 @@ function ResetPasswordSentPage() {
   };
 
   return (
-    <MyForm handleFunction={handleSubmit(onSubmit)}>
-      <InputTitle text="Zapomenuté heslo" />
+    <div className="min-h-screen bg-[#252525]">
+      <Header takePosition={true} homePage={false} withoutPadding={true} />{" "}
+      <MyForm handleFunction={handleSubmit(onSubmit)}>
+        <InputTitle text="Zapomenuté heslo" />
 
-      <p className="text-black max-w-110 text-center">
-        Na váš email <strong>{email}</strong> byl odeslán kód pro reset hesla.
-        Zkontrolujte také složku se spamem.
-      </p>
+        <p className="text-black max-w-110 text-center">
+          Na váš email <strong>{email}</strong> byl odeslán kód pro reset hesla.
+          Zkontrolujte také složku se spamem.
+        </p>
 
-      <div className="flex flex-col items-center gap-4">
-        <Controller
-          control={control}
-          name="code"
-          render={({ field }) => (
-            <OTPInput
-              maxLength={6}
-              value={field.value}
-              onChange={field.onChange}
-              render={({ slots }) => (
-                <div className="flex gap-2">
-                  {slots.map((slot, idx) => (
-                    <div
-                      key={idx}
-                      className={`w-10 h-12 border-2 flex items-center justify-center text-xl font-bold rounded-lg transition-all ${
-                        slot.isActive
-                          ? "border-blue-500 ring-2 ring-blue-200"
-                          : errors.code || serverError
-                            ? "border-red-500"
-                            : "border-gray-700"
-                      } bg-black text-white`}
-                    >
-                      {slot.char || ""}
-                      {slot.hasFakeCaret && (
-                        <div className="animate-caret-blink w-px h-6 bg-white" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-              )}
-            />
-          )}
+        <div className="flex flex-col items-center gap-4">
+          <Controller
+            control={control}
+            name="code"
+            render={({ field }) => (
+              <OTPInput
+                maxLength={6}
+                value={field.value}
+                onChange={field.onChange}
+                render={({ slots }) => (
+                  <div className="flex gap-2">
+                    {slots.map((slot, idx) => (
+                      <div
+                        key={idx}
+                        className={`w-10 h-12 border-2 flex items-center justify-center text-xl font-bold rounded-lg transition-all ${
+                          slot.isActive
+                            ? "border-blue-500 ring-2 ring-blue-200"
+                            : errors.code || serverError
+                              ? "border-red-500"
+                              : "border-gray-700"
+                        } bg-black text-white`}
+                      >
+                        {slot.char || ""}
+                        {slot.hasFakeCaret && (
+                          <div className="animate-caret-blink w-px h-6 bg-white" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              />
+            )}
+          />
+        </div>
+
+        <ErrorMessage
+          message={errors.code?.message || serverError || undefined}
         />
-      </div>
 
-      <ErrorMessage
-        message={errors.code?.message || serverError || undefined}
-      />
+        <button
+          disabled={isSubmitting}
+          className="input-button disabled:bg-gray-400"
+          type="submit"
+        >
+          {isSubmitting ? "Ověřování..." : "Ověřit kód"}
+        </button>
 
-      <button
-        disabled={isSubmitting}
-        className="input-button disabled:bg-gray-400"
-        type="submit"
-      >
-        {isSubmitting ? "Ověřování..." : "Ověřit kód"}
-      </button>
-
-      <InputLink text="Zpět na přihlášení" to="/login" />
-    </MyForm>
+        <InputLink text="Zpět na přihlášení" to="/login" />
+      </MyForm>{" "}
+    </div>
   );
 }
 
