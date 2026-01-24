@@ -148,14 +148,14 @@ function GetCardPage() {
 
           <div className="flex flex-col justify-center">
             <button
-              className="bg-green-500 hover:bg-green-600 p-2 inline-block rounded-sm mt-5 disabled:bg-gray-500 transition-colors"
+              className="bg-green-500 hover:bg-green-600 p-2 inline-block rounded-sm mt-5 disabled:bg-gray-500 transition-colors w-55 sm:w-80 self-center"
               type="submit"
               disabled={isSubmitting}
             >
               {isSubmitting ? "přidávám..." : "Přidat do košíku"}
             </button>
             <Link
-              className="bg-transparent border-2 border-white text-white hover:bg-[#1b1b1b] p-2 inline-block rounded-sm mt-5 text-center transition-colors"
+              className="bg-transparent border-2 border-white text-white hover:bg-[#1b1b1b] p-2 inline-block rounded-sm mt-5 text-center transition-colors w-55 sm:w-80 self-center"
               to="/moje-karty"
             >
               Zpět

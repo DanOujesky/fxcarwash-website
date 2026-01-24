@@ -19,7 +19,7 @@ export const sendOrderEmailToUser = async (
     <td style="padding: 12px; border-bottom: 1px solid #eee;">
       <strong style="color: #333;">${item.name}</strong>
     ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small> <br><small style="color: #666;">Způsob dopravy: ${item.shipping === "cp" ? "Česká pošta" : "Osobní převzetí"}</small>` : ""}
-    ${item.cardNumber ? `<br><small style="color: #666;">Karta: ${item.cardNumber}</small>` : ""}
+    ${item.cardNumber ? `<br><small style="color: #666;">Číslo karty: ${item.cardNumber}</small>` : ""}
     </td>
     <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; white-space: nowrap;">
       ${item.price.toLocaleString("cs-CZ")} Kč
@@ -97,7 +97,7 @@ export const sendOrderEmailToCompany = async (
       <td style="padding: 10px; border-bottom: 1px solid #eee;">
         <strong style="color: #333;">${item.name}</strong>
         ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small> <br><small style="color: #666;">Způsob dopravy: ${item.shipping === "cp" ? "Česká pošta" : "Osobní převzetí"}</small>` : ""}
-        ${item.cardNumber ? `<br><small style="color: #666;">Karta: ${item.cardNumber}</small>` : ""}
+        ${item.cardNumber ? `<br><small style="color: #666;">Číslo karty: ${item.cardNumber}</small>` : ""}
       </td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
         ${item.price.toLocaleString("cs-CZ")} Kč
