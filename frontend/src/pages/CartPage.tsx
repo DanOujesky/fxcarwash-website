@@ -63,13 +63,13 @@ function CartPage() {
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
-                        <div className="font-semibold">{item.name}</div>
+                        <div className="font-bold">{item.name}</div>
                       </div>
                       <div className="">
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
                       <div className="">Vaše cena: {item.price} Kč</div>
-                      <div className="mt-3">
+                      <div className="mt-3 text-green-500">
                         Výše kreditu s bonusem {user.discount}% od nás:{" "}
                         {item.credit} kreditů
                       </div>
@@ -101,7 +101,7 @@ function CartPage() {
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
-                        <div className="font-semibold">{item.name}</div>
+                        <div className="font-bold">{item.name}</div>
                         {!item.shipping && (
                           <div className="">Číslo karty: {item.cardNumber}</div>
                         )}
@@ -110,8 +110,8 @@ function CartPage() {
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
                       <div className="">Vaše cena: {item.price} Kč</div>
-                      <div className="mt-3">
-                        Výše kreditu s bonusem {user.discount}% pro vás:{" "}
+                      <div className="mt-3 text-green-500">
+                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
                         {item.credit} Kreditů
                       </div>
                     </div>

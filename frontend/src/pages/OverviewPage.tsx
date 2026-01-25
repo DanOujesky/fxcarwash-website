@@ -69,7 +69,7 @@ function OverviewPage() {
             />
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-            <h2 className="text-2xl underline">Produkty</h2>
+            <h2 className="text-2xl underline">Vaše objednávka</h2>
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
             {order.items.map((item) => (
@@ -82,13 +82,15 @@ function OverviewPage() {
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
-                        <div className="font-semibold">{item.name}</div>
+                        <div className="font-bold">{item.name}</div>
                       </div>
                       <div className="">
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
-                      <div className="">Vaše cena: {item.price} Kč</div>
-                      <div className="mt-3">
+                      <div className="">
+                        Cena za jednu kartu: {item.price} Kč
+                      </div>
+                      <div className="mt-3 text-green-500">
                         Výše kreditu s bonusem {user.discount}% od nás:{" "}
                         {item.credit} kreditů
                       </div>
@@ -107,7 +109,7 @@ function OverviewPage() {
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
-                        <div className="font-semibold">{item.name}</div>
+                        <div className="font-bold">{item.name}</div>
                         {!item.shipping && (
                           <div className="">Číslo karty: {item.cardNumber}</div>
                         )}
@@ -115,9 +117,11 @@ function OverviewPage() {
                       <div className="">
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
-                      <div className="">Vaše cena: {item.price} Kč</div>
-                      <div className="mt-3">
-                        Výše kreditu s bonusem {user.discount}% pro vás:{" "}
+                      <div className="">
+                        Cena za jednu kartu: {item.price} Kč
+                      </div>
+                      <div className="mt-3 text-green-500">
+                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
                         {item.credit} Kreditů
                       </div>
                     </div>
