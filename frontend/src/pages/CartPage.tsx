@@ -57,7 +57,7 @@ function CartPage() {
             {cart.map((item) => (
               <div
                 className="border-2 border-white p-5 justify-between w-[80%] sm:w-150"
-                key={item.id}
+                key={item.temp_id}
               >
                 {item.delivery ? (
                   <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
@@ -149,7 +149,7 @@ function CartPage() {
           </div>
 
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
-            <div className="flex flex-col w-55 sm:w-80">
+            <div className="flex flex-col justify-center w-55 sm:w-80">
               <button
                 onClick={handleContinue}
                 className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 cursor-pointer"
@@ -166,7 +166,7 @@ function CartPage() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col justify-center items-center body-bg-color pt-15">
+        <div className="flex flex-col justify-center items-center body-bg-color py-15">
           <div className="text-white text-center">
             <h2>V košíku nemáte žádné zboží</h2>
             <p>

@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
-import { ca, de } from "zod/locales";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -15,6 +14,19 @@ export const payment = async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   try {
+    if (order.address) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          phone: order.phone,
+          address: order.address,
+          city: order.city,
+          zipCode: order.zipCode,
+          country: order.country,
+        },
+      });
+    }
+
     const result = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
         data: {

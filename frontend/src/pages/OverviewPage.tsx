@@ -76,7 +76,7 @@ function OverviewPage() {
             {order.items.map((item) => (
               <div
                 className="border-2 border-white p-5 justify-between w-[80%] sm:w-150"
-                key={item.id}
+                key={item.temp_id}
               >
                 {item.delivery ? (
                   <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">

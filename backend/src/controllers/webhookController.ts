@@ -39,7 +39,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
             include: { items: true, user: true },
           });
 
-          if (!order || order.status === "PAID") return;
+          if (!order || !order.user || order.status === "PAID") return;
 
           await tx.order.update({
             where: { id: orderId },
@@ -83,13 +83,11 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
             }
           }
 
-          if (order.user) {
-            try {
-              await sendOrderEmailToUser(order.user, order);
-              await sendOrderEmailToCompany(order.user, order);
-            } catch (e) {
-              console.error("Email failed but payment is saved:", e);
-            }
+          try {
+            await sendOrderEmailToUser(order.user, order);
+            await sendOrderEmailToCompany(order.user, order);
+          } catch (e) {
+            console.error("Email failed but payment is saved:", e);
           }
         },
         { timeout: 15000 },

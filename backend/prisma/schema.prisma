@@ -23,6 +23,12 @@ model User {
   resetCode String?
   resetCodeExpiration DateTime? 
   createdAt DateTime @default(now())
+  phone        String?
+  address      String?
+  zipCode      String?
+  city         String?
+  country      String?
+
 
 
   cards Card[]

@@ -37,6 +37,11 @@ export const authMiddleware = async (
         role: true,
         cards: true,
         discount: true,
+        phone: true,
+        address: true,
+        city: true,
+        country: true,
+        zipCode: true,
       },
     });
 
@@ -77,6 +82,11 @@ export const softAuth = async (
         role: true,
         cards: true,
         discount: true,
+        phone: true,
+        address: true,
+        city: true,
+        country: true,
+        zipCode: true,
       },
     });
     req.user = user || null;

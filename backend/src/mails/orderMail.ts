@@ -1,5 +1,6 @@
 import { User, Order, OrderItem } from "@prisma/client";
 import { transporter } from "../utils/mailer";
+import { generateInvoice } from "../services/invoiceService";
 
 type OrderWithItems = Order & {
   items: OrderItem[];
@@ -41,6 +42,8 @@ export const sendOrderEmailToUser = async (
     </div>`
     : "";
 
+  const invoicePdf: Buffer = await generateInvoice(user, order);
+
   await transporter.sendMail({
     from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
     to: user.email,
@@ -81,6 +84,13 @@ export const sendOrderEmailToUser = async (
         </div>
       </div>
     `,
+    attachments: [
+      {
+        filename: `faktura_${order.id.slice(0, 8)}.pdf`,
+        content: invoicePdf,
+        contentType: "application/pdf",
+      },
+    ],
   });
 };
 export const sendOrderEmailToCompany = async (

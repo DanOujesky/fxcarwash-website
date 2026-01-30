@@ -42,11 +42,11 @@ function DeliveryPage() {
   } = useForm<DeliveryInput>({
     resolver: zodResolver(deliverySchema),
     defaultValues: {
-      phone: savedOrder?.phone || "",
-      address: savedOrder?.address || "",
-      zipCode: savedOrder?.zipCode || "",
-      city: savedOrder?.city || "",
-      country: savedOrder?.country || "",
+      phone: savedOrder?.phone || user?.phone || "",
+      address: savedOrder?.address || user?.address || "",
+      zipCode: savedOrder?.zipCode || user?.zipCode || "",
+      city: savedOrder?.city || user?.city || "",
+      country: savedOrder?.country || user?.country || "",
     },
   });
 
@@ -188,7 +188,7 @@ function DeliveryPage() {
             <ErrorMessage marginOn={true} message={errors.country?.message} />
           </div>
 
-          <div className="flex flex-col justify-center items-center gap-4 mt-5">
+          <div className="flex flex-col justify-center items-center gap-4 py-10">
             <button
               type="submit"
               className="bg-green-500 hover:bg-green-600 text-white p-3 w-55 sm:w-80 rounded-sm transition-colors disabled:bg-gray-500"

@@ -11,7 +11,7 @@ interface User {
   lastName: string;
   email: string;
   phone: string;
-  street: string;
+  address: string;
   city: string;
   zipCode: string;
   country: string;

@@ -100,7 +100,7 @@ function Header({
             >
               <NavLink to={"/"}>
                 <img
-                  className={`w-full h-full object-fit ${homePage ? "p-4" : ""}`}
+                  className={`w-full h-full object-fit ${homePage ? "p-5 " : ""}`}
                   src={
                     homePage ? "/icons/logo_homepage.png" : "/icons/logo.svg"
                   }
