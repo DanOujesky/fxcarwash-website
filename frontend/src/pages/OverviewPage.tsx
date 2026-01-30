@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import { Order } from "../types/Order";
+import Footer from "../components/Footer";
 
 function OverviewPage() {
   const { user, loading } = useAuth();
@@ -229,6 +230,7 @@ function OverviewPage() {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

@@ -6,6 +6,7 @@ import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import { useCart } from "../context/CartContext";
 import type { Order } from "../types/Order";
 import QuantityInput from "../components/QuantityInput";
+import Footer from "../components/Footer";
 
 function CartPage() {
   const { user, loading } = useAuth();
@@ -177,6 +178,7 @@ function CartPage() {
           </div>
         </div>
       )}
+      <Footer />
     </div>
   );
 }

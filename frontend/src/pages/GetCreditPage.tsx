@@ -12,6 +12,7 @@ import Header from "../components/Header";
 import ErrorMessage from "../components/ErrorMessage";
 import type { OrderItem } from "../types/Order";
 import { PRODUCT_ID } from "../constants/products";
+import Footer from "../components/Footer";
 
 function GetCreditPage() {
   const { user, loading } = useAuth();
@@ -151,6 +152,7 @@ function GetCreditPage() {
           </div>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }

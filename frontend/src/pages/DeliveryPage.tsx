@@ -12,6 +12,7 @@ import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import AddressAutocomplete from "../components/AddressAutocomplete";
 import Inputlabel from "../components/InputLabel";
 import ErrorMessage from "../components/ErrorMessage";
+import Footer from "../components/Footer";
 
 interface MapySuggestion {
   name: string;
@@ -204,6 +205,7 @@ function DeliveryPage() {
           </div>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useEffect } from "react";
 import CustomCard from "../components/CustomCard";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 function AccountPage() {
   const { user, loading } = useAuth();
@@ -64,6 +65,7 @@ function AccountPage() {
           </button>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

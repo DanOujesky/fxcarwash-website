@@ -11,6 +11,7 @@ import MyForm from "../components/MyForm";
 import InputLink from "../components/InputLink";
 import ErrorMessage from "../components/ErrorMessage";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 function ForgetPasswordPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -103,6 +104,7 @@ function ForgetPasswordPage() {
 
         <InputLink text="Zpět na přihlášení" to="/login" />
       </MyForm>{" "}
+      <Footer />
     </div>
   );
 }

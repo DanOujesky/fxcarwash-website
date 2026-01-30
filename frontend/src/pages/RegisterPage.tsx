@@ -11,6 +11,7 @@ import InputTitle from "../components/InputTitle";
 import MyForm from "../components/MyForm";
 import ErrorMessage from "../components/ErrorMessage";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 function RegisterPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -146,6 +147,7 @@ function RegisterPage() {
           {isSubmitting ? "Registrování..." : "Registrace"}
         </button>
       </MyForm>
+      <Footer />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import MyForm from "../components/MyForm";
 import InputTitle from "../components/InputTitle";
 import ErrorMessage from "../components/ErrorMessage";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 function NewPasswordPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -93,6 +94,7 @@ function NewPasswordPage() {
           {isSubmitting ? "Nastavování..." : "Nastavit heslo"}
         </button>
       </MyForm>{" "}
+      <Footer />
     </div>
   );
 }

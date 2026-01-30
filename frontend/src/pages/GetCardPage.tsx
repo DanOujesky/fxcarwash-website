@@ -12,6 +12,7 @@ import QuantityInput from "../components/QuantityInput";
 import ErrorMessage from "../components/ErrorMessage";
 import type { OrderItem } from "../types/Order";
 import { PRODUCT_ID } from "../constants/products";
+import Footer from "../components/Footer";
 
 function GetCardPage() {
   const { user, loading } = useAuth();
@@ -163,6 +164,7 @@ function GetCardPage() {
           </div>
         </form>
       </div>
+      <Footer />
     </div>
   );
 }

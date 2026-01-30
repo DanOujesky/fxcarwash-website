@@ -10,6 +10,7 @@ import MyForm from "../components/MyForm";
 import InputTitle from "../components/InputTitle";
 import ErrorMessage from "../components/ErrorMessage";
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 
 function LoginPage() {
   const location = useLocation();
@@ -132,6 +133,7 @@ function LoginPage() {
           {isSubmitting ? "Přihlašování..." : "Přihlásit se"}
         </button>
       </MyForm>
+      <Footer />
     </div>
   );
 }
