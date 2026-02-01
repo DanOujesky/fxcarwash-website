@@ -7,6 +7,7 @@ import { useCart } from "../context/CartContext";
 import type { Order } from "../types/Order";
 import QuantityInput from "../components/QuantityInput";
 import Footer from "../components/Footer";
+import { formatCurrency } from "../utils/formater";
 
 function CartPage() {
   const { user, loading } = useAuth();
@@ -69,7 +70,9 @@ function CartPage() {
                       <div className="">
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
-                      <div className="">Vaše cena: {item.price} Kč</div>
+                      <div className="">
+                        Vaše cena: {formatCurrency(item.price)}
+                      </div>
                       <div className="mt-3 text-green-500">
                         Výše kreditu s bonusem {user.discount}% od nás:{" "}
                         {item.credit} kreditů
@@ -110,7 +113,9 @@ function CartPage() {
                       <div className="">
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
-                      <div className="">Vaše cena: {item.price} Kč</div>
+                      <div className="">
+                        Vaše cena: {formatCurrency(item.price)}
+                      </div>
                       <div className="mt-3 text-green-500">
                         Výše kreditu s bonusem {user.discount}% od nás:{" "}
                         {item.credit} Kreditů
@@ -143,7 +148,7 @@ function CartPage() {
 
             <div className="w-[80%] sm:w-150 flex justify-between items-center text-white text-xl pt-5">
               <div className="font-bold underline underline-offset-8">
-                Celková cena: {totalPrice} Kč
+                Celková cena: {formatCurrency(totalPrice)}
               </div>
             </div>
           </div>

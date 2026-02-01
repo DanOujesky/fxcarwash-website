@@ -35,6 +35,7 @@ router.post(
 router.post("/login", loginLimiter, validateRequest(loginSchema), login);
 router.post("/logout", logout);
 router.get("/me", softAuth, getMe);
+
 router.post(
   "/email-verification",
   requestResetLimiter,

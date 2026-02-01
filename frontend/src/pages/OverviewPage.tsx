@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import { Order } from "../types/Order";
 import Footer from "../components/Footer";
+import { formatCurrency } from "../utils/formater";
 
 function OverviewPage() {
   const { user, loading } = useAuth();
@@ -89,7 +90,7 @@ function OverviewPage() {
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
                       <div className="">
-                        Cena za jednu kartu: {item.price} Kč
+                        Cena za jednu kartu: {formatCurrency(item.price)}
                       </div>
                       <div className="mt-3 text-green-500">
                         Výše kreditu s bonusem {user.discount}% od nás:{" "}
@@ -119,7 +120,7 @@ function OverviewPage() {
                         Váš požadavek na dobití kreditu: {item.price} kreditů
                       </div>
                       <div className="">
-                        Cena za jednu kartu: {item.price} Kč
+                        Cena za jednu kartu: {formatCurrency(item.price)}
                       </div>
                       <div className="mt-3 text-green-500">
                         Výše kreditu s bonusem {user.discount}% od nás:{" "}
@@ -157,7 +158,7 @@ function OverviewPage() {
               </div>
               <div className="sm:w-150 w-[80%] flex justify-between items-center text-white text-xl pt-5">
                 <div className="underline underline-offset-8 contactText font-bold">
-                  Celková cena: {order.price} Kč
+                  Celková cena: {formatCurrency(order.price)}
                 </div>
               </div>
             </div>
@@ -173,7 +174,7 @@ function OverviewPage() {
               </div>
               <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
                 <div className="underline underline-offset-8 contactText font-bold">
-                  Celková cena: {order.price} Kč
+                  Celková cena: {formatCurrency(order.price)}
                 </div>
               </div>
             </div>

@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-export const orderSchema = z
+export const orderFormSchema = z
   .object({
     shipping: z.enum(["cp", "op"], {
       error: "Vyberte způsob doručení",
     }),
     quantity: z.number().min(1).max(100),
-    street: z.string().optional(),
+    address: z.string().optional(),
     city: z.string().optional(),
     zipCode: z.string().optional(),
     credit: z.coerce
@@ -18,7 +18,7 @@ export const orderSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.shipping === "cp") {
-      if (!data.street || data.street.trim().length < 5) {
+      if (!data.address || data.address.trim().length < 5) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Zadejte prosím kompletní adresu (ulici a číslo)",
@@ -26,7 +26,7 @@ export const orderSchema = z
         });
         return;
       }
-      if (!/\d/.test(data.street)) {
+      if (!/\d/.test(data.address)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "V adrese chybí číslo popisné nebo orientační",
@@ -81,7 +81,7 @@ export const deliverySchema = z.object({
   country: z.string().min(1, "Země je povinná"),
 });
 
-export type OrderInput = z.infer<typeof orderSchema>;
+export type OrderFormInput = z.infer<typeof orderFormSchema>;
 export type AddCreditInput = z.infer<typeof addCreditSchema>;
 export type NewCardInput = z.infer<typeof newCardSchema>;
 export type DeliveryInput = z.infer<typeof deliverySchema>;

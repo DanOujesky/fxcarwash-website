@@ -1,0 +1,11 @@
+{
+  "version": "1.0",
+  "apis": [
+    {
+      "identifier": "nayax",
+      "source": "@nayax/v1.0#lf2umkeheium",
+      "integrity": "sha512-9JA9Xr3HplvhU5emirqs8SzEJjOQmhYNFTzTYqA89uoVkRyT3ZHuEoBayipCx4Q2vuKVzKaK8RrkB0iCbpiY+Q==",
+      "installerVersion": "6.1.3"
+    }
+  ]
+}
