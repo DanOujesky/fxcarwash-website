@@ -14,30 +14,27 @@ datasource db {
 }
 
 model User {
-  id String @id @default(uuid())
-  firstName String
-  lastName String
-  email String @unique
-  password String
-  role Role @default(USER)
-  discount Int @default(5)
-  memberId String? @unique
-  resetCode String?
-  resetCodeExpiration DateTime? 
-  createdAt DateTime @default(now())
-  phone        String?
-  address      String?
-  zipCode      String?
-  city         String?
-  country      String?
+  id                  String    @id @default(uuid())
+  firstName           String
+  lastName            String
+  email               String    @unique
+  password            String
+  role                Role      @default(USER)
+  discount            Int       @default(5)
+  memberId            String?   @unique
+  resetCode           String?
+  resetCodeExpiration DateTime?
+  createdAt           DateTime  @default(now())
+  phone               String?
+  address             String?
+  zipCode             String?
+  city                String?
+  country             String?
 
-
-
-  cards Card[]
+  cards  Card[]
   orders Order[]
-  news News[] @relation("NewsCreator")
+  news   News[]  @relation("NewsCreator")
 }
-
 
 enum OrderStatus {
   PENDING
@@ -48,54 +45,54 @@ enum OrderStatus {
 }
 
 model Order {
-  id           String      @id @default(uuid())
-  userId       String
-  
-  totalPrice   Int         
-  currency     String      @default("CZK")
-  
-  phone        String?
-  address      String?
-  zipCode      String?
-  city         String?
-  country      String?
-  
-  status       OrderStatus @default(PENDING)
-  stripeId     String?     @unique
-  
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id     String @id @default(uuid())
+  userId String
 
-  user         User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  items        OrderItem[]
+  totalPrice Int
+  currency   String @default("CZK")
+
+  phone   String?
+  address String?
+  zipCode String?
+  city    String?
+  country String?
+
+  status   OrderStatus @default(PENDING)
+  stripeId String?     @unique
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items OrderItem[]
 
   @@index([userId])
   @@index([stripeId])
 }
 
 model Product {
-  id          String      @id @default(uuid())
-  name        String    
-  isActive    Boolean     @default(true) 
-  
-  createdAt   DateTime    @default(now())
-  orders      OrderItem[]
+  id       String  @id @default(uuid())
+  name     String
+  isActive Boolean @default(true)
+
+  createdAt DateTime    @default(now())
+  orders    OrderItem[]
 }
 
 model OrderItem {
-  id          String  @id @default(uuid())
-  orderId     String
-  productId   String?
-  name        String 
-  price       Int
-  quantity    Int     @default(1)
-  credit      Int?
-  cardNumber  String? 
-  delivery    Boolean @default(false)
-  shipping    String?
+  id         String  @id @default(uuid())
+  orderId    String
+  productId  String?
+  name       String
+  price      Int
+  quantity   Int     @default(1)
+  credit     Int?
+  cardNumber String?
+  delivery   Boolean @default(false)
+  shipping   String?
 
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([orderId])
   @@index([productId])
@@ -107,26 +104,44 @@ enum CardStatus {
   BLOCKED
   LOST
 }
+
 model Card {
-  id        String   @id @default(uuid())
-  number    String   @unique
-  identifier String  @unique
-  credit    Int      @default(0)
-  status    CardStatus @default(IN_STOCK)
-  name      String?
-  userId    String?
-  createdAt DateTime @default(now())
+  id         String     @id @default(uuid())
+  number     String     @unique
+  identifier String     @unique
+  credit     Int        @default(0)
+  status     CardStatus @default(IN_STOCK)
+  name       String?
+  userId     String?
+  createdAt  DateTime   @default(now())
   assignedAt DateTime?
 
-  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user       User?       @relation(fields: [userId], references: [id], onDelete: Restrict)
+  creditLogs CreditLog[]
 
   @@index([userId])
 }
 
+model CreditLog {
+  id           String   @id @default(uuid())
+  cardId       String
+  card         Card     @relation(fields: [cardId], references: [id])
+  memberId     String
+  userId       String
+  orderId      String
+  amount       Int
+  balanceAfter Int
+  createdAt    DateTime @default(now())
+
+  @@index([cardId])
+  @@index([memberId])
+  @@index([orderId])
+}
+
 model News {
-  id String @id @default(uuid())
-  title String
-  text String
+  id        String   @id @default(uuid())
+  title     String
+  text      String
   imagePath String
   creatorId String
   createdAt DateTime @default(now())
