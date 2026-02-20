@@ -52,7 +52,7 @@ export const assignCardFromPool = async (tx: any, userId: string) => {
 
   return await tx.card.update({
     where: { id: availableCard.id },
-    data: { userId },
+    data: { userId, status: "ASSIGNED" },
   });
 };
 
