@@ -1,9 +1,15 @@
 import express from "express";
-import { refreshCards } from "../controllers/nayaxController";
-import { softAuth } from "../middleware/authMiddleware";
+import {
+  refreshCards,
+  createCard,
+  deactivateCard,
+} from "../controllers/nayaxController";
+import { authMiddleware, softAuth } from "../middleware/authMiddleware";
 
 const router = express.Router();
 
-router.get("/refreshCards", softAuth, refreshCards);
+router.get("/refreshCards", authMiddleware, refreshCards);
+router.post("/createCards", authMiddleware, createCard);
+router.post("/deactivateCard/:cardId", authMiddleware, deactivateCard);
 
 export default router;

@@ -10,6 +10,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  // url      = env("DATABASE_URL")
 }
 
 model User {
@@ -20,6 +21,7 @@ model User {
   password String
   role Role @default(USER)
   discount Int @default(5)
+  memberId String? @unique
   resetCode String?
   resetCodeExpiration DateTime? 
   createdAt DateTime @default(now())
@@ -99,15 +101,24 @@ model OrderItem {
   @@index([productId])
 }
 
+enum CardStatus {
+  IN_STOCK
+  ASSIGNED
+  BLOCKED
+  LOST
+}
 model Card {
-  id String @id @default(uuid())
-  number String @unique
-  credit Int @default(0)
-  name String?
-  userId String
+  id        String   @id @default(uuid())
+  number    String   @unique
+  identifier String  @unique
+  credit    Int      @default(0)
+  status    CardStatus @default(IN_STOCK)
+  name      String?
+  userId    String?
   createdAt DateTime @default(now())
+  assignedAt DateTime?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User? @relation(fields: [userId], references: [id], onDelete: Restrict)
 
   @@index([userId])
 }

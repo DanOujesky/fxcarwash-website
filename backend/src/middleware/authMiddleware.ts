@@ -42,6 +42,7 @@ export const authMiddleware = async (
         city: true,
         country: true,
         zipCode: true,
+        memberId: true,
       },
     });
 

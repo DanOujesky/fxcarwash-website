@@ -4,6 +4,7 @@ import newsRoutes from "./routes/newsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import webhookRoutes from "./routes/webhookRoutes.js";
+import nayaxRoutes from "./routes/nayaxRoutes.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/news", newsRoutes);
 app.use("/auth", authRoutes);
 app.use("/payment", paymentRoutes);
+app.use("/nayax", nayaxRoutes);
 
 const PORT = process.env.PORT || 5001;
 
