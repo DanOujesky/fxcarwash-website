@@ -5,6 +5,7 @@ interface Card {
   number: string;
   name: string;
   credit: number;
+  status: string;
 }
 interface User {
   firstName: string;
@@ -25,6 +26,7 @@ interface AuthContextType {
   setUser: (user: User | null) => void;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  refreshCards: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(

@@ -6,7 +6,7 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 function AccountPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, refreshCards } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,6 +14,12 @@ function AccountPage() {
       navigate("/login", { replace: true });
     }
   }, [loading, user, navigate]);
+
+  useEffect(() => {
+    if (!loading && user) {
+      refreshCards();
+    }
+  }, [loading]);
 
   if (loading || !user) {
     return <div className={`bg-black min-h-screen]`} />;
@@ -30,12 +36,16 @@ function AccountPage() {
         <h2 className="text-2xl underline text-center">Moje Karty</h2>
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color">
-        {user.cards.length > 0 ? (
+        {user.cards && user.cards.length > 0 ? (
           [...user.cards]
             .sort((a, b) => Number(a.number) - Number(b.number))
             .map((card) => (
               <div key={card.id} className="my-1 w-[80%] sm:w-120">
-                <CustomCard credit={card.credit} number={card.number} />
+                <CustomCard
+                  credit={card.credit}
+                  number={card.number}
+                  status={card.status === "ASSIGNED" ? 1 : 2}
+                />
               </div>
             ))
         ) : (

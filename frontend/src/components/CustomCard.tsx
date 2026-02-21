@@ -1,14 +1,45 @@
+import { useState } from "react";
+
 type CustomCardProps = {
   number: string;
   credit: number;
   isSelected?: boolean;
   hover?: boolean;
+  status: number;
 };
 
-function CustomCard({ number, credit, isSelected, hover }: CustomCardProps) {
+function CustomCard({
+  number,
+  credit,
+  isSelected,
+  hover,
+  status,
+}: CustomCardProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentStatus, setCurrentStatus] = useState(status);
+  const toggleCardStatus = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/nayax/toggleCardStatus/${number}`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to toggle card status: ${response.statusText}`);
+      }
+      setCurrentStatus((prev) => (prev === 1 ? 2 : 1));
+    } catch (error) {
+      console.error("Error toggling card status:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div
-      className={`flex flex-row w-full ${
+      className={`flex flex-row w-full relative ${
         hover && !isSelected
           ? "hover:bg-[#5f5f5f] bg-[#555555]"
           : "bg-[#555555]"
@@ -32,6 +63,18 @@ function CustomCard({ number, credit, isSelected, hover }: CustomCardProps) {
           KREDIT: <span className="font-normal">{credit}</span>
         </div>
       </div>
+      <button
+        onClick={toggleCardStatus}
+        className={`absolute right-1 bottom-1 ${currentStatus === 1 ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}  pt-[7px] pb-[3px] px-2 rounded-xl text-sm flex items-center`}
+      >
+        {currentStatus === 1
+          ? isLoading
+            ? "Zablokování..."
+            : "Zablokovat"
+          : isLoading
+            ? "Odblokování..."
+            : "Odblokovat"}
+      </button>
     </div>
   );
 }

@@ -18,6 +18,31 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(null);
     }
   };
+  const refreshCards = async () => {
+    if (!user?.email) return;
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/nayax/refreshCards`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        setUser((prev) => {
+          if (!prev) return prev;
+
+          return {
+            ...prev,
+            cards: data.cards,
+          };
+        });
+      }
+    } catch (error) {
+      console.error("Refresh cards failed:", error);
+    }
+  };
   const checkAuth = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
@@ -56,6 +81,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser,
         logout,
         checkAuth,
+        refreshCards,
       }}
     >
       {children}

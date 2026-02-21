@@ -1,11 +1,12 @@
-import e from "express";
 import { prisma } from "../config/db.js";
-import { User } from "@prisma/client";
 
 const BASE_URL = process.env.NAYAX_BASE_URL;
 const NAYAX_TOKEN = process.env.NAYAX_TOKEN;
 const ACTOR_ID = process.env.NAYAX_ACTOR_ID;
-const fetchNayax = async (endpoint: string, options: RequestInit = {}) => {
+export const fetchNayax = async (
+  endpoint: string,
+  options: RequestInit = {},
+) => {
   const url = `${BASE_URL}${endpoint}`;
   const defaultHeaders = {
     accept: "application/json",
@@ -38,13 +39,10 @@ export const assignCardFromPool = async (tx: any, userId: string) => {
   });
 
   if (card) {
-    return await tx.card.update({
-      where: { id: card.id },
-      data: { userId, assignedAt: new Date() },
-    });
+    return card;
   }
 
-  return null;
+  throw new Error("No available cards in the pool");
 };
 
 export const getCardByIdentifier = async (identifier: string) => {
