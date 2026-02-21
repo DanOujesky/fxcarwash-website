@@ -1,4 +1,6 @@
+import e from "express";
 import { prisma } from "../config/db.js";
+import { User } from "@prisma/client";
 
 const BASE_URL = process.env.NAYAX_BASE_URL;
 const NAYAX_TOKEN = process.env.NAYAX_TOKEN;
@@ -66,17 +68,18 @@ export const createCardInNayax = async (
         ActorID: ACTOR_ID,
         CardUniqueIdentifier: card.identifier,
         CardDisplayNumber: card.number,
-        CardTypeID: 33,
+        CartTypeID: 33,
         PhysicalTypeID: 30000530,
         Status: 1,
       },
-      CardHolderDetails: {
-        CardHolderName: `${user.firstName} ${user.lastName}`,
-        MobileNumber: user.phone,
+      CartHolderDetails: {
+        CardHolderName: user.firstName + " " + user.lastName,
         Email: user.email,
+        MobileNumber: user.phone,
       },
-      CardCreditAttributes: { Credit: credit },
-      CardCreditLimits: {},
+      CardCreditAttributes: {
+        Credit: credit,
+      },
     }),
   });
 };
@@ -93,21 +96,29 @@ export const updateCardInNayax = async (
   return fetchNayax(`/operational/v2/cards/${card.cardId}`, {
     method: "PUT",
     body: JSON.stringify({
+      ...existingCard,
+
       CardDetails: {
         ...existingCard.CardDetails,
         Status: 1,
       },
+
       CardHolderDetails: {
         ...existingCard.CardHolderDetails,
+        CardHolderName: user.firstName + " " + user.lastName,
         Email: user.email,
+        MobileNumber: user.phone,
+        MemberTypeID: null,
       },
+
       CardCreditAttributes: {
         ...existingCard.CardCreditAttributes,
         Credit: credit,
       },
-      CardCreditLimits: existingCard.CardCreditLimits,
-      CardDateRules: existingCard.CardDateRules,
-      GroupLocationLimits: existingCard.GroupLocationLimits,
+
+      CardCreditLimits: {
+        ...existingCard.CardCreditLimits,
+      },
     }),
   });
 };
@@ -151,7 +162,7 @@ export const createOrUpdateCardInNayax = async (
     return await prisma.card.update({
       where: { id: card.id },
       data: {
-        cardId: nayaxResponse?.CardDetails?.CardID,
+        cardId: String(nayaxResponse?.CardDetails?.CardID),
         email: user.email,
         assignedAt: new Date(),
         status: "ASSIGNED",
@@ -173,5 +184,5 @@ export const addCreditToCard = async (
     `/operational/v1/cards/${cardIdentifier}/credit/add?CardCredit=${credit}`,
     { method: "POST" },
   );
-  return data.NewCredit;
+  return data.value;
 };

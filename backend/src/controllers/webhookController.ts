@@ -56,7 +56,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     for (const item of order.items) {
       try {
         let card;
-        let newBalance;
+        let newBalance: number;
 
         if (item.delivery) {
           card = await prisma.$transaction(async (tx) => {
@@ -77,10 +77,18 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
           card = await prisma.card.findUnique({
             where: { number: item.cardNumber! },
           });
-          if (!card || card.userId !== order.userId || !card.identifier) {
-            // Log critical error but continue processing other items
+          if (
+            !card ||
+            card.userId !== order.userId ||
+            !card.identifier ||
+            item.credit === null
+          ) {
+            console.error(
+              `CRITICAL: Card not found or invalid for order ${orderId}, item ${item.id}`,
+            );
+            continue;
           }
-          newBalance = await addCreditToCard(card!.identifier, item.credit!);
+          newBalance = await addCreditToCard(card.identifier, item.credit);
 
           await prisma.card.update({
             where: { id: card!.id },
