@@ -1,7 +1,11 @@
 import Stripe from "stripe";
 import { prisma } from "../config/db.js";
 import { Request, Response } from "express";
-import * as nayax from "../services/nayaxService.js";
+import {
+  addCreditToCard,
+  assignCardFromPool,
+  createOrUpdateCardInNayax,
+} from "../services/nayaxService.js";
 import {
   sendOrderEmailToUser,
   sendOrderEmailToCompany,
@@ -49,38 +53,48 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       data: { status: "PAID" },
     });
 
-    const memberId = await nayax.ensureMemberExists(order.user);
-
     for (const item of order.items) {
       try {
         let card;
+        let newBalance;
 
         if (item.delivery) {
           card = await prisma.$transaction(async (tx) => {
-            return await nayax.assignCardFromPool(tx, order.userId);
+            return await assignCardFromPool(tx, order.userId);
           });
-          await nayax.createCardInNayax(memberId, card.identifier);
+
+          if (!card) {
+            // Log critical error but continue processing other items
+          }
+          const cardCreated = await createOrUpdateCardInNayax(
+            order.user,
+            item.credit!,
+            card,
+          );
+
+          newBalance = cardCreated.credit;
         } else {
           card = await prisma.card.findUnique({
             where: { number: item.cardNumber! },
           });
+          if (!card || card.userId !== order.userId || !card.identifier) {
+            // Log critical error but continue processing other items
+          }
+          newBalance = await addCreditToCard(card!.identifier, item.credit!);
+
+          await prisma.card.update({
+            where: { id: card!.id },
+            data: {
+              credit: newBalance,
+            },
+          });
         }
 
-        if (card && item.credit) {
-          const newBalance = await nayax.topupCardInNayax(
-            card.identifier,
-            item.credit,
-          );
-
+        if (item.credit) {
           await prisma.$transaction([
-            prisma.card.update({
-              where: { id: card.id },
-              data: { credit: newBalance },
-            }),
             prisma.creditLog.create({
               data: {
                 cardId: card.id,
-                memberId: memberId,
                 orderId: order.id,
                 userId: order.userId,
                 amount: item.credit,

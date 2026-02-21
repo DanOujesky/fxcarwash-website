@@ -21,7 +21,6 @@ model User {
   password            String
   role                Role      @default(USER)
   discount            Int       @default(5)
-  memberId            String?   @unique
   resetCode           String?
   resetCodeExpiration DateTime?
   createdAt           DateTime  @default(now())
@@ -109,6 +108,8 @@ model Card {
   id         String     @id @default(uuid())
   number     String     @unique
   identifier String     @unique
+  cardId     String?    @unique
+  email      String?     
   credit     Int        @default(0)
   status     CardStatus @default(IN_STOCK)
   name       String?
@@ -126,7 +127,6 @@ model CreditLog {
   id           String   @id @default(uuid())
   cardId       String
   card         Card     @relation(fields: [cardId], references: [id])
-  memberId     String
   userId       String
   orderId      String
   amount       Int
@@ -134,7 +134,6 @@ model CreditLog {
   createdAt    DateTime @default(now())
 
   @@index([cardId])
-  @@index([memberId])
   @@index([orderId])
 }
 
