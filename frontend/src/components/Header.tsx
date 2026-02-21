@@ -89,26 +89,23 @@ function Header({
             {isSideBarOpen ? "ZAVŘÍT MENU" : "MENU"}
           </div>
         </div>
-        {(!logo && !mobileScreen) ||
-          (logo && (
-            <div
-              className={`absolute ${
-                mobileScreen || homePage
-                  ? "right-[6%] sm:right-[5%] 2xl:right-[3%] 2xl:translate-x-18 2xl:h-36 2xl:w-36 sm:translate-x-15 sm:h-30 sm:w-30 mr-10 translate-x-13 h-26 w-26"
-                  : "right-[50%] translate-x-22 h-44 w-44"
-              } `}
-            >
-              <NavLink to={"/"}>
-                <img
-                  className={`w-full h-full object-fit ${homePage ? "p-5 " : ""}`}
-                  src={
-                    homePage ? "/icons/logo_homepage.png" : "/icons/logo.svg"
-                  }
-                  alt="car-wash-logo"
-                />
-              </NavLink>
-            </div>
-          ))}
+        {((!logo && !mobileScreen) || logo) && (
+          <div
+            className={`absolute ${
+              mobileScreen || homePage
+                ? "right-[6%] sm:right-[5%] 2xl:right-[3%] 2xl:translate-x-18 2xl:h-36 2xl:w-36 sm:translate-x-15 sm:h-30 sm:w-30 mr-10 translate-x-13 h-26 w-26"
+                : "right-[50%] translate-x-22 h-44 w-44"
+            } `}
+          >
+            <NavLink to={"/"}>
+              <img
+                className={`w-full h-full object-fit ${homePage ? "p-5 " : ""}`}
+                src={homePage ? "/icons/logo_homepage.png" : "/icons/logo.svg"}
+                alt="car-wash-logo"
+              />
+            </NavLink>
+          </div>
+        )}
 
         {account && <CartIcon />}
         {!account && !homePage && !mobileScreen && (
