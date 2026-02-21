@@ -5,7 +5,7 @@ type CustomCardProps = {
   credit: number;
   isSelected?: boolean;
   hover?: boolean;
-  status: number;
+  status?: number;
 };
 
 function CustomCard({
@@ -63,18 +63,20 @@ function CustomCard({
           KREDIT: <span className="font-normal">{credit}</span>
         </div>
       </div>
-      <button
-        onClick={toggleCardStatus}
-        className={`absolute right-1 bottom-1 ${currentStatus === 1 ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}  pt-[7px] pb-[3px] px-2 rounded-xl text-sm flex items-center`}
-      >
-        {currentStatus === 1
-          ? isLoading
-            ? "Zablokování..."
-            : "Zablokovat"
-          : isLoading
-            ? "Odblokování..."
-            : "Odblokovat"}
-      </button>
+      {status && (
+        <button
+          onClick={toggleCardStatus}
+          className={`absolute right-1 bottom-1 ${currentStatus === 1 ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}  pt-[7px] pb-[3px] px-2 rounded-xl text-sm flex items-center`}
+        >
+          {currentStatus === 1
+            ? isLoading
+              ? "Zablokování..."
+              : "Zablokovat"
+            : isLoading
+              ? "Odblokování..."
+              : "Odblokovat"}
+        </button>
+      )}
     </div>
   );
 }
