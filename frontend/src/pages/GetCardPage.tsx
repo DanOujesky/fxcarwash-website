@@ -55,7 +55,8 @@ function GetCardPage() {
       temp_id: crypto.randomUUID(),
       name: "Objednání nové FX karty",
       price: creditValue,
-      delivery: data.shipping === "cp",
+      delivery:
+        data.shipping === "cp" || (data.shipping === "op" && !user.address),
       shipping: data.shipping,
       quantity: quanityValue,
       credit: creditValue * (1 + user.discount / 100),
@@ -82,7 +83,7 @@ function GetCardPage() {
 
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
         <form
-          className="my-5 flex flex-col gap-3 w-full md:w-120"
+          className="my-5 flex flex-col gap-3 w-full md:w-125"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="flex flex-col">

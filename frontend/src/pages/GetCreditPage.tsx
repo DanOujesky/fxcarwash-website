@@ -78,9 +78,9 @@ function GetCreditPage() {
         <h2 className="text-2xl underline">Dobití kreditu</h2>
       </div>
 
-      <div className="flex flex-col justify-center items-center body-bg-color p-15">
+      <div className="flex flex-col justify-center items-center body-bg-color py-15 px-5 sm:p-15">
         <form
-          className="my-5 flex flex-col gap-3 w-full md:w-120"
+          className="my-5 flex-col gap-3 w-full md:w-120 flex sm:items-center"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="flex flex-col">
@@ -88,7 +88,7 @@ function GetCreditPage() {
             <div className="">
               {user.cards.map((card) => (
                 <div
-                  className="my-2 cursor-pointer"
+                  className="my-2 cursor-pointer w-full sm:w-140 lg:w-160"
                   key={card.id}
                   onClick={() =>
                     setValue("cardNumber", card.number, {
@@ -112,7 +112,7 @@ function GetCreditPage() {
             <Inputlabel white={true} text="Vyberte výši kreditu" />
             <select
               {...register("credit", { valueAsNumber: true })}
-              className="bg-white text-black p-2 cursor-pointer contactText outline-none rounded-sm"
+              className="bg-white text-black p-2 cursor-pointer contactText outline-none rounded-sm w-full sm:w-140 lg:w-160"
             >
               {[
                 500, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000, 8000,

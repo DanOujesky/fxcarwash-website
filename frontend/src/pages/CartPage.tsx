@@ -148,7 +148,7 @@ function CartPage() {
 
             <div className="w-[80%] sm:w-150 flex justify-between items-center text-white text-xl pt-5">
               <div className="font-bold underline underline-offset-8">
-                Celková cena: {formatCurrency(totalPrice)}
+                Celková cena s DPH: {formatCurrency(totalPrice)}
               </div>
             </div>
           </div>

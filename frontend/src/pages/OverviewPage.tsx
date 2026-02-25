@@ -13,6 +13,7 @@ function OverviewPage() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
+  const [onCompany, setOnCompany] = useState(false);
 
   const order: Order = location.state?.order;
 
@@ -71,7 +72,7 @@ function OverviewPage() {
             />
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-            <h2 className="text-2xl underline">Vaše objednávka</h2>
+            <h2 className="text-2xl underline">Shrnutí objednávky</h2>
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
             {order.items.map((item) => (
@@ -79,28 +80,26 @@ function OverviewPage() {
                 className="border-2 border-white p-5 justify-between w-[80%] sm:w-150"
                 key={item.temp_id}
               >
-                {item.delivery ? (
+                {item.shipping ? (
                   <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
-                        <div className="font-bold">{item.name}</div>
+                        <div className="font-bold ">
+                          {item.name === "Objednání nové FX karty"
+                            ? "FX karta v hodnotě " + item.price + " Kč"
+                            : ""}
+                        </div>
                       </div>
-                      <div className="">
-                        Váš požadavek na dobití kreditu: {item.price} kreditů
-                      </div>
-                      <div className="">
-                        Cena za jednu kartu: {formatCurrency(item.price)}
-                      </div>
-                      <div className="mt-3 text-green-500">
-                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
+                      <div className=" text-green-500">
+                        Množství kreditů s {user.discount}% bonusem:{" "}
                         {item.credit} kreditů
                       </div>
                     </div>
 
                     <div className=" flex flex-col items-center justify-center gap-2">
                       {item.shipping && (
-                        <div className="flex flex-col items-center justify-center text-3xl">
+                        <div className="flex flex-col items-center justify-center text-2xl">
                           {item.quantity} ks
                         </div>
                       )}
@@ -111,28 +110,19 @@ function OverviewPage() {
                     <div className=" flex flex-col">
                       {" "}
                       <div className=" flex flex-col">
-                        <div className="font-bold">{item.name}</div>
-                        {!item.shipping && (
-                          <div className="">Číslo karty: {item.cardNumber}</div>
-                        )}
+                        <div className="font-bold ">
+                          {`Dobití kreditu ${item.price} Kč na FX kartu č. ${item.cardNumber}`}
+                        </div>
                       </div>
-                      <div className="">
-                        Váš požadavek na dobití kreditu: {item.price} kreditů
-                      </div>
-                      <div className="">
-                        Cena za jednu kartu: {formatCurrency(item.price)}
-                      </div>
-                      <div className="mt-3 text-green-500">
-                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
-                        {item.credit} Kreditů
+                      <div className="text-green-500">
+                        Množství kreditů s {user.discount}% bonusem:{" "}
+                        {item.credit} kreditů
                       </div>
                     </div>
                     <div className=" flex flex-col items-center justify-center gap-2">
-                      {item.shipping && (
-                        <div className="flex flex-col items-center justify-center text-3xl">
-                          {item.quantity} ks
-                        </div>
-                      )}
+                      <div className="flex flex-col items-center justify-center text-2xl">
+                        1 ks
+                      </div>
                     </div>
                   </div>
                 )}
@@ -140,61 +130,90 @@ function OverviewPage() {
             ))}
           </div>
           {order.address ? (
-            <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-              <h2 className="text-2xl underline">Údaje</h2>
-              <div className="border-2 flex flex-col sm:flex-row border-white p-5 justify-between sm:w-150 w-[80%] mt-15 ">
+            <div className="flex flex-col justify-center items-center body-bg-color">
+              <div className="border-2 flex flex-col  border-white p-5 justify-between gap-10 sm:w-150 w-[80%] mt-5 ">
                 <div className="flex flex-col justify-baseline self-start">
-                  <p>Jméno: {user.firstName}</p>
-                  <p>Příjmení: {user.lastName}</p>
-                  <p>Email: {user.email}</p>
-                  <p>Telefon: {order.phone}</p>
+                  <div className="mb-2">
+                    <p className="font-bold underline">Kontaktní údaje</p>
+                    <p>
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p>{user.email}</p>
+                    <p>{order.phone}</p>
+                  </div>
+                  <div className="mb-2">
+                    <p className="font-bold underline">Doručovací adresa</p>
+                    <p>
+                      {order.address}, {order.zipCode} {order.city}{" "}
+                      {order.country}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex flex-col justify-baseline">
-                  <p>Adresa: {order.address}</p>
-                  <p>PSČ: {order.zipCode}</p>
-                  <p>Město: {order.city}</p>
-                  <p>Stát: {order.country}</p>
-                </div>
-              </div>
-              <div className="sm:w-150 w-[80%] flex justify-between items-center text-white text-xl pt-5">
-                <div className="underline underline-offset-8 contactText font-bold">
-                  Celková cena: {formatCurrency(order.price)}
+                <div className="flex flex-row justify-between self-start w-full">
+                  <p className="font-bold">Celková cena s DPH</p>
+                  <p className="text-green-500 text-2xl">
+                    {formatCurrency(order.price)}
+                  </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-              <h2 className="text-2xl underline">Údaje</h2>
-              <div className="border-2 flex flex-row border-white p-5 justify-center gap-10 w-150 mt-15">
+            <div className="flex flex-col justify-center items-center body-bg-color ">
+              <div className="border-2 flex flex-col border-white p-5 justify-center gap-10 w-150 mt-5">
                 <div className="flex flex-col justify-baseline self-start w-full">
-                  <p>Jméno: {user.firstName}</p>
-                  <p>Příjmení: {user.lastName}</p>
-                  <p>Email: {user.email}</p>
+                  <div className="mb-2">
+                    <p className="font-bold underline">Kontaktní údaje</p>
+                    <p>
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p>{user.email}</p>
+                    <p>{user.phone}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="w-150 flex justify-between items-center text-white text-xl pt-5">
-                <div className="underline underline-offset-8 contactText font-bold">
-                  Celková cena: {formatCurrency(order.price)}
+                <div className="flex flex-row justify-between self-start w-full">
+                  <p className="font-bold">Celková cena s DPH</p>
+                  <p className="text-green-500 text-2xl">
+                    {formatCurrency(order.price)}
+                  </p>
                 </div>
               </div>
             </div>
           )}
 
-          <div className="flex flex-row justify-center items-center gap-5 body-bg-color pt-15 mx-10">
-            <input
-              type="checkbox"
-              id="gdpr"
-              className="w-7 h-7 shrink-0 accent-green-500 cursor-pointer"
-              checked={isAgreed}
-              onChange={() => setIsAgreed(!isAgreed)}
-            />
-            <label className="text-white leading-none contactText">
-              Souhlasím s{" "}
-              <Link className="underline" to="/obchodni-podminky">
-                obchodními podmínkami
-              </Link>{" "}
-              a se zpracováním osobních údajů
-            </label>
+          <div className="flex flex-row justify-center items-center  body-bg-color pt-15 mx-10  ">
+            <div className="w-150 flex justify-start items-center gap-5 ">
+              <input
+                type="checkbox"
+                id="gdpr"
+                className="w-7 h-7 shrink-0 accent-green-500 cursor-pointer "
+                checked={onCompany}
+                onChange={() => setOnCompany(!onCompany)}
+              />
+              <label className="text-white leading-none contactText ">
+                Chci nakupovat na firmu
+              </label>
+            </div>
+          </div>
+          {onCompany && (
+            <div className="flex flex-col justify-center items-center body-bg-color pt-5 mx-10"></div>
+          )}
+          <div className="flex flex-row justify-center items-center body-bg-color pt-5 mx-10">
+            <div className="w-150 flex justify-start items-center gap-5 ">
+              <input
+                type="checkbox"
+                id="gdpr"
+                className="w-7 h-7 shrink-0 accent-green-500 cursor-pointer"
+                checked={isAgreed}
+                onChange={() => setIsAgreed(!isAgreed)}
+              />
+              <label className="text-white leading-none contactText">
+                Souhlasím s{" "}
+                <Link className="underline" to="/obchodni-podminky">
+                  obchodními podmínkami
+                </Link>{" "}
+                a se zpracováním osobních údajů
+              </label>
+            </div>
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color p-15">
             <div className="flex flex-col w-55 sm:w-80">
