@@ -60,10 +60,11 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
             </div>
             <div class="customer-box">
                 <div class="blue-title">Odběratel:</div>
-                <strong>${user.firstName} ${user.lastName}</strong><br>
-                ${order.address || ""}<br>
-                ${order.city || ""}, ${order.zipCode || ""}<br>
-                IČ: ${order.id.slice(0, 8)}
+                <strong>${order.companyAddress ? order.companyAddress : `${user.firstName} ${user.lastName}`}</strong><br>
+                ${order.companyAddress || order.address || user.address}<br>
+                ${order.companyCity || order.city || user.city}, ${order.companyZipCode || order.zipCode || user.zipCode}<br>
+                ${order.companyICO && `IČ: ${order.companyICO}<br>`}
+                ${order.companyDIC && `DIČ: ${order.companyDIC}`}
             </div>
         </div>
 
@@ -115,7 +116,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
         </div>
 
         <div class="footer">
-            <div>Vystavil: Irena Osvaldová | Ekonomický systém POHODA</div>
+            <div>Vystavil: sales@fxcarwash.cz</div>
         </div>
     </body>
     </html>

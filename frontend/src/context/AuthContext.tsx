@@ -18,6 +18,12 @@ interface User {
   country: string;
   discount: number;
   cards: Card[];
+  companyName: string;
+  companyICO: string;
+  companyDIC: string;
+  companyAddress: string;
+  companyZipCode: string;
+  companyCity: string;
 }
 
 interface AuthContextType {

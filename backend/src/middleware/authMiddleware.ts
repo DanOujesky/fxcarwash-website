@@ -42,6 +42,12 @@ export const authMiddleware = async (
         city: true,
         country: true,
         zipCode: true,
+        companyName: true,
+        companyAddress: true,
+        companyCity: true,
+        companyDIC: true,
+        companyICO: true,
+        companyZipCode: true,
       },
     });
 
@@ -87,6 +93,12 @@ export const softAuth = async (
         city: true,
         country: true,
         zipCode: true,
+        companyName: true,
+        companyAddress: true,
+        companyCity: true,
+        companyDIC: true,
+        companyICO: true,
+        companyZipCode: true,
       },
     });
     req.user = user || null;

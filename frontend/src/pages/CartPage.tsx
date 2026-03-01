@@ -14,6 +14,14 @@ function CartPage() {
   const navigate = useNavigate();
   const { cart, hasDelivery, totalPrice, updateCartQuantity, removeFromCart } =
     useCart();
+  const savedOrderString = localStorage.getItem("order");
+
+  let savedOrder = null;
+  try {
+    savedOrder = savedOrderString ? JSON.parse(savedOrderString) : null;
+  } catch (e) {
+    console.error("Chyba při parsování objednávky:", e);
+  }
 
   useEffect(() => {
     if (!loading && !user) {
@@ -30,6 +38,7 @@ function CartPage() {
       navigate("/doprava");
     } else {
       const newOrder: Order = {
+        ...savedOrder,
         id: crypto.randomUUID(),
         items: cart,
         price: totalPrice,

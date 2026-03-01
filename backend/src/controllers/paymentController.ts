@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
+import { UnsupportedOperation } from "puppeteer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -14,18 +15,22 @@ export const payment = async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   try {
-    if (order.address) {
-      await prisma.user.update({
-        where: { id: userId },
-        data: {
-          phone: order.phone,
-          address: order.address,
-          city: order.city,
-          zipCode: order.zipCode,
-          country: order.country,
-        },
-      });
-    }
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        phone: order.phone || undefined,
+        address: order.address || undefined,
+        city: order.city || undefined,
+        zipCode: order.zipCode || undefined,
+        country: order.country || undefined,
+        companyName: order.companyName || undefined,
+        companyICO: order.companyICO || undefined,
+        companyDIC: order.companyDIC || undefined,
+        companyAddress: order.companyAddress || undefined,
+        companyCity: order.companyCity || undefined,
+        companyZipCode: order.companyZipCode || undefined,
+      },
+    });
 
     const result = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
@@ -37,6 +42,12 @@ export const payment = async (req: Request, res: Response) => {
           zipCode: order.zipCode,
           country: order.country,
           phone: order.phone,
+          companyName: order.companyName,
+          companyAddress: order.companyAddress,
+          companyCity: order.companyCity,
+          companyDIC: order.companyDIC,
+          companyICO: order.companyICO,
+          companyZipCode: order.companyZipCode,
           status: "PENDING",
           items: {
             create: order.items.map((item: any) => ({

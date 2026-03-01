@@ -8,6 +8,12 @@ export interface Order {
   city?: string;
   country?: string;
   email: string;
+  companyName?: string;
+  companyICO?: string;
+  companyDIC?: string;
+  companyAddress?: string;
+  companyZipCode?: string;
+  companyCity?: string;
 }
 
 export interface OrderItem {

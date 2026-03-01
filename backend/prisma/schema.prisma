@@ -29,6 +29,12 @@ model User {
   zipCode             String?
   city                String?
   country             String?
+  companyName         String?
+  companyICO          String?
+  companyDIC          String?
+  companyAddress      String?
+  companyZipCode      String?
+  companyCity         String?
 
   cards  Card[]
   orders Order[]
@@ -45,6 +51,7 @@ enum OrderStatus {
 
 model Order {
   id     String @id @default(uuid())
+  orderNumber String @unique
   userId String
 
   totalPrice Int
@@ -55,6 +62,12 @@ model Order {
   zipCode String?
   city    String?
   country String?
+  companyName         String?
+  companyICO          String?
+  companyDIC          String?
+  companyAddress      String?
+  companyZipCode      String?
+  companyCity         String?
 
   status   OrderStatus @default(PENDING)
   stripeId String?     @unique

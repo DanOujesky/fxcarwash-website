@@ -80,6 +80,7 @@ function DeliveryPage() {
 
   const onSubmit = (data: DeliveryInput) => {
     const newOrder: Order = {
+      ...savedOrder,
       id: crypto.randomUUID(),
       items: cart,
       address: data.address,

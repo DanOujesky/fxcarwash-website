@@ -81,7 +81,36 @@ export const deliverySchema = z.object({
   country: z.string().min(1, "Země je povinná"),
 });
 
+export const companySchema = z.object({
+  companyName: z.string().min(2, "Název firmy musí mít aspoň 2 znaky"),
+
+  companyICO: z
+    .string()
+    .min(1, "IČO je povinné")
+    .transform((val) => val.replace(/\s+/g, ""))
+    .refine((val) => /^\d{8}$/.test(val), "IČO musí mít přesně 8 číslic"),
+
+  companyDIC: z
+    .string()
+    .transform((val) => val.replace(/\s+/g, "").toUpperCase())
+    .optional()
+    .or(z.literal("")),
+
+  companyAddress: z
+    .string()
+    .min(5, "Ulice a číslo popisné musí mít aspoň 5 znaků"),
+
+  companyZipCode: z
+    .string()
+    .min(1, "PSČ je povinné")
+    .transform((val) => val.replace(/\s+/g, ""))
+    .refine((val) => /^\d{5}$/.test(val), "PSČ musí mít 5 číslic"),
+
+  companyCity: z.string().min(2, "Město musí mít aspoň 2 znaky"),
+});
+
 export type OrderFormInput = z.infer<typeof orderFormSchema>;
 export type AddCreditInput = z.infer<typeof addCreditSchema>;
 export type NewCardInput = z.infer<typeof newCardSchema>;
 export type DeliveryInput = z.infer<typeof deliverySchema>;
+export type CompanySchema = z.infer<typeof companySchema>;
