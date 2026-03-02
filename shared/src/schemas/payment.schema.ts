@@ -12,7 +12,7 @@ const orderItemSchema = z.object({
   cardNumber: z.string().optional(),
 });
 
-export const companySchema = z.object({
+const companySchema = z.object({
   companyName: z
     .string()
     .min(1, "Název firmy je povinný")
@@ -54,4 +54,3 @@ export const paymentSchema = z.object({
 });
 
 export type OrderInput = z.infer<typeof orderSchema>;
-export type CompanySchema = z.infer<typeof companySchema>;

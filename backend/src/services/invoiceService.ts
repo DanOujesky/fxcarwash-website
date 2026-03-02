@@ -60,11 +60,17 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
             </div>
             <div class="customer-box">
                 <div class="blue-title">Odběratel:</div>
-                <strong>${order.companyAddress ? order.companyAddress : `${user.firstName} ${user.lastName}`}</strong><br>
-                ${order.companyAddress || order.address || user.address}<br>
-                ${order.companyCity || order.city || user.city}, ${order.companyZipCode || order.zipCode || user.zipCode}<br>
-                ${order.companyICO && `IČ: ${order.companyICO}<br>`}
-                ${order.companyDIC && `DIČ: ${order.companyDIC}`}
+                <strong>
+                    ${order.companyName ? order.companyName : `${user.firstName} ${user.lastName}`}
+                </strong><br>
+                
+                ${order.companyAddress || order.address || user.address || ""}<br>
+                
+                ${order.companyCity || order.city || user.city || ""} 
+                ${order.companyZipCode || order.zipCode || user.zipCode ? `, ${order.companyZipCode || order.zipCode || user.zipCode}` : ""}<br>
+                
+                ${order.companyICO ? `IČ: ${order.companyICO}<br>` : ""}
+                ${order.companyDIC ? `DIČ: ${order.companyDIC}` : ""}
             </div>
         </div>
 
