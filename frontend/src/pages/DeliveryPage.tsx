@@ -167,15 +167,20 @@ function DeliveryPage() {
               />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            {errors.city?.message ? (
-              <ErrorMessage message={errors.city.message} />
-            ) : (
-              <div></div>
-            )}
-
-            <ErrorMessage message={errors.zipCode?.message} />
-          </div>
+          {(errors.city || errors.zipCode) && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                {errors.city?.message && (
+                  <ErrorMessage message={errors.city.message} />
+                )}
+              </div>
+              <div>
+                {errors.zipCode?.message && (
+                  <ErrorMessage message={errors.zipCode.message} />
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col">
             <Inputlabel white={true} text="Stát" />

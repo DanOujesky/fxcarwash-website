@@ -34,7 +34,7 @@ function CartPage() {
   }
 
   const handleContinue = () => {
-    if (hasDelivery) {
+    if (hasDelivery || !user.address) {
       navigate("/doprava");
     } else {
       const newOrder: Order = {
@@ -61,7 +61,10 @@ function CartPage() {
       {cart && cart.length > 0 ? (
         <div>
           <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-            <CartPhaseDisplay delivery={hasDelivery} phaseNumber={1} />
+            <CartPhaseDisplay
+              delivery={hasDelivery || !user.address}
+              phaseNumber={1}
+            />
           </div>
           <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
             {cart.map((item) => (

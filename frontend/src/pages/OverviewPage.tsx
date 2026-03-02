@@ -57,6 +57,8 @@ function OverviewPage() {
 
     const finalOrder = onCompany ? { ...order, ...companyData } : order;
 
+    console.log(finalOrder);
+
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/payment/create-checkout-session`,
@@ -84,8 +86,8 @@ function OverviewPage() {
     const currentCompanyData = getValues();
 
     const updatedOrder = onCompany
-      ? { ...order, ...currentCompanyData, onCompany: true }
-      : { ...order, onCompany: false };
+      ? { ...order, ...currentCompanyData }
+      : { ...order };
 
     localStorage.setItem("order", JSON.stringify(updatedOrder));
 

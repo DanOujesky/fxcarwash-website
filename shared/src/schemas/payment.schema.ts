@@ -2,19 +2,37 @@ import { z } from "zod";
 
 const orderItemSchema = z.object({
   id: z.string().uuid(),
-  name: z.string(),
-  price: z.coerce.number().positive(),
-  credit: z.coerce.number().positive(),
-  quantity: z.coerce.number().int().positive().optional().default(1),
+  temp_id: z.string().optional(),
+  name: z.string().min(1, "Název položky je povinný"),
+  price: z.coerce.number().nonnegative(),
+  credit: z.coerce.number().nonnegative(),
+  quantity: z.coerce.number().int().positive().default(1),
   delivery: z.boolean(),
   shipping: z.string().optional(),
   cardNumber: z.string().optional(),
 });
 
+export const companySchema = z.object({
+  companyName: z
+    .string()
+    .min(1, "Název firmy je povinný")
+    .optional()
+    .or(z.literal("")),
+  companyICO: z
+    .string()
+    .regex(/^\d{8}$/, "IČO musí mít 8 číslic")
+    .optional()
+    .or(z.literal("")),
+  companyDIC: z.string().optional().or(z.literal("")),
+  companyAddress: z.string().optional().or(z.literal("")),
+  companyZipCode: z.string().optional().or(z.literal("")),
+  companyCity: z.string().optional().or(z.literal("")),
+});
+
 export const orderSchema = z.object({
   id: z.string().uuid().optional(),
   items: z.array(orderItemSchema).min(1, "Košík nesmí být prázdný"),
-  price: z.coerce.number().positive(),
+  price: z.coerce.number().positive("Cena musí být kladná"),
   email: z.string().email("Neplatný formát e-mailu"),
 
   phone: z.string().optional(),
@@ -22,6 +40,13 @@ export const orderSchema = z.object({
   zipCode: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
+
+  companyName: z.string().optional(),
+  companyICO: z.string().optional(),
+  companyDIC: z.string().optional(),
+  companyAddress: z.string().optional(),
+  companyZipCode: z.string().optional(),
+  companyCity: z.string().optional(),
 });
 
 export const paymentSchema = z.object({
@@ -29,3 +54,4 @@ export const paymentSchema = z.object({
 });
 
 export type OrderInput = z.infer<typeof orderSchema>;
+export type CompanySchema = z.infer<typeof companySchema>;
