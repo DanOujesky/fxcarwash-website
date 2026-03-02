@@ -7,7 +7,6 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
   const totalAll = order.totalPrice;
   const totalBase = Math.round((totalAll / 1.21) * 100) / 100;
   const totalVat = Math.round((totalAll - totalBase) * 100) / 100;
-  const vs = order.id.replace(/\D/g, "").slice(0, 10) || "25001";
 
   const formatDate = (date: Date) => date.toLocaleDateString("cs-CZ");
   const formatCurrency = (val: number) =>
@@ -39,7 +38,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
         <div class="header">
             <div style="font-size: 28px; font-weight: bold;">F.X. CARWASH</div>
             <div style="text-align: right;">
-                <h2 style="margin: 0; font-size: 16px;">FAKTURA - DAŇOVÝ DOKLAD č. ${vs}</h2>
+                <h2 style="margin: 0; font-size: 16px;">FAKTURA - DAŇOVÝ DOKLAD č. ${order.orderFullNumber}</h2>
             </div>
         </div>
 
@@ -53,7 +52,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
             </div>
             <div class="column">
                 <table style="width: 100%;">
-                    <tr><td>Variabilní symbol:</td><td style="text-align: right;"><strong>${vs}</strong></td></tr>
+                    <tr><td>Variabilní symbol:</td><td style="text-align: right;"><strong>${order.orderFullNumber}</strong></td></tr>
                     <tr><td>Číslo účtu:</td><td style="text-align: right;"><strong>361179237 / 0300</strong></td></tr>
                     <tr><td>Forma úhrady:</td><td style="text-align: right;">Příkazem</td></tr>
                 </table>
@@ -77,7 +76,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
         <table style="width: 100%; margin-top: 10px;">
             <tr>
                 <td>Datum vystavení: <strong>${formatDate(new Date())}</strong></td>
-                <td>Datum splatnosti: <strong>${formatDate(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000))}</strong></td>
+                <td>Datum splatnosti: <strong>${formatDate(new Date())}</strong></td>
             </tr>
         </table>
 

@@ -51,7 +51,8 @@ enum OrderStatus {
 
 model Order {
   id     String @id @default(uuid())
-  orderNumber String @unique
+  orderFullNumber String @unique
+  orderNumberCount Int
   userId String
 
   totalPrice Int
