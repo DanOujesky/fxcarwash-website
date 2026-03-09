@@ -70,6 +70,21 @@ function LoginPage() {
     <div className="min-h-screen bg-[#252525]">
       <Header takePosition={true} homePage={false} withoutPadding={true} />
 
+      <div className="header-color w-full page-title-height header-margin flex justify-center items-center  flex-col gap-1">
+        <h2 className="text-white page-title-size mb-7">fx karty</h2>
+        <p className="text-center textUnder mx-5">
+          Po registraci/přihlášení nabízíme možnost objednání zvýhodněných
+          předplacených karet. Lze objednat novou kartu či opakovaně dobíjet
+          stávající karty. FX karty jsou k dispozici v hodnotách od 500 do 10
+          000 Kč. V rámci věrnostního programu získáte od nás bonus v podobě
+          kreditu navíc.
+        </p>
+        <p className="text-center textUnder mx-5">
+          Seznámit se s našemi obchodními podmínkami můžete zde:{" "}
+          <a className="underline">obchodní podmínky</a>
+        </p>
+      </div>
+
       <MyForm handleFunction={handleSubmit(onSubmit)}>
         <InputTitle text="Přihlášení" />
 
