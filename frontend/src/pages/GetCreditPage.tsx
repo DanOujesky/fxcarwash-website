@@ -36,17 +36,12 @@ function GetCreditPage() {
   const selectedCardNumber = watch("cardNumber");
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/", { replace: true });
-    }
-    if (user && user.cards.length < 1) {
+    if (!loading && !user) navigate("/", { replace: true });
+    if (user && user.cards.length < 1)
       navigate("/moje-karty", { replace: true });
-    }
   }, [loading, user, navigate]);
 
-  if (loading || !user) {
-    return <div className="h-screen bg-black" />;
-  }
+  if (loading || !user) return <div className="h-screen bg-black" />;
 
   const onSubmit = (data: AddCreditInput) => {
     const creditValue = Number(data.credit);
@@ -54,7 +49,7 @@ function GetCreditPage() {
     const orderItem: OrderItem = {
       id: PRODUCT_ID.ADD_CREDIT,
       temp_id: crypto.randomUUID(),
-      name: "Dobítí kreditu na předplacenou FX kartu",
+      name: "Dobítí kreditu na FX kartu",
       price: creditValue,
       delivery: false,
       cardNumber: data.cardNumber,
@@ -66,29 +61,24 @@ function GetCreditPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525]">
-      <Header
-        account={true}
-        homePage={false}
-        logo={false}
-        withoutPadding={true}
-      />
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+      <Header account homePage={false} logo={false} withoutPadding />
 
-      <div className="flex flex-col justify-center items-center body-bg-color pt-15 text-white">
-        <h2 className="text-2xl underline">Dobití kreditu</h2>
-      </div>
+      <div className="max-w-[720px] mx-auto px-6 py-12">
+        <h2 className="text-2xl font-semibold text-center pb-6">
+          Dobití kreditu
+        </h2>
 
-      <div className="flex flex-col justify-center items-center body-bg-color py-15 px-5 sm:p-15">
         <form
-          className="my-5 flex-col gap-3 w-full md:w-120 flex sm:items-center"
+          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
+          {/* Výběr karty */}
           <div className="flex flex-col">
-            <Inputlabel white={true} text="Vyberte Kartu" />
-            <div className="">
+            <Inputlabel white text="Vyberte Kartu" />
+            <div className="flex flex-col gap-2">
               {user.cards.map((card) => (
                 <div
-                  className="my-2 cursor-pointer w-full sm:w-140 lg:w-160"
                   key={card.id}
                   onClick={() =>
                     setValue("cardNumber", card.number, {
@@ -97,7 +87,7 @@ function GetCreditPage() {
                   }
                 >
                   <CustomCard
-                    hover={true}
+                    hover
                     isSelected={selectedCardNumber === card.number}
                     credit={card.credit}
                     number={card.number}
@@ -106,13 +96,15 @@ function GetCreditPage() {
               ))}
               <input type="hidden" {...register("cardNumber")} />
             </div>
+            <ErrorMessage message={errors.cardNumber?.message} />
           </div>
 
+          {/* Výše kreditu */}
           <div className="flex flex-col">
-            <Inputlabel white={true} text="Vyberte výši kreditu" />
+            <Inputlabel white text="Vyberte výši kreditu" />
             <select
               {...register("credit", { valueAsNumber: true })}
-              className="bg-white text-black p-2 cursor-pointer contactText outline-none rounded-sm w-full sm:w-140 lg:w-160"
+              className="input-field input-white-field border-white "
             >
               {[
                 500, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000, 8000,
@@ -123,28 +115,20 @@ function GetCreditPage() {
                 </option>
               ))}
             </select>
+            <ErrorMessage message={errors.credit?.message} />
           </div>
 
-          <div className="flex flex-col gap-1 min-h-[20px] text-center">
-            <ErrorMessage
-              message={
-                errors.cardNumber?.message ||
-                errors.credit?.message ||
-                undefined
-              }
-            />
-          </div>
-
-          <div className="flex flex-col justify-center">
+          {/* Tlačítka */}
+          <div className="flex flex-col  gap-4 pt-6">
             <button
-              className="bg-green-500 hover:bg-green-600 p-2 inline-block rounded-sm mt-5  disabled:bg-gray-500 w-55 sm:w-80 self-center"
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition disabled:bg-gray-500"
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "přidávám..." : "Přidat do košíku"}
+              {isSubmitting ? "Přidávám..." : "Přidat do košíku"}
             </button>
             <Link
-              className="bg-transparent border-2 border-white text-white hover:bg-[#1b1b1b] p-2 inline-block rounded-sm mt-5 text-center transition-colors w-55 sm:w-80 self-center"
+              className="flex-1 border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition"
               to="/moje-karty"
             >
               Zpět
@@ -152,6 +136,7 @@ function GetCreditPage() {
           </div>
         </form>
       </div>
+
       <Footer />
     </div>
   );

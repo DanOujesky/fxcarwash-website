@@ -59,58 +59,81 @@ export const newCardSchema = z.object({
     .min(500, "Minimální výše kreditu je 500 Kč")
     .max(10000, "Maximální výše kreditu je 10 000 Kč"),
 });
-export const deliverySchema = z.object({
-  phone: z
-    .string()
-    .min(1, "Telefon je povinný")
-    .regex(
-      /^(\+?\d{1,3})?[\s-]?\d{3}[\s-]?\d{3}[\s-]?\d{3}$/,
-      "Neplatný formát telefonu",
-    ),
+export const deliverySchema = z
+  .object({
+    phone: z
+      .string()
+      .min(1, "Telefon je povinný")
+      .regex(
+        /^(\+?\d{1,3})?[\s-]?\d{3}[\s-]?\d{3}[\s-]?\d{3}$/,
+        "Neplatný formát telefonu",
+      ),
 
-  address: z.string().min(5, "Ulice a číslo popisné musí mít aspoň 5 znaků"),
+    address: z.string().min(5, "Ulice a číslo musí mít alespoň 5 znaků"),
 
-  zipCode: z
-    .string()
-    .min(1, "PSČ je povinné")
-    .transform((val) => val.replace(/\s+/g, ""))
-    .refine((val) => /^\d{5}$/.test(val), "PSČ musí mít 5 číslic"),
+    zipCode: z
+      .string()
+      .transform((val) => val.replace(/\s+/g, ""))
+      .refine((val) => /^\d{5}$/.test(val), "PSČ musí mít 5 číslic"),
 
-  city: z.string().min(2, "Město musí mít aspoň 2 znaky"),
+    city: z.string().min(2, "Město musí mít alespoň 2 znaky"),
 
-  country: z.string().min(1, "Země je povinná"),
-});
+    country: z.string().min(2, "Země je povinná"),
 
-export const companySchema = z.object({
-  companyName: z.string().min(2, "Název firmy musí mít aspoň 2 znaky"),
+    isCompany: z.boolean(),
 
-  companyICO: z
-    .string()
-    .min(1, "IČO je povinné")
-    .transform((val) => val.replace(/\s+/g, ""))
-    .refine((val) => /^\d{8}$/.test(val), "IČO musí mít přesně 8 číslic"),
+    companyName: z.string().optional(),
+    companyICO: z.string().optional(),
+    companyDIC: z.string().optional(),
+    companyAddress: z.string().optional(),
+    companyZipCode: z.string().optional(),
+    companyCity: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isCompany) {
+      if (!data.companyName || data.companyName.length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyName"],
+          message: "Název firmy je povinný",
+        });
+      }
 
-  companyDIC: z
-    .string()
-    .transform((val) => val.replace(/\s+/g, "").toUpperCase())
-    .optional()
-    .or(z.literal("")),
+      if (!data.companyICO || !/^\d{8}$/.test(data.companyICO)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyICO"],
+          message: "IČO musí mít 8 číslic",
+        });
+      }
 
-  companyAddress: z
-    .string()
-    .min(5, "Ulice a číslo popisné musí mít aspoň 5 znaků"),
+      if (!data.companyAddress || data.companyAddress.length < 5) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyAddress"],
+          message: "Adresa firmy je povinná",
+        });
+      }
 
-  companyZipCode: z
-    .string()
-    .min(1, "PSČ je povinné")
-    .transform((val) => val.replace(/\s+/g, ""))
-    .refine((val) => /^\d{5}$/.test(val), "PSČ musí mít 5 číslic"),
+      if (!data.companyCity || data.companyCity.length < 2) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyCity"],
+          message: "Město je povinné",
+        });
+      }
 
-  companyCity: z.string().min(2, "Město musí mít aspoň 2 znaky"),
-});
+      if (!data.companyZipCode || !/^\d{5}$/.test(data.companyZipCode)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["companyZipCode"],
+          message: "PSČ musí mít 5 číslic",
+        });
+      }
+    }
+  });
 
 export type OrderFormInput = z.infer<typeof orderFormSchema>;
 export type AddCreditInput = z.infer<typeof addCreditSchema>;
 export type NewCardInput = z.infer<typeof newCardSchema>;
 export type DeliveryInput = z.infer<typeof deliverySchema>;
-export type CompanySchema = z.infer<typeof companySchema>;

@@ -8,15 +8,18 @@ import type { Order } from "../types/Order";
 import QuantityInput from "../components/QuantityInput";
 import Footer from "../components/Footer";
 import { formatCurrency } from "../utils/formater";
+import OrderSummary from "../components/OrderSummary";
 
 function CartPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { cart, hasDelivery, totalPrice, updateCartQuantity, removeFromCart } =
     useCart();
+
   const savedOrderString = localStorage.getItem("order");
 
   let savedOrder = null;
+
   try {
     savedOrder = savedOrderString ? JSON.parse(savedOrderString) : null;
   } catch (e) {
@@ -44,6 +47,7 @@ function CartPage() {
         price: totalPrice,
         email: user.email,
       };
+
       localStorage.setItem("order", JSON.stringify(newOrder));
 
       navigate("/souhrn", { state: { order: newOrder } });
@@ -51,150 +55,112 @@ function CartPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525]">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
       <Header
         account={true}
         homePage={false}
         logo={false}
         withoutPadding={true}
       />
+
       {cart && cart.length > 0 ? (
-        <div>
-          <div className="flex flex-col justify-center items-center body-bg-color pt-15">
+        <>
+          <div className="flex justify-center pt-12">
             <CartPhaseDisplay
               delivery={hasDelivery || !user.address}
               phaseNumber={1}
             />
           </div>
-          <div className="flex flex-col justify-center items-center body-bg-color gap-5 pt-15 contactText ">
-            {cart.map((item) => (
-              <div
-                className="border-2 border-white p-5 justify-between w-[80%] sm:w-150"
-                key={item.temp_id}
-              >
-                {item.delivery ? (
-                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
-                    <div className=" flex flex-col">
-                      {" "}
-                      <div className=" flex flex-col">
-                        <div className="font-bold">{item.name}</div>
-                      </div>
-                      <div className="">
-                        Váš požadavek na dobití kreditu: {item.price} kreditů
-                      </div>
-                      <div className="">
-                        Vaše cena: {formatCurrency(item.price)}
-                      </div>
-                      <div className="mt-3 text-green-500">
-                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
-                        {item.credit} kreditů
-                      </div>
-                    </div>
+          <div className="max-w-[1200px] mx-auto px-6 flex flex-col lg:flex-row gap-12 pt-16 pb-20">
+            <div className="flex flex-col gap-6 w-full">
+              {cart.map((item) => (
+                <div
+                  key={item.temp_id}
+                  className="w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-6 flex flex-col sm:flex-row justify-between gap-6 shadow-lg hover:border-white/20 transition"
+                >
+                  <div className="flex flex-col gap-1">
+                    <h3 className="text-lg font-semibold">{item.name}</h3>
 
-                    <div className=" flex flex-col items-center justify-center gap-2">
-                      <div
-                        onClick={() => removeFromCart(item.temp_id)}
-                        className={`w-15 flex flex-col items-center justify-center ${item.shipping ? "" : "mr-[24.5px]"}`}
-                      >
-                        <img
-                          className="self-center invert w-full h-full object-cover cursor-pointer"
-                          src="/icons/trash-icon.svg"
-                        ></img>
-                      </div>
-                      {item.shipping && (
-                        <QuantityInput
-                          value={item.quantity || 1}
-                          onChange={(newQuantity) => {
-                            updateCartQuantity(item.temp_id, newQuantity);
-                          }}
-                          size={30}
-                        />
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 justify-between">
-                    <div className=" flex flex-col">
-                      {" "}
-                      <div className=" flex flex-col">
-                        <div className="font-bold">{item.name}</div>
-                        {!item.shipping && (
-                          <div className="">Číslo karty: {item.cardNumber}</div>
-                        )}
-                      </div>
-                      <div className="">
-                        Váš požadavek na dobití kreditu: {item.price} kreditů
-                      </div>
-                      <div className="">
-                        Vaše cena: {formatCurrency(item.price)}
-                      </div>
-                      <div className="mt-3 text-green-500">
-                        Výše kreditu s bonusem {user.discount}% od nás:{" "}
-                        {item.credit} Kreditů
-                      </div>
-                    </div>
-                    <div className=" flex flex-col items-center justify-center gap-2">
-                      <div
-                        onClick={() => removeFromCart(item.temp_id)}
-                        className={`w-15 flex flex-col items-center justify-center  ${item.shipping ? "" : "sm:mr-[24.5px]"}`}
-                      >
-                        <img
-                          className="self-center invert w-full h-full object-cover cursor-pointer"
-                          src="/icons/trash-icon.svg"
-                        ></img>
-                      </div>
-                      {item.shipping && (
-                        <QuantityInput
-                          value={item.quantity || 1}
-                          onChange={(newQuantity) => {
-                            updateCartQuantity(item.temp_id, newQuantity);
-                          }}
-                          size={30}
-                        />
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                    {!item.shipping && !item.delivery && (
+                      <p className="text-gray-400 text-sm">
+                        Číslo karty: {item.cardNumber}
+                      </p>
+                    )}
 
-            <div className="w-[80%] sm:w-150 flex justify-between items-center text-white text-xl pt-5">
-              <div className="font-bold underline underline-offset-8">
-                Celková cena s DPH: {formatCurrency(totalPrice)}
-              </div>
+                    <p className="text-gray-300 mt-2">
+                      Váš požadavek na dobití kreditu: {item.price} kreditů
+                    </p>
+
+                    <p className="font-medium">
+                      Vaše cena: {formatCurrency(item.price)}
+                    </p>
+
+                    <p className="text-green-400 text-sm mt-1">
+                      Bonus {user.discount}% → {item.credit} kreditů
+                    </p>
+                  </div>
+
+                  <div
+                    className={`flex flex-col items-center justify-center gap-3`}
+                  >
+                    <button
+                      onClick={() => removeFromCart(item.temp_id)}
+                      className={`flex items-center justify-center rounded-md cursor-pointer`}
+                    >
+                      <img
+                        className="invert w-15 h-15"
+                        src="/icons/trash-icon.svg"
+                        alt="remove"
+                      />
+                    </button>
+
+                    <QuantityInput
+                      value={item.quantity || 1}
+                      onChange={(newQuantity) =>
+                        updateCartQuantity(item.temp_id, newQuantity)
+                      }
+                      size={30}
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+            <div className="w-full lg:w-[420px] flex flex-col gap-6">
+              <OrderSummary totalPrice={totalPrice} />
 
-          <div className="flex flex-col justify-center items-center body-bg-color p-15">
-            <div className="flex flex-col justify-center w-55 sm:w-80">
               <button
                 onClick={handleContinue}
-                className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 cursor-pointer"
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-lg transition cursor-pointer"
               >
                 Pokračovat
               </button>
+
               <Link
                 to="/moje-karty"
-                className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5 text-center"
+                className="w-full border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition"
               >
                 Zpět k nákupu
               </Link>
             </div>
           </div>
-        </div>
+        </>
       ) : (
-        <div className="flex flex-col justify-center items-center body-bg-color py-15">
-          <div className="text-white text-center">
-            <h2>V košíku nemáte žádné zboží</h2>
-            <p>
+        <div className="flex flex-col justify-center items-center py-32">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-4">
+              V košíku nemáte žádné zboží
+            </h2>
+
+            <p className="text-gray-400">
               Pokračujte prosím na{" "}
-              <Link to="/moje-karty" className="underline">
+              <Link to="/moje-karty" className="underline hover:text-white">
                 hlavní stránku
               </Link>
             </p>
           </div>
         </div>
       )}
+
       <Footer />
     </div>
   );

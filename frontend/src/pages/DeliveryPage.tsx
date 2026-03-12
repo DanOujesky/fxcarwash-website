@@ -2,10 +2,9 @@ import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { deliverySchema, type DeliveryInput } from "@shared/index";
 import { useAuth } from "../hooks/useAuth";
 import { useCart } from "../context/CartContext";
-import { deliverySchema, type DeliveryInput } from "@shared/index";
-import type { Order } from "../types/Order";
 
 import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
@@ -13,6 +12,8 @@ import AddressAutocomplete from "../components/AddressAutocomplete";
 import Inputlabel from "../components/InputLabel";
 import ErrorMessage from "../components/ErrorMessage";
 import Footer from "../components/Footer";
+
+import type { Order } from "../types/Order";
 
 interface MapySuggestion {
   name: string;
@@ -24,56 +25,47 @@ function DeliveryPage() {
   const { user, loading } = useAuth();
   const { cart, totalPrice } = useCart();
   const navigate = useNavigate();
-  const savedOrderString = localStorage.getItem("order");
 
-  let savedOrder = null;
-  try {
-    savedOrder = savedOrderString ? JSON.parse(savedOrderString) : null;
-  } catch (e) {
-    console.error("Chyba při parsování objednávky:", e);
-  }
+  const savedOrderString = localStorage.getItem("order");
+  const savedOrder = savedOrderString ? JSON.parse(savedOrderString) : null;
 
   const {
     register,
     handleSubmit,
     setValue,
     control,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<DeliveryInput>({
     resolver: zodResolver(deliverySchema),
     defaultValues: {
-      phone: savedOrder?.phone || user?.phone || "",
-      address: savedOrder?.address || user?.address || "",
-      zipCode: savedOrder?.zipCode || user?.zipCode || "",
-      city: savedOrder?.city || user?.city || "",
-      country: savedOrder?.country || user?.country || "",
+      phone: user?.phone || "",
+      address: user?.address || "",
+      zipCode: user?.zipCode || "",
+      city: user?.city || "",
+      country: user?.country || "",
+      isCompany: false,
     },
   });
 
+  const isCompany = watch("isCompany");
+
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/", { replace: true });
-    }
-    if (!loading && cart.length === 0) {
-      navigate("/moje-karty");
-    }
+    if (!loading && !user) navigate("/", { replace: true });
+    if (!loading && cart.length === 0) navigate("/moje-karty");
   }, [loading, user, navigate, cart]);
 
-  if (loading || !user) {
-    return <div className="h-screen bg-black" />;
-  }
+  if (loading || !user) return <div className="h-screen bg-black" />;
 
   const handleAddressSelect = (fullAddress: MapySuggestion) => {
-    setValue("address", fullAddress.name, { shouldValidate: true });
-    setValue("zipCode", fullAddress.zip || "", { shouldValidate: true });
+    setValue("address", fullAddress.name);
+    setValue("zipCode", fullAddress.zip || "");
 
     if (fullAddress.location) {
-      const locationParts = fullAddress.location
-        .split(",")
-        .map((part) => part.trim());
-      if (locationParts.length > 1) {
-        setValue("city", locationParts[0], { shouldValidate: true });
-        setValue("country", locationParts[1], { shouldValidate: true });
+      const parts = fullAddress.location.split(",").map((p) => p.trim());
+      if (parts.length > 1) {
+        setValue("city", parts[0]);
+        setValue("country", parts[1]);
       }
     }
   };
@@ -83,13 +75,9 @@ function DeliveryPage() {
       ...savedOrder,
       id: crypto.randomUUID(),
       items: cart,
-      address: data.address,
-      zipCode: data.zipCode,
-      city: data.city,
-      country: data.country,
-      phone: data.phone,
       price: totalPrice,
       email: user.email,
+      ...data,
     };
 
     localStorage.setItem("order", JSON.stringify(newOrder));
@@ -97,25 +85,23 @@ function DeliveryPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525]">
-      <Header
-        account={true}
-        homePage={false}
-        logo={false}
-        withoutPadding={true}
-      />
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+      <Header account homePage={false} logo={false} withoutPadding />
 
-      <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-        <CartPhaseDisplay delivery={true} phaseNumber={2} />
+      <div className="flex justify-center pt-12">
+        <CartPhaseDisplay delivery phaseNumber={2} />
       </div>
 
-      <div className="flex flex-col justify-center items-center body-bg-color pt-15">
+      <div className="max-w-[720px] mx-auto px-4 sm:px-6 pt-12 pb-20">
         <form
-          className="my-5 flex flex-col gap-3 w-full max-w-md px-4"
           onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
         >
+          <h2 className="text-lg font-semibold">Doručovací údaje</h2>
+
+          {/* Telefon */}
           <div className="flex flex-col">
-            <Inputlabel white={true} text="Telefon" />
+            <Inputlabel white text="Telefon" />
             <input
               {...register("phone")}
               className={`input-field input-white-field ${
@@ -123,94 +109,160 @@ function DeliveryPage() {
               }`}
               type="tel"
             />
-            <ErrorMessage marginOn={true} message={errors.phone?.message} />
+            <ErrorMessage message={errors.phone?.message} />
           </div>
 
+          {/* Adresa */}
           <Controller
             control={control}
             name="address"
             render={({ field: { onChange, value } }) => (
               <AddressAutocomplete
-                onAddressSelect={(fullAddress) => {
-                  handleAddressSelect(fullAddress);
-                  onChange(fullAddress.name);
+                onAddressSelect={(addr) => {
+                  handleAddressSelect(addr);
+                  onChange(addr.name);
                 }}
                 onChange={onChange}
                 initialValue={value}
                 error={errors.address}
-                white={true}
+                white
               />
             )}
           />
           <ErrorMessage message={errors.address?.message} />
-          <input type="hidden" {...register("address")} />
 
-          <div className="grid grid-cols-2 gap-4 w-full">
+          {/* Město a PSČ */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex flex-col">
-              <Inputlabel white={true} text="Město" />
+              <Inputlabel white text="Město" />
               <input
                 {...register("city")}
                 className={`input-field input-white-field ${
                   errors.city ? "border-red-500" : "border-transparent"
                 }`}
-                type="text"
               />
+              <ErrorMessage message={errors.city?.message} />
             </div>
+
             <div className="flex flex-col">
-              <Inputlabel white={true} text="PSČ" />
+              <Inputlabel white text="PSČ" />
               <input
                 {...register("zipCode")}
                 className={`input-field input-white-field ${
                   errors.zipCode ? "border-red-500" : "border-transparent"
                 }`}
-                type="text"
               />
+              <ErrorMessage message={errors.zipCode?.message} />
             </div>
           </div>
-          {(errors.city || errors.zipCode) && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                {errors.city?.message && (
-                  <ErrorMessage message={errors.city.message} />
-                )}
-              </div>
-              <div>
-                {errors.zipCode?.message && (
-                  <ErrorMessage message={errors.zipCode.message} />
-                )}
-              </div>
-            </div>
-          )}
 
+          {/* Stát */}
           <div className="flex flex-col">
-            <Inputlabel white={true} text="Stát" />
+            <Inputlabel white text="Stát" />
             <input
               {...register("country")}
               className={`input-field input-white-field ${
                 errors.country ? "border-red-500" : "border-transparent"
               }`}
-              type="text"
             />
-            <ErrorMessage marginOn={true} message={errors.country?.message} />
+            <ErrorMessage message={errors.country?.message} />
           </div>
 
-          <div className="flex flex-col justify-center items-center gap-4 py-10">
+          {/* Checkbox firma */}
+          <label className="flex items-center gap-3 pt-4 cursor-pointer">
+            <input
+              className="w-6 h-6 accent-green-500 cursor-pointer"
+              type="checkbox"
+              {...register("isCompany")}
+            />
+            Nakoupit na firmu
+          </label>
+
+          {/* Firemní údaje */}
+          {isCompany && (
+            <div className="flex flex-col gap-4 border-t border-white/10 pt-6">
+              <h3 className="text-lg font-semibold">Firemní údaje</h3>
+
+              <div className="flex flex-col">
+                <Inputlabel white text="Název firmy" />
+                <input
+                  {...register("companyName")}
+                  className="input-field input-white-field border-white"
+                />
+                <ErrorMessage message={errors.companyName?.message} />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex flex-col">
+                  <Inputlabel white text="IČO" />
+                  <input
+                    {...register("companyICO")}
+                    className="input-field input-white-field border-white"
+                  />
+                  <ErrorMessage message={errors.companyICO?.message} />
+                </div>
+
+                <div className="flex flex-col">
+                  <Inputlabel white text="DIČ" />
+                  <input
+                    {...register("companyDIC")}
+                    className="input-field input-white-field border-white"
+                  />
+                  <ErrorMessage message={errors.companyDIC?.message} />
+                </div>
+              </div>
+
+              <div className="flex flex-col">
+                <Inputlabel white text="Adresa firmy" />
+                <input
+                  {...register("companyAddress")}
+                  className="input-field input-white-field border-white"
+                />
+                <ErrorMessage message={errors.companyAddress?.message} />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="flex flex-col">
+                  <Inputlabel white text="Město" />
+                  <input
+                    {...register("companyCity")}
+                    className="input-field input-white-field border-white"
+                  />
+                  <ErrorMessage message={errors.companyCity?.message} />
+                </div>
+
+                <div className="flex flex-col">
+                  <Inputlabel white text="PSČ" />
+                  <input
+                    {...register("companyZipCode")}
+                    className="input-field input-white-field border-white"
+                  />
+                  <ErrorMessage message={errors.companyZipCode?.message} />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Tlačítka */}
+          <div className="flex flex-col  gap-4 pt-6">
             <button
               type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white p-3 w-55 sm:w-80 rounded-sm transition-colors disabled:bg-gray-500"
               disabled={isSubmitting}
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition disabled:bg-gray-500"
             >
               {isSubmitting ? "Zpracovávám..." : "Pokračovat"}
             </button>
+
             <Link
               to="/kosik"
-              className="text-white border-2 border-white hover:bg-[#1b1b1b] p-2 w-55 sm:w-80 text-center rounded-sm transition-colors"
+              className="flex-1 border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition"
             >
               Zpět
             </Link>
           </div>
         </form>
       </div>
+
       <Footer />
     </div>
   );

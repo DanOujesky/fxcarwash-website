@@ -42,13 +42,11 @@ function GetCardPage() {
     }
   }, [loading, user, navigate]);
 
-  if (loading || !user) {
-    return <div className="h-screen bg-black" />;
-  }
+  if (loading || !user) return <div className="h-screen bg-black" />;
 
   const onSubmit = (data: NewCardInput) => {
     const creditValue = Number(data.credit);
-    const quanityValue = Number(data.quantity);
+    const quantityValue = Number(data.quantity);
 
     const newOrderItem: OrderItem = {
       id: PRODUCT_ID.NEW_CARD,
@@ -58,7 +56,7 @@ function GetCardPage() {
       delivery:
         data.shipping === "cp" || (data.shipping === "op" && !user.address),
       shipping: data.shipping,
-      quantity: quanityValue,
+      quantity: quantityValue,
       credit: creditValue * (1 + user.discount / 100),
     };
 
@@ -67,30 +65,24 @@ function GetCardPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525]">
-      <Header
-        account={true}
-        homePage={false}
-        logo={false}
-        withoutPadding={true}
-      />
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+      <Header account homePage={false} logo={false} withoutPadding />
 
-      <div className="flex flex-col justify-center items-center body-bg-color pt-15">
-        <h2 className="text-2xl underline text-white text-center">
+      <div className="max-w-[720px] mx-auto px-6 py-12">
+        <h2 className="text-2xl font-semibold text-center pb-6">
           Objednání karty
         </h2>
-      </div>
 
-      <div className="flex flex-col justify-center items-center body-bg-color p-15">
         <form
-          className="my-5 flex flex-col gap-3 w-full md:w-125"
+          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
+          {/* Způsob doručení */}
           <div className="flex flex-col">
-            <Inputlabel white={true} text="Vyberte způsob doručení" />
+            <Inputlabel white text="Vyberte způsob doručení" />
             <select
               {...register("shipping")}
-              className="bg-white text-black p-2 cursor-pointer contactText rounded-sm outline-none"
+              className="input-field input-white-field border-white"
               defaultValue=""
             >
               <option value="" disabled hidden>
@@ -99,6 +91,7 @@ function GetCardPage() {
               <option value="cp">Česká pošta (zdarma)</option>
               <option value="op">Osobní převzetí (zdarma)</option>
             </select>
+            <ErrorMessage message={errors.shipping?.message} />
           </div>
 
           {shipping === "op" && (
@@ -109,11 +102,12 @@ function GetCardPage() {
             </p>
           )}
 
+          {/* Výše kreditu */}
           <div className="flex flex-col">
-            <Inputlabel white={true} text="Vyberte výši kreditu" />
+            <Inputlabel white text="Vyberte výši kreditu" />
             <select
               {...register("credit", { valueAsNumber: true })}
-              className="bg-white text-black p-2 cursor-pointer contactText rounded-sm outline-none"
+              className="input-field input-white-field border-white"
             >
               {[
                 500, 1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000, 8000,
@@ -124,10 +118,12 @@ function GetCardPage() {
                 </option>
               ))}
             </select>
+            <ErrorMessage message={errors.credit?.message} />
           </div>
 
+          {/* Počet karet */}
           <div className="flex flex-col">
-            <Inputlabel white={true} text="Zadejte počet Karet" />
+            <Inputlabel white text="Zadejte počet Karet" />
             <Controller
               control={control}
               name="quantity"
@@ -135,29 +131,20 @@ function GetCardPage() {
                 <QuantityInput value={field.value} onChange={field.onChange} />
               )}
             />
+            <ErrorMessage message={errors.quantity?.message} />
           </div>
 
-          <div className="flex flex-col gap-1 min-h-[24px] text-center">
-            <ErrorMessage
-              message={
-                errors.shipping?.message ||
-                errors.quantity?.message ||
-                errors.credit?.message ||
-                undefined
-              }
-            />
-          </div>
-
-          <div className="flex flex-col justify-center">
+          {/* Tlačítka */}
+          <div className="flex flex-col  gap-4 pt-6">
             <button
-              className="bg-green-500 hover:bg-green-600 p-2 inline-block rounded-sm mt-5 disabled:bg-gray-500 transition-colors w-55 sm:w-80 self-center"
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition disabled:bg-gray-500"
               type="submit"
               disabled={isSubmitting}
             >
-              {isSubmitting ? "přidávám..." : "Přidat do košíku"}
+              {isSubmitting ? "Přidávám..." : "Přidat do košíku"}
             </button>
             <Link
-              className="bg-transparent border-2 border-white text-white hover:bg-[#1b1b1b] p-2 inline-block rounded-sm mt-5 text-center transition-colors w-55 sm:w-80 self-center"
+              className="flex-1 border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition"
               to="/moje-karty"
             >
               Zpět
@@ -165,6 +152,7 @@ function GetCardPage() {
           </div>
         </form>
       </div>
+
       <Footer />
     </div>
   );
