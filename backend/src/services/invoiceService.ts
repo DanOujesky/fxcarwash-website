@@ -54,7 +54,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
                 <table style="width: 100%;">
                     <tr><td>Variabilní symbol:</td><td style="text-align: right;"><strong>${order.orderFullNumber}</strong></td></tr>
                     <tr><td>Číslo účtu:</td><td style="text-align: right;"><strong>361179237 / 0300</strong></td></tr>
-                    <tr><td>Forma úhrady:</td><td style="text-align: right;">Příkazem</td></tr>
+                    <tr><td>Forma úhrady:</td><td style="text-align: right;">Platba kartou</td></tr>
                 </table>
             </div>
             <div class="customer-box">
@@ -76,14 +76,15 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
         <table style="width: 100%; margin-top: 10px;">
             <tr>
                 <td>Datum vystavení: <strong>${formatDate(new Date())}</strong></td>
-                <td>Datum splatnosti: <strong>${formatDate(new Date())}</strong></td>
+                <td>Datum uskutečnitelného zdanitelného pnění: <strong>${formatDate(new Date())}</strong></td>
             </tr>
         </table>
 
         <table class="items">
             <thead>
                 <tr>
-                    <th style="width: 50%;">Označení dodávky</th>
+                    <th style="width: 40%;">Označení dodávky</th>
+                    <th style="text-align: center;">Ks</th>
                     <th style="text-align: right;">Základ</th>
                     <th style="text-align: right;">%DPH</th>
                     <th style="text-align: right;">DPH</th>
@@ -92,17 +93,22 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
             </thead>
             <tbody>
                 ${order.items
-                  .map(
-                    (item) => `
-                    <tr>
-                        <td>${item.name}</td>
-                        <td style="text-align: right;">${formatCurrency(item.price / 1.21)}</td>
-                        <td style="text-align: right;">21%</td>
-                        <td style="text-align: right;">${formatCurrency(item.price - item.price / 1.21)}</td>
-                        <td style="text-align: right;">${formatCurrency(item.price)}</td>
-                    </tr>
-                `,
-                  )
+                  .map((item) => {
+                    const total = item.price * item.quantity;
+                    const base = total / 1.21;
+                    const vat = total - base;
+
+                    return `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td style="text-align: center;">${item.quantity}</td>
+                            <td style="text-align: right;">${formatCurrency(base)}</td>
+                            <td style="text-align: right;">21%</td>
+                            <td style="text-align: right;">${formatCurrency(vat)}</td>
+                            <td style="text-align: right;">${formatCurrency(total)}</td>
+                        </tr>
+                        `;
+                  })
                   .join("")}
             </tbody>
         </table>
