@@ -23,7 +23,7 @@ interface MapySuggestion {
 
 function DeliveryPage() {
   const { user, loading } = useAuth();
-  const { cart, totalPrice } = useCart();
+  const { cart, totalPrice, hasDelivery } = useCart();
   const navigate = useNavigate();
 
   const savedOrderString = localStorage.getItem("order");
@@ -97,9 +97,10 @@ function DeliveryPage() {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
         >
-          <h2 className="text-lg font-semibold">Doručovací údaje</h2>
+          <h2 className="text-lg font-semibold">
+            {hasDelivery ? "Doručovací" : "Fakturační"} údaje
+          </h2>
 
-          {/* Telefon */}
           <div className="flex flex-col">
             <Inputlabel white text="Telefon" />
             <input
@@ -112,7 +113,6 @@ function DeliveryPage() {
             <ErrorMessage message={errors.phone?.message} />
           </div>
 
-          {/* Adresa */}
           <Controller
             control={control}
             name="address"
@@ -131,7 +131,6 @@ function DeliveryPage() {
           />
           <ErrorMessage message={errors.address?.message} />
 
-          {/* Město a PSČ */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex flex-col">
               <Inputlabel white text="Město" />
@@ -156,7 +155,6 @@ function DeliveryPage() {
             </div>
           </div>
 
-          {/* Stát */}
           <div className="flex flex-col">
             <Inputlabel white text="Stát" />
             <input
@@ -168,17 +166,15 @@ function DeliveryPage() {
             <ErrorMessage message={errors.country?.message} />
           </div>
 
-          {/* Checkbox firma */}
-          <label className="flex items-center gap-3 pt-4 cursor-pointer">
+          <label className="flex items-center gap-3 pt-4 cursor-pointer font-medium contactText">
             <input
-              className="w-6 h-6 accent-green-500 cursor-pointer"
+              className="w-7 h-7 accent-green-500 cursor-pointer"
               type="checkbox"
               {...register("isCompany")}
             />
             Nakoupit na firmu
           </label>
 
-          {/* Firemní údaje */}
           {isCompany && (
             <div className="flex flex-col gap-4 border-t border-white/10 pt-6">
               <h3 className="text-lg font-semibold">Firemní údaje</h3>
@@ -243,7 +239,6 @@ function DeliveryPage() {
             </div>
           )}
 
-          {/* Tlačítka */}
           <div className="flex flex-col  gap-4 pt-6">
             <button
               type="submit"

@@ -73,7 +73,6 @@ function OverviewPage() {
       </div>
 
       <div className="max-w-[1200px] mx-auto px-6 pt-16 pb-24 grid lg:grid-cols-[1fr_380px] gap-12">
-        {/* ITEMS */}
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold">Shrnutí objednávky</h2>
 
@@ -97,7 +96,6 @@ function OverviewPage() {
           ))}
         </div>
 
-        {/* ORDER SUMMARY */}
         <div className="flex flex-col gap-6">
           <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 shadow-lg sticky top-32 flex flex-col gap-6">
             <h3 className="text-xl font-semibold">Souhrn</h3>
@@ -131,16 +129,19 @@ function OverviewPage() {
               </p>
             </div>
 
-            <div className="flex items-start gap-3 text-sm">
+            <div className="flex items-center gap-3 text-sm w-full justify-center">
               <input
                 type="checkbox"
                 id="gdpr"
-                className="w-5 h-5 accent-green-500 mt-1 cursor-pointer"
+                className="w-7 h-7 accent-green-500 cursor-pointer"
                 checked={isAgreed}
                 onChange={() => setIsAgreed(!isAgreed)}
               />
 
-              <label htmlFor="gdpr" className="text-gray-300">
+              <label
+                htmlFor="gdpr"
+                className="text-white leading-none flex-1 contactText font-medium"
+              >
                 Souhlasím s{" "}
                 <Link className="underline text-white" to="/obchodni-podminky">
                   obchodními podmínkami

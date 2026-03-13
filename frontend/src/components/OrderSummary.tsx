@@ -6,7 +6,7 @@ type Props = {
 
 function OrderSummary({ totalPrice }: Props) {
   return (
-    <div className="w-full sm:w-[420px] bg-[#1f1f1f] border border-white/10 rounded-xl p-6 shadow-xl">
+    <div className="w-full lg:w-[420px] bg-[#1f1f1f] border border-white/10 rounded-xl p-6 shadow-xl">
       <h2 className="text-xl font-semibold text-white mb-6">
         Souhrn objednávky
       </h2>

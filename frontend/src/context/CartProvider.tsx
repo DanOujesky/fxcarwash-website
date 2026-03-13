@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import type { OrderItem } from "../types/Order";
 import { CartContext } from "./CartContext";
+import { useAuth } from "../hooks/useAuth";
 
 interface CartProviderProps {
   children: ReactNode;
@@ -9,6 +10,7 @@ interface CartProviderProps {
 
 export const CartProvider = ({ children }: CartProviderProps) => {
   const [cart, setCart] = useState<OrderItem[]>([]);
+  const { user } = useAuth();
 
   useEffect(() => {
     const saved = localStorage.getItem("cart");
@@ -50,7 +52,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     );
   };
 
-  const hasDelivery = cart.some((item) => item.shipping == "cp");
+  const hasDelivery = cart.some(
+    (item) =>
+      item.shipping === "cp" || (!user?.address && item.shipping === "op"),
+  );
   const totalPrice = cart.reduce((sum, item) => {
     const price = item.price || 0;
     const quantity = item.quantity || 1;

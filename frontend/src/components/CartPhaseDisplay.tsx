@@ -30,32 +30,23 @@ function CartPhaseDisplay({ phaseNumber, delivery }: CartPhaseDisplayProps) {
 
         <span className={getLineClass(1)}></span>
 
-        {delivery ? (
-          <>
-            <div className={getBubbleClass(2)}>
-              <div className="bg-[#1d1d1b] text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex justify-center items-center contactText font-medium text-sm sm:text-[20px]">
-                2
-              </div>
-              <p className="font-medium text-xs sm:text-base">Doprava</p>
-            </div>
-
-            <span className={getLineClass(2)}></span>
-
-            <div className={getBubbleClass(3)}>
-              <div className="bg-[#1d1d1b] text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex justify-center items-center contactText font-medium text-sm sm:text-[20px]">
-                3
-              </div>
-              <p className="font-medium text-xs sm:text-base">Souhrn</p>
-            </div>
-          </>
-        ) : (
-          <div className={getBubbleClass(2)}>
-            <div className="bg-[#1d1d1b] text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex justify-center items-center contactText font-medium text-sm sm:text-[20px]">
-              2
-            </div>
-            <p className="font-medium text-xs sm:text-base">Souhrn</p>
+        <div className={getBubbleClass(2)}>
+          <div className="bg-[#1d1d1b] text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex justify-center items-center contactText font-medium text-sm sm:text-[20px]">
+            2
           </div>
-        )}
+          <p className="font-medium text-xs sm:text-base">
+            {delivery ? "Doprava" : "Fakturační údaje"}
+          </p>
+        </div>
+
+        <span className={getLineClass(2)}></span>
+
+        <div className={getBubbleClass(3)}>
+          <div className="bg-[#1d1d1b] text-white rounded-full w-6 h-6 sm:w-8 sm:h-8 flex justify-center items-center contactText font-medium text-sm sm:text-[20px]">
+            3
+          </div>
+          <p className="font-medium text-xs sm:text-base">Souhrn</p>
+        </div>
       </div>
     </div>
   );

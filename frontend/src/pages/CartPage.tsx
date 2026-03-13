@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
 import { useCart } from "../context/CartContext";
-import type { Order } from "../types/Order";
 import QuantityInput from "../components/QuantityInput";
 import Footer from "../components/Footer";
 import { formatCurrency } from "../utils/formater";
@@ -15,16 +14,6 @@ function CartPage() {
   const navigate = useNavigate();
   const { cart, hasDelivery, totalPrice, updateCartQuantity, removeFromCart } =
     useCart();
-
-  const savedOrderString = localStorage.getItem("order");
-
-  let savedOrder = null;
-
-  try {
-    savedOrder = savedOrderString ? JSON.parse(savedOrderString) : null;
-  } catch (e) {
-    console.error("Chyba při parsování objednávky:", e);
-  }
 
   useEffect(() => {
     if (!loading && !user) {
@@ -37,21 +26,7 @@ function CartPage() {
   }
 
   const handleContinue = () => {
-    if (hasDelivery || !user.address) {
-      navigate("/doprava");
-    } else {
-      const newOrder: Order = {
-        ...savedOrder,
-        id: crypto.randomUUID(),
-        items: cart,
-        price: totalPrice,
-        email: user.email,
-      };
-
-      localStorage.setItem("order", JSON.stringify(newOrder));
-
-      navigate("/souhrn", { state: { order: newOrder } });
-    }
+    navigate("/doprava");
   };
 
   return (
@@ -66,10 +41,7 @@ function CartPage() {
       {cart && cart.length > 0 ? (
         <>
           <div className="flex justify-center pt-12">
-            <CartPhaseDisplay
-              delivery={hasDelivery || !user.address}
-              phaseNumber={1}
-            />
+            <CartPhaseDisplay phaseNumber={1} delivery={hasDelivery} />
           </div>
           <div className="max-w-[1200px] mx-auto px-6 flex flex-col lg:flex-row gap-12 pt-16 pb-20">
             <div className="flex flex-col gap-6 w-full">
@@ -101,7 +73,7 @@ function CartPage() {
                   </div>
 
                   <div
-                    className={`flex flex-col items-center justify-center gap-3`}
+                    className={`flex flex-col items-center justify-center gap-3 ${item.shipping ? "" : "w-[109px] self-center"}`}
                   >
                     <button
                       onClick={() => removeFromCart(item.temp_id)}
@@ -113,14 +85,15 @@ function CartPage() {
                         alt="remove"
                       />
                     </button>
-
-                    <QuantityInput
-                      value={item.quantity || 1}
-                      onChange={(newQuantity) =>
-                        updateCartQuantity(item.temp_id, newQuantity)
-                      }
-                      size={30}
-                    />
+                    {item.shipping && (
+                      <QuantityInput
+                        value={item.quantity || 1}
+                        onChange={(newQuantity) =>
+                          updateCartQuantity(item.temp_id, newQuantity)
+                        }
+                        size={30}
+                      />
+                    )}
                   </div>
                 </div>
               ))}

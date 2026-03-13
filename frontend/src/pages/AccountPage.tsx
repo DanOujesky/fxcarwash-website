@@ -53,13 +53,14 @@ function AccountPage() {
         )}
       </div>
       <div className="flex flex-col justify-center items-center body-bg-color p-15">
-        <div className="flex flex-col w-55 sm:w-80">
+        <div className="flex flex-col w-55 sm:w-80 gap-4">
           <Link
             to="/objednat-kartu"
-            className="bg-green-500 hover:bg-green-600 p-2 inline-block  rounded-sm mt-5 text-center"
+            className="bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg text-center transition"
           >
             Chci FX kartu
           </Link>
+
           <button
             onClick={() => {
               if (user.cards.length < 1) {
@@ -69,7 +70,7 @@ function AccountPage() {
 
               navigate("/dobit-kartu");
             }}
-            className="bg-transparent border-2 hover:bg-[#1b1b1b] p-2 inline-block  rounded-sm mt-5"
+            className="border border-white/20 text-white py-3 rounded-lg hover:bg-white/5 transition"
           >
             Dobít kredit
           </button>

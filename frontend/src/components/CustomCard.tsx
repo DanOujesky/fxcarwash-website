@@ -71,7 +71,7 @@ function CustomCard({
       {status && (
         <button
           onClick={toggleCardStatus}
-          className={`absolute right-1 bottom-1 ${currentStatus === 1 ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}  pt-[5px] pb-[2px] px-2 rounded-xl sm:text-[12px] text-[10px] flex items-center`}
+          className={`absolute right-1 bottom-1 ${currentStatus === 1 ? "bg-red-500 hover:bg-red-600" : "bg-green-500 hover:bg-green-600"}  pt-[5px] pb-[2px] px-2 rounded-xl sm:text-[12px] text-[10px] flex items-center cursor-pointer`}
         >
           {currentStatus === 1
             ? isLoading
