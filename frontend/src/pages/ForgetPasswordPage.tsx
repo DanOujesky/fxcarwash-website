@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 
 import { forgetPasswordSchema, type ForgetPasswordInput } from "@shared/index";
 
-import InputTitle from "../components/InputTitle";
 import Inputlabel from "../components/InputLabel";
-import MyForm from "../components/MyForm";
-import InputLink from "../components/InputLink";
 import ErrorMessage from "../components/ErrorMessage";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -74,36 +71,50 @@ function ForgetPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#252525]">
-      <Header takePosition={true} homePage={false} withoutPadding={true} />{" "}
-      <MyForm handleFunction={handleSubmit(onSubmit)}>
-        <InputTitle text="Obnovení hesla" />
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+      <Header account homePage={false} logo={false} withoutPadding />
 
-        <div className="flex flex-col">
-          <Inputlabel text="E-mail" />
-          <input
-            {...register("email")}
-            className={`input-field input-black-field ${
-              errors.email ? "border-red-500" : "border-transparent"
-            }`}
-            type="email"
-          />
-        </div>
-
-        <ErrorMessage
-          message={errors.email?.message || serverError || undefined}
-        />
-
-        <button
-          disabled={isSubmitting}
-          className="input-button disabled:bg-gray-400 disabled:cursor-not-allowed"
-          type="submit"
+      <div className="max-w-[520px] mx-auto px-4 sm:px-6 pt-16 pb-20">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
         >
-          {isSubmitting ? "Odesílám..." : "obnovit heslo"}
-        </button>
+          <h2 className="text-lg font-semibold text-center">Obnovení hesla</h2>
 
-        <InputLink text="Zpět na přihlášení" to="/login" />
-      </MyForm>{" "}
+          <div className="flex flex-col">
+            <Inputlabel white text="E-mail" />
+            <input
+              {...register("email")}
+              type="email"
+              className={`input-field input-white-field ${
+                errors.email ? "border-red-500" : "border-transparent"
+              }`}
+            />
+          </div>
+
+          <ErrorMessage
+            message={errors.email?.message || serverError || undefined}
+          />
+
+          <div className="flex flex-col gap-4 pt-6">
+            <button
+              disabled={isSubmitting}
+              type="submit"
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition disabled:bg-gray-500"
+            >
+              {isSubmitting ? "Odesílám..." : "Obnovit heslo"}
+            </button>
+
+            <Link
+              to="/login"
+              className="flex-1 border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition"
+            >
+              Zpět na přihlášení
+            </Link>
+          </div>
+        </form>
+      </div>
+
       <Footer />
     </div>
   );

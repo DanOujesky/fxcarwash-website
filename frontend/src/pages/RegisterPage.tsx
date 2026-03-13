@@ -7,8 +7,6 @@ import { Link } from "react-router-dom";
 import { registerSchema, type RegisterInput } from "@shared/index";
 
 import Inputlabel from "../components/InputLabel";
-import InputTitle from "../components/InputTitle";
-import MyForm from "../components/MyForm";
 import ErrorMessage from "../components/ErrorMessage";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
@@ -29,6 +27,7 @@ function RegisterPage() {
 
   const onSubmit = async (data: RegisterInput) => {
     setServerError(null);
+
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/register`, {
         method: "POST",
@@ -53,10 +52,12 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#252525]">
-      <Header takePosition={true} homePage={false} withoutPadding={true} />{" "}
-      <div className="header-color w-full page-title-height header-margin flex justify-center items-center  flex-col gap-1">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+      <Header account homePage={false} logo={false} withoutPadding />
+
+      <div className="header-color w-full page-title-height header-margin flex justify-center items-center flex-col gap-1">
         <h2 className="text-white page-title-size mb-7">fx karty</h2>
+
         <p className="text-center textUnder mx-5">
           Po registraci/přihlášení nabízíme možnost objednání zvýhodněných
           předplacených karet. Lze objednat novou kartu či opakovaně dobíjet
@@ -64,76 +65,82 @@ function RegisterPage() {
           000 Kč. V rámci věrnostního programu získáte od nás bonus v podobě
           kreditu navíc.
         </p>
+
         <p className="text-center textUnder mx-5">
           Seznámit se s našemi obchodními podmínkami můžete zde:{" "}
-          <a className="underline">obchodní podmínky</a>
+          <a href="/obchodni-podminky" className="underline">
+            obchodní podmínky
+          </a>
         </p>
       </div>
-      <MyForm handleFunction={handleSubmit(onSubmit)}>
-        <InputTitle text="Registrace účtu" />
 
-        <div className="grid grid-cols-2 gap-4 w-full max-w-2xl mx-auto">
+      <div className="max-w-[520px] mx-auto px-4 sm:px-6 py-16">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
+        >
+          <h2 className="text-lg font-semibold text-center">Registrace</h2>
+
+          <div className="grid grid-cols-2 gap-6">
+            <div className="flex flex-col">
+              <Inputlabel white text="Jméno" />
+              <input
+                {...register("firstName")}
+                type="text"
+                className={`input-field input-white-field ${
+                  errors.firstName ? "border-red-500" : "border-transparent"
+                }`}
+              />
+            </div>
+
+            <div className="flex flex-col">
+              <Inputlabel white text="Příjmení" />
+              <input
+                {...register("lastName")}
+                type="text"
+                className={`input-field input-white-field ${
+                  errors.lastName ? "border-red-500" : "border-transparent"
+                }`}
+              />
+            </div>
+          </div>
+
           <div className="flex flex-col">
-            <Inputlabel text="Jméno" />
+            <Inputlabel white text="E-mail" />
             <input
-              {...register("firstName")}
-              className={`input-field input-black-field ${
-                errors.firstName ? "border-red-500" : "border-transparent"
+              {...register("email")}
+              type="email"
+              className={`input-field input-white-field ${
+                errors.email ? "border-red-500" : "border-transparent"
               }`}
-              type="text"
             />
           </div>
+
           <div className="flex flex-col">
-            <Inputlabel text="Příjmení" />
+            <Inputlabel white text="Heslo" />
             <input
-              {...register("lastName")}
-              className={`input-field input-black-field ${
-                errors.lastName ? "border-red-500" : "border-transparent"
+              {...register("password")}
+              type="password"
+              className={`input-field input-white-field ${
+                errors.password ? "border-red-500" : "border-transparent"
               }`}
-              type="text"
             />
           </div>
-        </div>
 
-        <div className="flex flex-col">
-          <Inputlabel text="E-mail" />
-          <input
-            {...register("email")}
-            className={`input-field input-black-field ${
-              errors.email ? "border-red-500" : "border-transparent"
-            }`}
-            type="email"
-          />
-        </div>
+          <div className="flex items-center gap-3 text-sm">
+            <input
+              type="checkbox"
+              id="gdpr"
+              className="w-5 h-5 accent-green-500 cursor-pointer"
+              checked={isAgreed}
+              onChange={() => setIsAgreed(!isAgreed)}
+            />
 
-        <div className="flex flex-col">
-          <Inputlabel text="Heslo" />
-          <input
-            {...register("password")}
-            className={`input-field input-black-field ${
-              errors.password ? "border-red-500" : "border-transparent"
-            }`}
-            type="password"
-          />
-        </div>
+            <label htmlFor="gdpr" className="text-gray-300 cursor-pointer">
+              Souhlasím se zpracováním osobních údajů
+            </label>
+          </div>
 
-        <div className="flex items-center justify-center gap-5 text-sm text-gray-400 w-full">
-          <input
-            type="checkbox"
-            id="gdpr"
-            className="w-7 h-7 accent-green-500 cursor-pointer"
-            checked={isAgreed}
-            onChange={() => setIsAgreed(!isAgreed)}
-          />
-          <label
-            htmlFor="gdpr"
-            className="text-black leading-none flex-1 contactText cursor-pointer"
-          >
-            Souhlasím se zpracováním osobních údajů
-          </label>
-        </div>
-
-        <div className="flex flex-col gap-1 min-h-[20px]">
           <ErrorMessage
             message={
               errors.firstName?.message ||
@@ -144,23 +151,26 @@ function RegisterPage() {
               undefined
             }
           />
-        </div>
 
-        <Link
-          to="/login"
-          className="text-black contactText text-center hover:underline"
-        >
-          Už jste zaregistrovaní? Přihlašte se
-        </Link>
+          <Link
+            to="/login"
+            className="text-white text-center hover:underline text-sm"
+          >
+            Už máte účet? Přihlaste se
+          </Link>
 
-        <button
-          className="w-full bg-green-500 hover:bg-green-600 text-black font-bold py-4 rounded transition-all disabled:bg-gray-400 disabled:cursor-not-allowed"
-          type="submit"
-          disabled={isSubmitting || !isAgreed}
-        >
-          {isSubmitting ? "Registrování..." : "Registrace"}
-        </button>
-      </MyForm>
+          <div className="flex flex-col gap-4 pt-2">
+            <button
+              disabled={isSubmitting || !isAgreed}
+              type="submit"
+              className="bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition disabled:bg-gray-500"
+            >
+              {isSubmitting ? "Registrování..." : "Registrovat se"}
+            </button>
+          </div>
+        </form>
+      </div>
+
       <Footer />
     </div>
   );
