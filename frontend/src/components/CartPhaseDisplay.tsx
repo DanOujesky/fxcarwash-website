@@ -35,7 +35,7 @@ function CartPhaseDisplay({ phaseNumber, delivery }: CartPhaseDisplayProps) {
             2
           </div>
           <p className="font-medium text-xs sm:text-base">
-            {delivery ? "Doprava" : "Fakturační údaje"}
+            {delivery ? "Doprava" : "Doprava"}
           </p>
         </div>
 

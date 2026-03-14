@@ -85,7 +85,7 @@ function DeliveryPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
       <Header account homePage={false} logo={false} withoutPadding />
 
       <div className="flex justify-center pt-12">
@@ -95,7 +95,7 @@ function DeliveryPage() {
       <div className="max-w-[720px] mx-auto px-4 sm:px-6 pt-12 pb-20">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
+          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl p-8 shadow-lg"
         >
           <h2 className="text-lg font-semibold">
             {hasDelivery ? "Doručovací" : "Fakturační"} údaje
@@ -239,7 +239,7 @@ function DeliveryPage() {
             </div>
           )}
 
-          <div className="flex flex-col  gap-4 pt-6">
+          <div className="flex flex-col self-center w-55 sm:w-80  gap-4 pt-6">
             <button
               type="submit"
               disabled={isSubmitting}

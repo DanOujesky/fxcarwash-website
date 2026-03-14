@@ -30,7 +30,7 @@ function CartPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
       <Header
         account={true}
         homePage={false}
@@ -48,7 +48,7 @@ function CartPage() {
               {cart.map((item) => (
                 <div
                   key={item.temp_id}
-                  className="w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-6 flex flex-col sm:flex-row justify-between gap-6 shadow-lg hover:border-white/20 transition"
+                  className="w-full header-color border border-white/10 rounded-xl p-6 flex flex-col sm:flex-row justify-between gap-6 shadow-lg hover:border-white/20 transition"
                 >
                   <div className="flex flex-col gap-1">
                     <h3 className="text-lg font-semibold">{item.name}</h3>
@@ -98,19 +98,19 @@ function CartPage() {
                 </div>
               ))}
             </div>
-            <div className="w-full lg:w-[420px] flex flex-col gap-6">
+            <div className="w-full   lg:w-[420px] flex flex-col gap-6">
               <OrderSummary totalPrice={totalPrice} />
 
               <button
                 onClick={handleContinue}
-                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-lg transition cursor-pointer"
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-lg transition cursor-pointer self-center w-55 sm:w-80 "
               >
                 Pokračovat
               </button>
 
               <Link
                 to="/moje-karty"
-                className="w-full border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition"
+                className="w-full border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition self-center w-55 sm:w-80"
               >
                 Zpět k nákupu
               </Link>

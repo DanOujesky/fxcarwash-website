@@ -43,11 +43,12 @@ export const sendOrderEmailToUser = async (
     : "";
 
   const invoicePdf: Buffer = await generateInvoice(user, order);
+  const paddedNumber = order.orderNumberCount.toString().padStart(4, "0");
 
   await transporter.sendMail({
     from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
     to: user.email,
-    subject: `Potvrzení objednávky č. ${order.orderNumberCount}`,
+    subject: `Potvrzení objednávky č. ${paddedNumber}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
         <div style="background: ${darkBg}; color: white; padding: 40px 20px; text-align: center;">
@@ -117,10 +118,13 @@ export const sendOrderEmailToCompany = async (
     )
     .join("");
 
+  const invoicePdf: Buffer = await generateInvoice(user, order);
+  const paddedNumber = order.orderNumberCount.toString().padStart(4, "0");
+
   await transporter.sendMail({
     from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL,
-    subject: `NOVÁ OBJEDNÁVKA: ${user.lastName} (${order.orderNumberCount})`,
+    subject: `NOVÁ OBJEDNÁVKA: ${user.lastName} (${paddedNumber})`,
     html: `
       <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
         <div style="background: ${darkBg}; color: white; padding: 20px; text-align: center;">
@@ -165,5 +169,12 @@ export const sendOrderEmailToCompany = async (
         </div>
       </div>
     `,
+    attachments: [
+      {
+        filename: `faktura_${order.id.slice(0, 8)}.pdf`,
+        content: invoicePdf,
+        contentType: "application/pdf",
+      },
+    ],
   });
 };

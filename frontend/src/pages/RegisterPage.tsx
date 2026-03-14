@@ -52,7 +52,7 @@ function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
       <Header account homePage={false} logo={false} withoutPadding />
 
       <div className="header-color w-full page-title-height header-margin flex justify-center items-center flex-col gap-1">
@@ -77,7 +77,7 @@ function RegisterPage() {
       <div className="max-w-[520px] mx-auto px-4 sm:px-6 py-16">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
+          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl p-8 shadow-lg"
         >
           <h2 className="text-lg font-semibold text-center">Registrace</h2>
 
@@ -127,19 +127,15 @@ function RegisterPage() {
             />
           </div>
 
-          <div className="flex items-center gap-3 text-sm">
+          <label className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer contactText">
             <input
               type="checkbox"
-              id="gdpr"
-              className="w-5 h-5 accent-green-500 cursor-pointer"
+              className="w-7 h-7 accent-green-500"
               checked={isAgreed}
               onChange={() => setIsAgreed(!isAgreed)}
             />
-
-            <label htmlFor="gdpr" className="text-gray-300 cursor-pointer">
-              Souhlasím se zpracováním osobních údajů
-            </label>
-          </div>
+            Souhlasím se zpracováním osobních údajů
+          </label>
 
           <ErrorMessage
             message={

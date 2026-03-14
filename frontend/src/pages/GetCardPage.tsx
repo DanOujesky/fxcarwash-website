@@ -65,7 +65,7 @@ function GetCardPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
       <Header account homePage={false} logo={false} withoutPadding />
 
       <div className="max-w-[720px] mx-auto px-6 py-12">
@@ -74,10 +74,9 @@ function GetCardPage() {
         </h2>
 
         <form
-          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
+          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl p-8 shadow-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
-          {/* Způsob doručení */}
           <div className="flex flex-col">
             <Inputlabel white text="Vyberte způsob doručení" />
             <select
@@ -102,7 +101,6 @@ function GetCardPage() {
             </p>
           )}
 
-          {/* Výše kreditu */}
           <div className="flex flex-col">
             <Inputlabel white text="Vyberte výši kreditu" />
             <select
@@ -121,7 +119,6 @@ function GetCardPage() {
             <ErrorMessage message={errors.credit?.message} />
           </div>
 
-          {/* Počet karet */}
           <div className="flex flex-col">
             <Inputlabel white text="Zadejte počet Karet" />
             <Controller
@@ -134,8 +131,7 @@ function GetCardPage() {
             <ErrorMessage message={errors.quantity?.message} />
           </div>
 
-          {/* Tlačítka */}
-          <div className="flex flex-col  gap-4 pt-6">
+          <div className="flex flex-col self-center w-55 sm:w-80  gap-4 pt-6">
             <button
               className="flex-1 bg-green-500 hover:bg-green-600 text-white py-3 rounded-lg transition disabled:bg-gray-500"
               type="submit"

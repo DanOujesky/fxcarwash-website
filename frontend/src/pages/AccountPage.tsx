@@ -25,7 +25,7 @@ function AccountPage() {
     return <div className={`bg-black min-h-screen]`} />;
   }
   return (
-    <div className={`min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525]`}>
+    <div className={`min-h-screen pt-[121px] sm:pt-[185px] body-bg-color`}>
       <Header
         account={true}
         homePage={false}

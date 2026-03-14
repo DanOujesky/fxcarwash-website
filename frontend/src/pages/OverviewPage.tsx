@@ -65,7 +65,7 @@ function OverviewPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
       <Header withoutPadding account homePage={false} logo={false} />
 
       <div className="flex justify-center pt-12">
@@ -79,7 +79,7 @@ function OverviewPage() {
           {order.items.map((item) => (
             <div
               key={item.temp_id}
-              className="flex justify-between items-center bg-[#1b1b1b] border border-white/10 rounded-xl p-6"
+              className="flex justify-between items-center header-color border border-white/10 rounded-xl p-6"
             >
               <div className="flex flex-col gap-1">
                 <p className="font-medium">

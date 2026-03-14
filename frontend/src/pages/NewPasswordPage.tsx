@@ -65,13 +65,13 @@ function NewPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen pt-[121px] sm:pt-[185px] bg-[#252525] text-white">
+    <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
       <Header account homePage={false} logo={false} withoutPadding />
 
       <div className="max-w-[520px] mx-auto px-4 sm:px-6 pt-16 pb-20">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-6 w-full bg-[#1b1b1b] border border-white/10 rounded-xl p-8 shadow-lg"
+          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl p-8 shadow-lg"
         >
           <h2 className="text-lg font-semibold text-center">
             Nastavení nového hesla
