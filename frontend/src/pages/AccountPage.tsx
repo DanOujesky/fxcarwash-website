@@ -40,7 +40,7 @@ function AccountPage() {
           [...user.cards]
             .sort((a, b) => Number(a.number) - Number(b.number))
             .map((card) => (
-              <div key={card.id} className="my-1 w-[80%] sm:w-140 lg:w-160">
+              <div key={card.id} className="my-1 w-[90%] sm:w-140 lg:w-160">
                 <CustomCard
                   credit={card.credit}
                   number={card.number}

@@ -95,7 +95,7 @@ function DeliveryPage() {
       <div className="max-w-[720px] mx-auto px-4 sm:px-6 pt-12 pb-20">
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl p-8 shadow-lg"
+          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl sm:p-8 py-8 px-4 shadow-lg"
         >
           <h2 className="text-lg font-semibold">
             {hasDelivery ? "Doručovací" : "Fakturační"} údaje

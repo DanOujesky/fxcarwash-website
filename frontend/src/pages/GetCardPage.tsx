@@ -74,7 +74,7 @@ function GetCardPage() {
         </h2>
 
         <form
-          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl p-8 shadow-lg"
+          className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl sm:p-8 py-8 shadow-lg"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="flex flex-col">

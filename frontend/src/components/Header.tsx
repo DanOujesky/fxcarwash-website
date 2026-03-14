@@ -93,14 +93,14 @@ function Header({
           <div
             className={`absolute ${
               mobileScreen || homePage
-                ? "right-[6%] sm:right-[5%] 2xl:right-[3%] 2xl:translate-x-18 2xl:h-36 2xl:w-36 sm:translate-x-15 sm:h-30 sm:w-30 mr-10 translate-x-13 h-26 w-26"
+                ? "sm:h-44 sm:w-44 h-25 w-25 right-[0%] mr-4"
                 : "right-[50%] translate-x-22 h-44 w-44"
             } `}
           >
             <NavLink to={"/"}>
               <img
-                className={`w-full h-full object-fit ${homePage ? "p-5 " : ""}`}
-                src={homePage ? "/icons/logo_homepage.png" : "/icons/logo.svg"}
+                className={`w-full h-full p-2 py-4 sm:p-4 sm:py-8 object-fit `}
+                src="/icons/logo_homepage.png"
                 alt="car-wash-logo"
               />
             </NavLink>
@@ -110,7 +110,7 @@ function Header({
         {account && <CartIcon />}
         {!account && !homePage && !mobileScreen && (
           <div
-            className={`w-60 h-16 sm:h-32 flex justify-center items-center gap-5 ${
+            className={`w-60 h-16 sm:h-32 flex justify-end items-center gap-5 ${
               isSideBarOpen ? "hidden sm:flex" : ""
             }`}
           >

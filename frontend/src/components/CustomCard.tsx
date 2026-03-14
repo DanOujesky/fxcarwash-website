@@ -49,10 +49,10 @@ function CustomCard({
         <div className="w-full h-full bg-black rounded-sm">
           <img
             src="/icons/logo_homepage.png"
-            className="w-full h-full p-2 px-5 sm:p-5 sm:px-10"
+            className="w-full h-full px-6 py-2 sm:px-12 sm:py-4"
           ></img>
         </div>
-        <div className="absolute bottom-4 right-5 sm:bottom-6 sm:right-7 contactText text-[8px] sm:text-[12px]">
+        <div className="absolute bottom-4 right-5 sm:bottom-6 sm:right-7 contactText text-[8px] sm:text-[10px]">
           {number}
         </div>
       </div>
