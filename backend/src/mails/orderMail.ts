@@ -57,13 +57,13 @@ export const sendOrderEmailToUser = async (
         </div>
 
         <div style="padding: 30px;">
-          <p>Dobrý den, ${user.firstName},</p>
-          <p>děkujeme za Vaši objednávku. Zde je přehled Vaší objednávky:</p>
+          <p>Dobrý den,</p>
+          <p>děkujeme za Váš nákup. Fakturu k dodanému zboží naleznete v příloze mailu. Shrnutí Vaší objednávky:</p>
           
           <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
             ${itemsHtml}
             <tr>
-              <td style="padding: 15px 12px; font-weight: bold;">Celkem k úhradě</td>
+              <td style="padding: 15px 12px; font-weight: bold;">Celkem k úhradě s DPH</td>
               <td style="padding: 15px 12px; font-weight: bold; text-align: right; color: ${brandColor}; font-size: 18px;">
                 ${order.totalPrice.toLocaleString("cs-CZ")} Kč
               </td>
@@ -129,7 +129,7 @@ export const sendOrderEmailToCompany = async (
       <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
         <div style="background: ${darkBg}; color: white; padding: 20px; text-align: center;">
           <h2 style="margin: 0;">Nová objednávka</h2>
-          <p style="margin: 5px 0 0; opacity: 0.8;">ID: ${order.id}</p>
+          <p style="margin: 5px 0 0; opacity: 0.8;">Číslo objednávky: ${order.orderIdentifier}</p>
         </div>
 
         <div style="padding: 20px;">
