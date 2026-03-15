@@ -23,7 +23,7 @@ interface MapySuggestion {
 
 function DeliveryPage() {
   const { user, loading } = useAuth();
-  const { cart, totalPrice, hasDelivery } = useCart();
+  const { cart, totalPrice } = useCart();
   const navigate = useNavigate();
 
   const savedOrderString = localStorage.getItem("order");
@@ -44,7 +44,13 @@ function DeliveryPage() {
       zipCode: user?.zipCode || "",
       city: user?.city || "",
       country: user?.country || "",
-      isCompany: false,
+      isCompany: user?.companyName ? true : false,
+      companyName: user?.companyName || "",
+      companyDIC: user?.companyDIC || "",
+      companyICO: user?.companyICO || "",
+      companyAddress: user?.companyAddress || "",
+      companyCity: user?.companyCity || "",
+      companyZipCode: user?.companyZipCode || "",
     },
   });
 
@@ -97,9 +103,7 @@ function DeliveryPage() {
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-6 w-full header-color border border-white/10 rounded-xl sm:p-8 py-8 px-4 shadow-lg"
         >
-          <h2 className="text-lg font-semibold">
-            {hasDelivery ? "Doručovací" : "Fakturační"} údaje
-          </h2>
+          <h2 className="text-lg font-semibold">Doručovací údaje</h2>
 
           <div className="flex flex-col">
             <Inputlabel white text="Telefon" />

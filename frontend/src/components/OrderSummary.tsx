@@ -12,13 +12,17 @@ function OrderSummary({ totalPrice }: Props) {
       </h2>
 
       <div className="flex justify-between text-gray-300 mb-2">
-        <span>Mezisoučet</span>
-        <span>{formatCurrency(totalPrice)}</span>
+        <span>Cena bez DPH</span>
+        <span>{formatCurrency(totalPrice * 0.79)}</span>
+      </div>
+      <div className="flex justify-between text-gray-300 mb-2">
+        <span>DPH 21 %</span>
+        <span>{formatCurrency(totalPrice * 0.21)}</span>
       </div>
 
       <div className="flex justify-between text-gray-300 mb-4">
-        <span>DPH</span>
-        <span>Včetně</span>
+        <span>Doprava</span>
+        <span>Zdarma</span>
       </div>
 
       <div className="border-t border-white/10 pt-4 flex justify-between text-lg font-semibold text-white">

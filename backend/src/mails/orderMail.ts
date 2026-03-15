@@ -48,7 +48,7 @@ export const sendOrderEmailToUser = async (
   await transporter.sendMail({
     from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
     to: user.email,
-    subject: `Potvrzení objednávky č. ${paddedNumber}`,
+    subject: `Potvrzení objednávky č. ${order.orderIdentifier}`,
     html: `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
         <div style="background: ${darkBg}; color: white; padding: 40px 20px; text-align: center;">
@@ -124,7 +124,7 @@ export const sendOrderEmailToCompany = async (
   await transporter.sendMail({
     from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL,
-    subject: `NOVÁ OBJEDNÁVKA: ${user.lastName} (${paddedNumber})`,
+    subject: `NOVÁ OBJEDNÁVKA: ${user.lastName} (${order.orderIdentifier})`,
     html: `
       <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
         <div style="background: ${darkBg}; color: white; padding: 20px; text-align: center;">

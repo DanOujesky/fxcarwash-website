@@ -66,7 +66,7 @@ function ResetPasswordSentPage() {
 
   return (
     <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
-      <Header account homePage={false} logo={false} withoutPadding />
+      <Header homePage={false} logo={false} withoutPadding />
 
       <div className="max-w-[520px] mx-auto px-4 sm:px-6 pt-16 pb-20">
         <form

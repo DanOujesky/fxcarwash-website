@@ -34,6 +34,7 @@ export const payment = async (req: Request, res: Response) => {
 
     const result = await prisma.$transaction(async (tx) => {
       const yearShort = new Date().getFullYear().toString().slice(-2);
+      const fullYear = new Date().getFullYear();
 
       const lastOrder = await tx.order.findFirst({
         where: {
@@ -51,12 +52,13 @@ export const payment = async (req: Request, res: Response) => {
 
       const nextNumber = (lastOrder?.orderNumberCount ?? 0) + 1;
       const paddedNumber = nextNumber.toString().padStart(4, "0");
-
+      const identifierNumber = `${fullYear}${paddedNumber}`;
       const fullNumber = `${yearShort}FVE${paddedNumber}`;
       const newOrder = await tx.order.create({
         data: {
           userId: userId as string,
           totalPrice: Number(order.price),
+          orderIdentifier: Number(identifierNumber),
           orderNumberCount: nextNumber,
           orderFullNumber: fullNumber,
           address: order.address,
@@ -104,7 +106,7 @@ export const payment = async (req: Request, res: Response) => {
           orderId: newOrder.id,
           userId: String(userId),
         },
-        success_url: `${process.env.FRONTEND_URL}/payment/success?id=${newOrder.id}`,
+        success_url: `${process.env.FRONTEND_URL}/payment/success?id=${newOrder.orderIdentifier}`,
         cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
       });
 

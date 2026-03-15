@@ -10,7 +10,10 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
 
   const formatDate = (date: Date) => date.toLocaleDateString("cs-CZ");
   const formatCurrency = (val: number) =>
-    val.toLocaleString("cs-CZ", { minimumFractionDigits: 2 });
+    val.toLocaleString("cs-CZ", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
   const htmlContent = `
     <html>
@@ -52,7 +55,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
             </div>
             <div class="column">
                 <table style="width: 100%;">
-                    <tr><td>Variabilní symbol:</td><td style="text-align: right;"><strong>${order.orderFullNumber}</strong></td></tr>
+                    <tr><td>Variabilní symbol:</td><td style="text-align: right;"><strong>${order.orderIdentifier}</strong></td></tr>
                     <tr><td>Číslo účtu:</td><td style="text-align: right;"><strong>361179237 / 0300</strong></td></tr>
                     <tr><td>Forma úhrady:</td><td style="text-align: right;">Platba kartou</td></tr>
                 </table>

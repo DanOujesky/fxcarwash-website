@@ -66,7 +66,7 @@ function LoginPage() {
 
   return (
     <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color text-white">
-      <Header account homePage={false} logo={false} withoutPadding />
+      <Header homePage={false} logo={false} withoutPadding />
       <div className="header-color w-full page-title-height header-margin flex justify-center items-center  flex-col gap-1">
         <h2 className="text-white page-title-size mb-7">fx karty</h2>
         <p className="text-center textUnder mx-5">
@@ -130,6 +130,7 @@ function LoginPage() {
           </div>
 
           <ErrorMessage
+            disableMargin
             message={
               errors.email?.message ||
               errors.password?.message ||

@@ -53,6 +53,7 @@ model Order {
   id     String @id @default(uuid())
   orderFullNumber String @unique
   orderNumberCount Int
+  orderIdentifier Int @unique
   userId String
 
   totalPrice Int
