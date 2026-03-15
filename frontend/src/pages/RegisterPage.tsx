@@ -60,14 +60,13 @@ function RegisterPage() {
 
         <p className="text-center textUnder mx-5">
           Po registraci/přihlášení nabízíme možnost objednání zvýhodněných
-          předplacených karet. Lze objednat novou kartu či opakovaně dobíjet
-          stávající karty. FX karty jsou k dispozici v hodnotách od 500 do 10
-          000 Kč. V rámci věrnostního programu získáte od nás bonus v podobě
-          kreditu navíc.
+          předplacených karet, které můžete využít na služby našeho mycího
+          centra. Lze objednat novou kartu či opakovaně dobíjet stávající karty.
+          FX karty jsou k dispozici v hodnotách od 500 do 10 000 Kč. V rámci
+          věrnostního programu získáte od nás bonus v podobě kreditu navíc.
         </p>
-
-        <p className="text-center textUnder mx-5">
-          Seznámit se s našemi obchodními podmínkami můžete zde:{" "}
+        <p className="text-center textUnder mt-2 mx-5">
+          Seznámit se s obchodními podmínkami e-shopu můžete zde:{" "}
           <a href="/obchodni-podminky" className="underline">
             obchodní podmínky
           </a>
