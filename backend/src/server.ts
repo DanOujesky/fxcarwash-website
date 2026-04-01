@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import { spamLimiter } from "./utils/authLimiter.js";
 import newsRoutes from "./routes/newsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
@@ -29,6 +30,8 @@ app.use("/news", newsRoutes);
 app.use("/auth", authRoutes);
 app.use("/payment", paymentRoutes);
 app.use("/nayax", nayaxRoutes);
+
+app.use(spamLimiter);
 
 const PORT = process.env.PORT || 5001;
 

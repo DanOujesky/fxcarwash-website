@@ -1,5 +1,21 @@
 import rateLimit from "express-rate-limit";
 
+export const spamLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    message:
+      "Příliš mnoho požadavků z této IP adresy, zkuste to prosím později.",
+  },
+  handler: (req, res, next, options) => {
+    console.warn(`Rate limit překročen pro IP: ${req.ip}`);
+    res.status(options.statusCode).send(options.message);
+  },
+});
+
 export const registerLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,

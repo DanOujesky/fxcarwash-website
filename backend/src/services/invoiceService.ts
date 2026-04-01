@@ -286,7 +286,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       <div class="meta-value">${formatDate(new Date())}</div>
     </div>
     <div class="meta-cell">
-      <div class="meta-label">Datum zdanitelného plnění</div>
+      <div class="meta-label">Datum uskutečnění zdanitelného plnění</div>
       <div class="meta-value">${formatDate(new Date())}</div>
     </div>
     <div class="meta-cell">
