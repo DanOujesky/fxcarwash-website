@@ -100,13 +100,15 @@ function OverviewPage() {
           <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 shadow-lg sticky top-32 flex flex-col gap-6">
             <h3 className="text-xl font-semibold">Souhrn</h3>
 
-            <div className="flex flex-col gap-2 text-sm text-gray-300">
+            <div className="flex flex-col text-sm text-gray-300 gap-2">
               <p className="font-medium text-white">Kontaktní údaje</p>
               <p>
                 {user.firstName} {user.lastName}
+                <br />
+                {user.email}
+                <br />
+                {order.phone || user.phone}
               </p>
-              <p>{user.email}</p>
-              <p>{order.phone || user.phone}</p>
             </div>
 
             {order.address && (
@@ -118,6 +120,19 @@ function OverviewPage() {
                   {order.zipCode} {order.city}
                   <br />
                   {order.country}
+                </p>
+              </div>
+            )}
+            {order.companyName && (
+              <div className="flex flex-col gap-2 text-sm text-gray-300 border-t border-white/10 pt-4">
+                <p className="font-medium text-white">Fakturační adresa</p>
+                <p>
+                  {order.companyName}
+                  <br />
+                  {order.companyAddress}
+                  <br />
+                  {order.companyZipCode} {order.companyCity}
+                  <br />
                 </p>
               </div>
             )}
