@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
-import { UnsupportedOperation } from "puppeteer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -18,7 +17,7 @@ export const payment = async (req: Request, res: Response) => {
     await prisma.user.update({
       where: { id: userId },
       data: {
-        phone: order.phone || undefined,
+        phone: order.phone,
         address: order.address || undefined,
         city: order.city || undefined,
         zipCode: order.zipCode || undefined,

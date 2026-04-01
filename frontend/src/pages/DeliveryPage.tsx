@@ -27,7 +27,7 @@ function DeliveryPage() {
   const navigate = useNavigate();
 
   const savedOrderString = localStorage.getItem("order");
-  const savedOrder = savedOrderString ? JSON.parse(savedOrderString) : null;
+  const order = savedOrderString ? JSON.parse(savedOrderString) : null;
 
   const {
     register,
@@ -39,18 +39,18 @@ function DeliveryPage() {
   } = useForm<DeliveryInput>({
     resolver: zodResolver(deliverySchema),
     defaultValues: {
-      phone: user?.phone || "",
-      address: user?.address || "",
-      zipCode: user?.zipCode || "",
-      city: user?.city || "",
-      country: user?.country || "",
-      isCompany: user?.companyName ? true : false,
-      companyName: user?.companyName || "",
-      companyDIC: user?.companyDIC || "",
-      companyICO: user?.companyICO || "",
-      companyAddress: user?.companyAddress || "",
-      companyCity: user?.companyCity || "",
-      companyZipCode: user?.companyZipCode || "",
+      phone: order?.phone || user?.phone || "",
+      address: order?.address || user?.address || "",
+      zipCode: order?.zipCode || user?.zipCode || "",
+      city: order?.city || user?.city || "",
+      country: order?.country || user?.country || "",
+      isCompany: order?.companyName ? true : false,
+      companyName: order?.companyName || user?.companyName || "",
+      companyDIC: order?.companyDIC || user?.companyDIC || "",
+      companyICO: order?.companyICO || user?.companyICO || "",
+      companyAddress: order?.companyAddress || user?.companyAddress || "",
+      companyCity: order?.companyCity || user?.companyCity || "",
+      companyZipCode: order?.companyZipCode || user?.companyZipCode || "",
     },
   });
 
@@ -78,12 +78,25 @@ function DeliveryPage() {
 
   const onSubmit = (data: DeliveryInput) => {
     const newOrder: Order = {
-      ...savedOrder,
+      ...order,
       id: crypto.randomUUID(),
-      items: cart,
+      items: cart.map((item) => ({
+        ...item,
+        quantity: item.quantity ?? 1,
+      })),
       price: totalPrice,
       email: user.email,
-      ...data,
+      phone: data.phone,
+      address: data.address,
+      city: data.city,
+      zipCode: data.zipCode,
+      country: data.country,
+      companyName: isCompany ? data.companyName : undefined,
+      companyICO: isCompany ? data.companyICO : undefined,
+      companyDIC: isCompany ? data.companyDIC : undefined,
+      companyAddress: isCompany ? data.companyAddress : undefined,
+      companyCity: isCompany ? data.companyCity : undefined,
+      companyZipCode: isCompany ? data.companyZipCode : undefined,
     };
 
     localStorage.setItem("order", JSON.stringify(newOrder));

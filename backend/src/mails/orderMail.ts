@@ -63,7 +63,7 @@ export const sendOrderEmailToUser = async (
           <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
             ${itemsHtml}
             <tr>
-              <td style="padding: 15px 12px; font-weight: bold;">Celkem k úhradě s DPH</td>
+              <td style="padding: 15px 12px; font-weight: bold;">Celková cena s DPH</td>
               <td style="padding: 15px 12px; font-weight: bold; text-align: right; color: ${brandColor}; font-size: 18px;">
                 ${order.totalPrice.toLocaleString("cs-CZ")} Kč
               </td>
@@ -87,7 +87,7 @@ export const sendOrderEmailToUser = async (
     `,
     attachments: [
       {
-        filename: `faktura_${order.id.slice(0, 8)}.pdf`,
+        filename: `faktura_${order.orderIdentifier}.pdf`,
         content: invoicePdf,
         contentType: "application/pdf",
       },
@@ -156,22 +156,18 @@ export const sendOrderEmailToCompany = async (
           <table style="width: 100%; border-collapse: collapse;">
             ${itemsHtml}
             <tr>
-              <td style="padding: 15px 10px; font-weight: bold;">Celkový obrat</td>
+              <td style="padding: 15px 10px; font-weight: bold;">Celková cena s DPH</td>
               <td style="padding: 15px 10px; font-weight: bold; text-align: right; font-size: 16px;">
                 ${order.totalPrice.toLocaleString("cs-CZ")} Kč
               </td>
             </tr>
           </table>
-
-          <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-left: 4px solid ${adminColor}; font-size: 13px;">
-            <strong>Poznámka pro expedici:</strong> Pokud objednávka obsahuje fyzické karty, připravte je k odeslání. U dobití kreditu proběhla aktualizace v DB automaticky.
-          </div>
         </div>
       </div>
     `,
     attachments: [
       {
-        filename: `faktura_${order.id.slice(0, 8)}.pdf`,
+        filename: `faktura_${order.orderIdentifier}.pdf`,
         content: invoicePdf,
         contentType: "application/pdf",
       },
