@@ -160,7 +160,6 @@ const login = async (req: Request, res: Response) => {
         id: user.id,
         email: user.email,
       },
-      token,
     },
   });
 };

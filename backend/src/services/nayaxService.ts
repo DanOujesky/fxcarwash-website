@@ -42,7 +42,7 @@ export const assignCardFromPool = async (tx: any, userId: string) => {
     return card;
   }
 
-  throw new Error("No available cards in the pool");
+  return null;
 };
 
 export const getCardByIdentifier = async (identifier: string) => {

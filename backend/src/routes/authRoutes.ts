@@ -22,6 +22,7 @@ import {
   loginLimiter,
   requestResetLimiter,
   verifyCodeLimiter,
+  newPasswordLimiter,
 } from "../utils/authLimiter.js";
 
 const router = express.Router();
@@ -48,5 +49,10 @@ router.post(
   validateRequest(resetPasswordSchema),
   verifyResetCode,
 );
-router.post("/newPassword", validateRequest(newPasswordSchema), setNewPassword);
+router.post(
+  "/newPassword",
+  newPasswordLimiter,
+  validateRequest(newPasswordSchema),
+  setNewPassword,
+);
 export default router;

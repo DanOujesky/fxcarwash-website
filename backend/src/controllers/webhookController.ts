@@ -64,7 +64,14 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
           });
 
           if (!card) {
-            // Log critical error but continue processing other items
+            console.error(
+              `CRITICAL: Žádná karta v poolu pro order ${orderId}, item ${item.id}`,
+            );
+            await sendOrderEmailToCompany(order.user, {
+              ...order,
+              // přidej flag že karta nebyla přiřazena
+            });
+            continue;
           }
           const cardCreated = await createOrUpdateCardInNayax(
             order.user,

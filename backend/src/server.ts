@@ -13,6 +13,7 @@ import cookieParser from "cookie-parser";
 const app = express();
 app.set("trust proxy", 1);
 
+app.use(helmet());
 app.use(
   cors({
     origin: process.env.FRONTEND_URL,
@@ -26,12 +27,11 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
+app.use(spamLimiter);
 app.use("/news", newsRoutes);
 app.use("/auth", authRoutes);
 app.use("/payment", paymentRoutes);
 app.use("/nayax", nayaxRoutes);
-
-app.use(spamLimiter);
 
 const PORT = process.env.PORT || 5001;
 
@@ -70,3 +70,6 @@ process.on("uncaughtException", async (err) => {
   await disconnectDB();
   process.exit(1);
 });
+function helmet(): any {
+  throw new Error("Function not implemented.");
+}
