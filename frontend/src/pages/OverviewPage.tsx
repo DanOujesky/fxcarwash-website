@@ -48,7 +48,10 @@ function OverviewPage() {
       if (res.ok) {
         window.location.href = data.url;
       } else {
-        console.error(data.errors);
+        alert(
+          data.error ||
+            "Nastala chyba při vytváření platební session. Zkuste to prosím znovu.",
+        );
       }
     } catch (error) {
       console.error(error);
@@ -88,7 +91,12 @@ function OverviewPage() {
                     : `Dobití kreditu ${item.price} Kč`}
                 </p>
 
-                <p className="text-green-500 text-sm">Kredity: {item.credit}</p>
+                {user.discount > 0 && (
+                  <p className="text-green-500 text-sm">
+                    Kredity:{" "}
+                    {Math.round(item.credit * (1 + user.discount / 100))}
+                  </p>
+                )}
               </div>
 
               <div className="text-lg font-medium">{item.quantity || 1} ks</div>

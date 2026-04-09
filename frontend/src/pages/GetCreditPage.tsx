@@ -53,7 +53,7 @@ function GetCreditPage() {
       price: creditValue,
       delivery: false,
       cardNumber: data.cardNumber,
-      credit: creditValue * (1 + user.discount / 100),
+      credit: creditValue,
     };
 
     addToCart(orderItem);

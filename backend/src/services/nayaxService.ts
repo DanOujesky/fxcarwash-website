@@ -1,8 +1,10 @@
 import { prisma } from "../config/db.js";
+import { logger } from "../utils/logger.js";
 
 const BASE_URL = process.env.NAYAX_BASE_URL;
 const NAYAX_TOKEN = process.env.NAYAX_TOKEN;
 const ACTOR_ID = process.env.NAYAX_ACTOR_ID;
+
 export const fetchNayax = async (
   endpoint: string,
   options: RequestInit = {},
@@ -29,12 +31,15 @@ export const fetchNayax = async (
   return response.json();
 };
 
+export const getAvailableCardCount = async (): Promise<number> => {
+  return prisma.card.count({
+    where: { userId: null, status: "IN_STOCK" },
+  });
+};
+
 export const assignCardFromPool = async (tx: any, userId: string) => {
   const card = await tx.card.findFirst({
-    where: {
-      userId: null,
-      status: "IN_STOCK",
-    },
+    where: { userId: null, status: "IN_STOCK" },
     orderBy: { createdAt: "asc" },
   });
 
@@ -75,9 +80,7 @@ export const createCardInNayax = async (
         Email: user.email,
         MobileNumber: user.phone,
       },
-      CardCreditAttributes: {
-        Credit: credit,
-      },
+      CardCreditAttributes: { Credit: credit },
     }),
   });
 };
@@ -95,12 +98,7 @@ export const updateCardInNayax = async (
     method: "PUT",
     body: JSON.stringify({
       ...existingCard,
-
-      CardDetails: {
-        ...existingCard.CardDetails,
-        Status: 1,
-      },
-
+      CardDetails: { ...existingCard.CardDetails, Status: 1 },
       CardHolderDetails: {
         ...existingCard.CardHolderDetails,
         CardHolderName: user.firstName + " " + user.lastName,
@@ -108,15 +106,11 @@ export const updateCardInNayax = async (
         MobileNumber: user.phone,
         MemberTypeID: null,
       },
-
       CardCreditAttributes: {
         ...existingCard.CardCreditAttributes,
         Credit: credit,
       },
-
-      CardCreditLimits: {
-        ...existingCard.CardCreditLimits,
-      },
+      CardCreditLimits: { ...existingCard.CardCreditLimits },
     }),
   });
 };
@@ -128,31 +122,32 @@ export const createOrUpdateCardInNayax = async (
 ) => {
   try {
     const existingCardResponse = await getCardByIdentifier(card.identifier);
-
     const existingCard = Array.isArray(existingCardResponse)
       ? existingCardResponse[0]
       : null;
-
     const cardExists = !!existingCard;
 
     let nayaxResponse;
 
     if (!cardExists) {
+      logger.info(
+        { cardIdentifier: card.identifier },
+        "Vytváříme novou kartu v Nayax",
+      );
       nayaxResponse = await createCardInNayax(user, credit, card);
     } else {
       const nayaxCardId = card.cardId || existingCard?.CardDetails?.CardID;
-
-      if (!nayaxCardId) {
+      if (!nayaxCardId)
         throw new Error("Card exists but CardId missing in Nayax response");
-      }
 
+      logger.info(
+        { cardIdentifier: card.identifier, nayaxCardId },
+        "Aktualizujeme kartu v Nayax",
+      );
       nayaxResponse = await updateCardInNayax(
         user,
         credit,
-        {
-          ...card,
-          cardId: nayaxCardId,
-        },
+        { ...card, cardId: nayaxCardId },
         existingCard,
       );
     }
@@ -169,7 +164,10 @@ export const createOrUpdateCardInNayax = async (
       },
     });
   } catch (error: any) {
-    console.error("Nayax Sync Error:", error);
+    logger.error(
+      { error: error.message, cardId: card.id },
+      "Chyba synchronizace karty s Nayax",
+    );
     throw new Error(`Failed to sync card with Nayax: ${error.message}`);
   }
 };

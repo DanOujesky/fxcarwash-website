@@ -57,7 +57,7 @@ function GetCardPage() {
         data.shipping === "cp" || (data.shipping === "op" && !user.address),
       shipping: data.shipping,
       quantity: quantityValue,
-      credit: creditValue * (1 + user.discount / 100),
+      credit: creditValue,
     };
 
     addToCart(newOrderItem);

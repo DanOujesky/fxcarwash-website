@@ -9,8 +9,9 @@ export const generateToken = (userId: string, res: Response): string => {
     throw new Error("JWT_SECRET není definován v .env souboru!");
   }
 
+  const expiresIn = (process.env.JWT_EXPIRES_IN || "30d") as SignOptions["expiresIn"];
   const signOptions: SignOptions = {
-    expiresIn: (process.env.JWT_EXPIRES_IN as any) || "30d",
+    expiresIn,
   };
 
   const token = jwt.sign(payload, secret, signOptions);

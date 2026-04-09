@@ -68,7 +68,7 @@ function CartPage() {
                     </p>
 
                     <p className="text-green-400 text-sm mt-1">
-                      Bonus {user.discount}% → {item.credit} kreditů
+                      Bonus {user.discount}% → {Math.round(item.credit * (1 + user.discount / 100))} kreditů
                     </p>
                   </div>
 

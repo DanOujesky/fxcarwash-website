@@ -1,6 +1,7 @@
 import { User, Order, OrderItem } from "@prisma/client";
 import { transporter } from "../utils/mailer";
 import { generateInvoice } from "../services/invoiceService";
+import { logger } from "../utils/logger.js";
 
 type OrderWithItems = Order & {
   items: OrderItem[];
@@ -43,7 +44,6 @@ export const sendOrderEmailToUser = async (
     : "";
 
   const invoicePdf: Buffer = await generateInvoice(user, order);
-  const paddedNumber = order.orderNumberCount.toString().padStart(4, "0");
 
   await transporter.sendMail({
     from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
@@ -94,6 +94,7 @@ export const sendOrderEmailToUser = async (
     ],
   });
 };
+
 export const sendOrderEmailToCompany = async (
   user: User,
   order: OrderWithItems,
@@ -119,7 +120,6 @@ export const sendOrderEmailToCompany = async (
     .join("");
 
   const invoicePdf: Buffer = await generateInvoice(user, order);
-  const paddedNumber = order.orderNumberCount.toString().padStart(4, "0");
 
   await transporter.sendMail({
     from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
@@ -172,5 +172,67 @@ export const sendOrderEmailToCompany = async (
         contentType: "application/pdf",
       },
     ],
+  });
+};
+
+export const sendLowStockAlert = async (remainingCards: number) => {
+  logger.warn({ remainingCards }, "Odesílám upozornění na nízkou zásobu karet");
+
+  await transporter.sendMail({
+    from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
+    to: process.env.FXCARWASH_EMAIL,
+    subject: `⚠️ UPOZORNĚNÍ: Nízká zásoba karet (zbývá ${remainingCards} ks)`,
+    html: `
+      <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f39c12; border-radius: 8px;">
+        <div style="background: #f39c12; color: white; padding: 20px; text-align: center; border-radius: 7px 7px 0 0;">
+          <h2 style="margin: 0;">⚠️ Nízká zásoba karet</h2>
+        </div>
+        <div style="padding: 20px;">
+          <p>V poolu karet zbývá pouze <strong>${remainingCards} karet</strong>.</p>
+          <p>Doporučujeme karty doplnit, aby nedošlo k situaci kdy zákazník zaplatí a karta mu nebude moci být přiřazena.</p>
+          <p style="color: #888; font-size: 13px;">Toto upozornění bylo odesláno automaticky systémem FX Carwash.</p>
+        </div>
+      </div>
+    `,
+  });
+};
+
+export const sendCardPoolEmptyAlert = async (order: any, item: any) => {
+  logger.error(
+    { orderId: order.id, itemId: item.id },
+    "KRITICKÉ: Pool karet prázdný po platbě",
+  );
+
+  await transporter.sendMail({
+    from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
+    to: process.env.FXCARWASH_EMAIL,
+    subject: `🚨 KRITICKÉ: Zákazník zaplatil ale karta není k dispozici! Objednávka ${order.orderIdentifier}`,
+    html: `
+      <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 2px solid #e74c3c; border-radius: 8px;">
+        <div style="background: #e74c3c; color: white; padding: 20px; text-align: center; border-radius: 6px 6px 0 0;">
+          <h2 style="margin: 0;">🚨 NUTNÁ OKAMŽITÁ AKCE</h2>
+        </div>
+        <div style="padding: 20px;">
+          <p><strong>Zákazník zaplatil objednávku, ale v poolu nejsou žádné karty k přiřazení!</strong></p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <tr><td style="padding: 8px; color: #666;">Číslo objednávky:</td><td style="padding: 8px; font-weight: bold;">${order.orderIdentifier}</td></tr>
+            <tr><td style="padding: 8px; color: #666;">Zákazník:</td><td style="padding: 8px;">${order.user?.firstName} ${order.user?.lastName}</td></tr>
+            <tr><td style="padding: 8px; color: #666;">E-mail zákazníka:</td><td style="padding: 8px;">${order.user?.email}</td></tr>
+            <tr><td style="padding: 8px; color: #666;">Položka:</td><td style="padding: 8px;">${item.name}</td></tr>
+            <tr><td style="padding: 8px; color: #666;">Kredit:</td><td style="padding: 8px;">${item.credit} Kč</td></tr>
+          </table>
+
+          <div style="margin-top: 20px; padding: 15px; background: #fff3f3; border-radius: 6px; border-left: 4px solid #e74c3c;">
+            <strong>Co dělat:</strong>
+            <ol style="margin: 10px 0 0;">
+              <li>Okamžitě kontaktuj zákazníka (${order.user?.email})</li>
+              <li>Doplň karty do poolu v databázi</li>
+              <li>Manuálně přiřaď kartu a dobij kredit</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    `,
   });
 };

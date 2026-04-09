@@ -62,7 +62,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       font-weight: 400;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #9ca3af;
+      color: #4b5563;
       margin-top: 5px;
     }
 
@@ -75,7 +75,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       font-weight: 600;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #9ca3af;
+      color: #4b5563;
       margin-bottom: 5px;
     }
 
@@ -109,7 +109,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       font-weight: 700;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: #b0b7c3;
+      color: #4b5563;
       margin-bottom: 6px;
     }
 
@@ -138,7 +138,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       font-weight: 700;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: #b0b7c3;
+      color: #4b5563;
       margin-bottom: 10px;
     }
 
@@ -152,7 +152,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
 
     .party-detail {
       font-size: 9.5px;
-      color: #6b7280;
+      color: #374151;
       line-height: 1.7;
     }
 
@@ -161,7 +161,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       padding-top: 9px;
       border-top: 1px solid #e5e7eb;
       font-size: 9px;
-      color: #9ca3af;
+      color: #4b5563;
       line-height: 1.6;
     }
 
@@ -180,7 +180,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       font-weight: 700;
       letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: #9ca3af;
+      color: #4b5563;
       padding: 0 12px 10px 12px;
       text-align: left;
     }
@@ -222,13 +222,13 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       justify-content: space-between;
       padding: 7px 0;
       font-size: 10px;
-      color: #6b7280;
+      color: #374151;
       border-bottom: 1px solid #f3f4f6;
     }
 
     .totals-row span:last-child {
       font-weight: 500;
-      color: #374151;
+      color: #1a1a2e;
     }
 
     .totals-row.grand {
@@ -254,7 +254,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
 
     .footer-note {
       font-size: 8px;
-      color: #b0b7c3;
+      color: #4b5563;
       line-height: 1.7;
     }
 
@@ -263,7 +263,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
       font-weight: 700;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: #d1d5db;
+      color: #6b7280;
     }
   </style>
 </head>

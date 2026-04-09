@@ -1,6 +1,7 @@
 import { Response, Request } from "express";
 import { prisma } from "../config/db.js";
 import { fetchNayax } from "../services/nayaxService.js";
+import { logger } from "../utils/logger.js";
 
 export const refreshCards = async (req: Request, res: Response) => {
   try {
@@ -8,6 +9,7 @@ export const refreshCards = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
     const cards = await fetchNayax(
       `/operational/v1/cards?CardEmail=${user.email}`,
       { method: "GET" },
@@ -20,29 +22,37 @@ export const refreshCards = async (req: Request, res: Response) => {
     for (const card of cards) {
       await prisma.card.update({
         where: { identifier: card.CardDetails.CardUniqueIdentifier },
-        data: {
-          credit: card.CardCreditAttributes.Credit,
-        },
+        data: { credit: card.CardCreditAttributes.Credit },
       });
     }
+
     const updatedCards = await prisma.card.findMany({
       where: { userId: user.id },
     });
 
+    logger.info(
+      { userId: user.id, count: updatedCards.length },
+      "Karty synchronizovány z Nayax",
+    );
     res.json({ cards: updatedCards });
   } catch (error: any) {
-    console.error("Error refreshing cards:", error);
+    logger.error({ error: error.message }, "Chyba při synchronizaci karet");
     res.status(500).json({ error: "Failed to refresh cards" });
   }
 };
 
 export const toggleCardStatus = async (req: Request, res: Response) => {
   try {
-    const { cardNumber } = req.params;
+    const cardNumber = String(req.params.cardNumber);
     const user = req.user;
 
+    // Validace formátu cardNumber — pouze číslice, 8–20 znaků
+    if (!/^\d{8,20}$/.test(cardNumber)) {
+      return res.status(400).json({ error: "Neplatný formát čísla karty" });
+    }
+
     const card = await prisma.card.findUnique({
-      where: { number: String(cardNumber) },
+      where: { number: cardNumber },
     });
 
     if (!card || !user) {
@@ -53,12 +63,14 @@ export const toggleCardStatus = async (req: Request, res: Response) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    console.log(
-      `/operational/v1/cards/${card.identifier}/status/${card.status === "ASSIGNED" ? 2 : 1}`,
+    const newStatusCode = card.status === "ASSIGNED" ? 2 : 1;
+    logger.info(
+      { cardNumber, currentStatus: card.status, newStatusCode },
+      "Změna stavu karty v Nayax",
     );
 
     const nayaxResponse = await fetchNayax(
-      `/operational/v1/cards/${card.identifier}/status/${card.status === "ASSIGNED" ? 2 : 1}`,
+      `/operational/v1/cards/${card.identifier}/status/${newStatusCode}`,
       { method: "POST" },
     );
 
@@ -69,18 +81,23 @@ export const toggleCardStatus = async (req: Request, res: Response) => {
     }
 
     const updatedCard = await prisma.card.update({
-      where: { number: String(cardNumber) },
+      where: { number: cardNumber },
       data: {
         status: card.status === "ASSIGNED" ? "BLOCKED" : "ASSIGNED",
       },
     });
+
+    logger.info(
+      { cardNumber, newStatus: updatedCard.status },
+      "Stav karty úspěšně změněn",
+    );
 
     res.json({
       message: `Card status updated to ${updatedCard.status}`,
       newStatus: updatedCard.status,
     });
   } catch (error: any) {
-    console.error("DETAILED ERROR:", error.message);
+    logger.error({ error: error.message }, "Chyba při změně stavu karty");
     res
       .status(500)
       .json({ error: error.message || "Failed to update card status" });
