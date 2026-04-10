@@ -17,6 +17,7 @@ interface User {
   zipCode: string;
   country: string;
   discount: number;
+  role: "USER" | "ADMIN";
   cards: Card[];
   companyName: string;
   companyICO: string;

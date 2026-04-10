@@ -188,9 +188,53 @@ export const sendLowStockAlert = async (remainingCards: number) => {
           <h2 style="margin: 0;">⚠️ Nízká zásoba karet</h2>
         </div>
         <div style="padding: 20px;">
-          <p>V poolu karet zbývá pouze <strong>${remainingCards} karet</strong>.</p>
-          <p>Doporučujeme karty doplnit, aby nedošlo k situaci kdy zákazník zaplatí a karta mu nebude moci být přiřazena.</p>
+          <p>Zbývá pouze <strong>${remainingCards} karet</strong>.</p>
           <p style="color: #888; font-size: 13px;">Toto upozornění bylo odesláno automaticky systémem FX Carwash.</p>
+        </div>
+      </div>
+    `,
+  });
+};
+
+export const sendWaitlistAvailabilityEmail = async (
+  firstName: string,
+  email: string,
+) => {
+  const brandColor = "#2ecc71";
+  const darkBg = "#252525";
+
+  await transporter.sendMail({
+    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: "FX Karty jsou opět skladem!",
+    html: `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee;">
+        <div style="background: ${darkBg}; color: white; padding: 40px 20px; text-align: center;">
+          <h1 style="margin: 0;">FX CARWASH</h1>
+          <p style="margin: 10px 0 0; opacity: 0.7;">Karty jsou opět k dispozici</p>
+        </div>
+
+        <div style="padding: 30px;">
+          <p>Dobrý den, ${firstName},</p>
+          <p>
+            Máme pro Vás skvělou zprávu — FX karty jsou opět <strong style="color: ${brandColor}">skladem</strong>!<br>
+            Zaregistroval(a) jste se do pořadníku a nyní můžete svou objednávku dokončit.
+          </p>
+
+          <div style="margin-top: 30px; text-align: center;">
+            <a href="${process.env.FRONTEND_URL}/nova-karta"
+               style="background: ${brandColor}; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+               OBJEDNAT KARTU
+            </a>
+          </div>
+
+          <p style="margin-top: 30px; color: #888; font-size: 13px;">
+            Karty se mohou opět vyprodávat rychle, doporučujeme neotálet.
+          </p>
+        </div>
+
+        <div style="background: #f4f4f4; padding: 20px; text-align: center; font-size: 12px; color: #888;">
+          <p>F.X. Carwash s.r.o. | Podpora: sales@fxcarwash.cz</p>
         </div>
       </div>
     `,

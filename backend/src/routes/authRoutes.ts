@@ -4,6 +4,7 @@ import {
   login,
   logout,
   getMe,
+  updateProfile,
   requestPasswordReset,
   verifyResetCode,
   setNewPassword,
@@ -36,6 +37,7 @@ router.post(
 router.post("/login", loginLimiter, validateRequest(loginSchema), login);
 router.post("/logout", logout);
 router.get("/me", softAuth, getMe);
+router.patch("/profile", authMiddleware, updateProfile);
 
 router.post(
   "/email-verification",

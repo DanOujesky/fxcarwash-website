@@ -16,7 +16,7 @@
   "dependencies": {
     "@fxcarwash/shared": "^1.0.0",
     "@prisma/adapter-pg": "^7.3.0",
-    "@prisma/client": "^6.19.2",
+    "@prisma/client": "^6.19.3",
     "axios": "^1.13.5",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.69.3",

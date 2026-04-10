@@ -2,6 +2,8 @@ import { Route, Routes } from "react-router";
 
 import { AuthProvider } from "./context/AuthProvider";
 import { AuthRedirectHandler } from "./utils/AuthRedirectHandler";
+import { ToastProvider } from "./context/ToastContext";
+import { ToastContainer } from "./components/Toast";
 
 import HomePage from "./pages/HomePage";
 import AboutPage from "./pages/AboutPage";
@@ -14,6 +16,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
 import ResetPasswordSentPage from "./pages/ResetPasswordSentPage";
 import AccountPage from "./pages/AccountPage";
+import ProfilePage from "./pages/ProfilePage";
 import NewPasswordPage from "./pages/NewPasswordPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCanceledPage from "./pages/PaymentCanceledPage";
@@ -24,10 +27,13 @@ import DeliveryPage from "./pages/DeliveryPage";
 import OverviewPage from "./pages/OverviewPage";
 import ScrollToTop from "./components/ScrollToTop";
 import BussinessConditions from "./pages/BussinessConditions";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
+    <ToastProvider>
     <AuthProvider>
+      <ToastContainer />
       <ScrollToTop />
       <Routes>
         <Route index element={<HomePage />} />
@@ -54,8 +60,11 @@ function App() {
         <Route path="dobit-kartu" element={<GetCreditPage />} />
         <Route path="objednat-kartu" element={<GetCardPage />} />
         <Route path="moje-karty" element={<AccountPage />} />
+        <Route path="profil" element={<ProfilePage />} />
+        <Route path="admin" element={<AdminPage />} />
       </Routes>
     </AuthProvider>
+    </ToastProvider>
   );
 }
 

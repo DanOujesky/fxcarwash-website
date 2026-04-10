@@ -70,7 +70,10 @@ export const payment = async (req: Request, res: Response) => {
     0,
   );
 
-  const deliveryCount = resolvedItems.filter((i) => i.original.delivery).length;
+  const deliveryCount = resolvedItems
+    .filter((i) => i.original.delivery)
+    .reduce((sum, i) => sum + (Number(i.original.quantity) || 1), 0);
+
   if (deliveryCount > 0) {
     const availableCards = await prisma.card.count({
       where: { userId: null, status: "IN_STOCK" },
@@ -83,7 +86,11 @@ export const payment = async (req: Request, res: Response) => {
       );
       return res.status(400).json({
         error:
-          "Karty nejsou momentálně skladem. Kontaktujte nás prosím na sales@fxcarwash.cz",
+          availableCards === 0
+            ? "Karty momentálně nejsou na skladě."
+            : `Na skladě zbývá pouze ${availableCards} ${availableCards === 1 ? "karta" : availableCards < 5 ? "karty" : "karet"}.`,
+        availableCards,
+        outOfStock: true,
       });
     }
 

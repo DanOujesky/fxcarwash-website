@@ -4,14 +4,18 @@ import { useEffect } from "react";
 import CustomCard from "../components/CustomCard";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import { useToast } from "../context/ToastContext";
 
 function AccountPage() {
   const { user, loading, refreshCards } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/login", { replace: true });
+    } else if (!loading && user && user.role === "ADMIN") {
+      navigate("/admin", { replace: true });
     }
   }, [loading, user, navigate]);
 
@@ -64,7 +68,11 @@ function AccountPage() {
           <button
             onClick={() => {
               if (user.cards.length < 1) {
-                alert("Nejdříve si musíte objednat FX kartu");
+                showToast({
+                  type: "warning",
+                  title: "Nemáte FX kartu",
+                  message: "Nejdříve si musíte objednat FX kartu",
+                });
                 return;
               }
 

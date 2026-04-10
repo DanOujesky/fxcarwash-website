@@ -180,11 +180,54 @@ const getMe = (req: Request, res: Response) => {
   res.status(200).json({ status: "success", user: req.user });
 };
 
+const updateProfile = async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({ error: "Nepřihlášený uživatel" });
+  }
+
+  const { firstName, lastName, email, phone, address, city, zipCode, country } =
+    req.body;
+
+  if (email && email !== req.user?.email) {
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return res.status(409).json({ error: "Tento e-mail je již používán jiným účtem" });
+    }
+  }
+
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { firstName, lastName, ...(email ? { email } : {}), phone, address, city, zipCode, country },
+    select: {
+      id: true,
+      firstName: true,
+      lastName: true,
+      email: true,
+      phone: true,
+      address: true,
+      city: true,
+      zipCode: true,
+      country: true,
+      discount: true,
+      companyName: true,
+      companyICO: true,
+      companyDIC: true,
+      companyAddress: true,
+      companyZipCode: true,
+      companyCity: true,
+    },
+  });
+
+  res.status(200).json({ status: "success", user: updated });
+};
+
 export {
   register,
   login,
   logout,
   getMe,
+  updateProfile,
   requestPasswordReset,
   verifyResetCode,
   setNewPassword,

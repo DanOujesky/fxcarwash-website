@@ -1,6 +1,7 @@
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useEffect, useState } from "react";
+import { useToast } from "../context/ToastContext";
 
 import Header from "../components/Header";
 import CartPhaseDisplay from "../components/CartPhaseDisplay";
@@ -13,9 +14,17 @@ function OverviewPage() {
   const { user, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
+  const [stockError, setStockError] = useState<{
+    message: string;
+    availableCards: number;
+  } | null>(null);
+  const [waitlistStatus, setWaitlistStatus] = useState<
+    "idle" | "loading" | "joined" | "already"
+  >("idle");
 
   const order: Order = location.state?.order;
 
@@ -31,6 +40,7 @@ function OverviewPage() {
 
   const handlePayment = async () => {
     setIsLoading(true);
+    setStockError(null);
 
     try {
       const res = await fetch(
@@ -47,22 +57,65 @@ function OverviewPage() {
 
       if (res.ok) {
         window.location.href = data.url;
+      } else if (data.outOfStock) {
+        setStockError({
+          message: data.error,
+          availableCards: data.availableCards ?? 0,
+        });
       } else {
-        alert(
-          data.error ||
+        showToast({
+          type: "error",
+          title: "Chyba platby",
+          message:
+            data.error ||
             "Nastala chyba při vytváření platební session. Zkuste to prosím znovu.",
-        );
+        });
       }
     } catch (error) {
       console.error(error);
+      showToast({
+        type: "error",
+        title: "Chyba připojení",
+        message: "Nepodařilo se připojit k serveru. Zkuste to prosím znovu.",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleJoinWaitlist = async () => {
+    setWaitlistStatus("loading");
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/waitlist/join`,
+        {
+          method: "POST",
+          credentials: "include",
+        },
+      );
+      const data = await res.json();
+      if (data.alreadyJoined) {
+        setWaitlistStatus("already");
+      } else {
+        setWaitlistStatus("joined");
+        showToast({
+          type: "success",
+          title: "Zapsán(a) do pořadníku",
+          message: "Jakmile budou karty opět skladem, dáme Vám vědět emailem.",
+        });
+      }
+    } catch {
+      setWaitlistStatus("idle");
+      showToast({
+        type: "error",
+        title: "Chyba",
+        message: "Nepodařilo se zapsat do pořadníku. Zkuste to prosím znovu.",
+      });
+    }
+  };
+
   const handleGoingBack = () => {
     localStorage.setItem("order", JSON.stringify(order));
-
     const targetPath = order.address ? "/doprava" : "/kosik";
     navigate(targetPath);
   };
@@ -78,6 +131,72 @@ function OverviewPage() {
       <div className="max-w-[1200px] mx-auto px-6 pt-16 pb-24 grid lg:grid-cols-[1fr_380px] gap-12">
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold">Shrnutí objednávky</h2>
+
+          {stockError && (
+            <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-5 flex flex-col gap-4">
+              <div className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-9 h-9 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center">
+                  <svg
+                    className="w-5 h-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg>
+                </span>
+                <div>
+                  <p className="font-semibold text-red-400">
+                    {stockError.availableCards === 0
+                      ? "Karty nejsou momentálně na skladě"
+                      : "Nedostatek karet na skladě"}
+                  </p>
+                  <p className="text-sm text-gray-300 mt-1">
+                    {stockError.message}
+                  </p>
+                </div>
+              </div>
+
+              <div className="border-t border-red-500/20 pt-4">
+                <p className="text-sm text-gray-400 mb-3">
+                  Chcete být informováni, jakmile budou karty opět k dispozici?
+                </p>
+                {waitlistStatus === "joined" || waitlistStatus === "already" ? (
+                  <div className="flex items-center gap-2 text-green-400 text-sm font-medium">
+                    <svg
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    {waitlistStatus === "already"
+                      ? "Již jste v pořadníku — dáme Vám vědět emailem."
+                      : "Zapsán(a)! Dáme Vám vědět emailem."}
+                  </div>
+                ) : (
+                  <button
+                    onClick={handleJoinWaitlist}
+                    disabled={waitlistStatus === "loading"}
+                    className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 border border-white/20 text-sm font-medium transition disabled:opacity-60"
+                  >
+                    {waitlistStatus === "loading"
+                      ? "Zapisuji..."
+                      : "Chci být informován(a)"}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
 
           {order.items.map((item) => (
             <div

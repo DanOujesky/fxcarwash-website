@@ -164,6 +164,18 @@ model News {
   creator User @relation("NewsCreator", fields: [creatorId], references: [id], onDelete: Cascade)
 }
 
+model CardWaitlist {
+  id        String   @id @default(uuid())
+  email     String
+  firstName String
+  lastName  String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@unique([email])
+  @@index([email])
+}
+
 enum Role {
   USER
   ADMIN
