@@ -46,7 +46,6 @@ export const toggleCardStatus = async (req: Request, res: Response) => {
     const cardNumber = String(req.params.cardNumber);
     const user = req.user;
 
-    // Validace formátu cardNumber — pouze číslice, 1–20 znaků
     if (!/^\d{1,20}$/.test(cardNumber)) {
       return res.status(400).json({ error: "Neplatný formát čísla karty" });
     }

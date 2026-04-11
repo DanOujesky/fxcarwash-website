@@ -110,7 +110,6 @@ function ProfilePage() {
       />
 
       <div className="max-w-[560px] mx-auto px-4 sm:px-6 py-12">
-        {/* Hlavička */}
         <div className="flex items-center gap-4 mb-8">
           <div className="w-14 h-14 rounded-full border border-white/20 bg-white/5 flex items-center justify-center flex-shrink-0">
             <svg
@@ -142,7 +141,6 @@ function ProfilePage() {
           </button>
         </div>
 
-        {/* Formulář */}
         <form
           onSubmit={handleSave}
           className="flex flex-col gap-5 bg-[#1b1b1b] border border-white/10 rounded-xl p-6 shadow-lg"

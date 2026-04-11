@@ -10,7 +10,6 @@ import ErrorMessage from "../components/ErrorMessage";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
-// Rozšíření shared schéma o potvrzení hesla (jen na frontendu)
 const newPasswordFormSchema = newPasswordSchema
   .extend({
     confirmPassword: z.string().min(1, "Zadejte potvrzení hesla"),

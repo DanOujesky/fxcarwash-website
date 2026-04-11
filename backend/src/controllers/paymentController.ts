@@ -14,8 +14,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 function resolveItemPrice(item: any, userDiscount: number) {
   const credit = Number(item.credit);
 
-  // Přijmeme jak raw hodnotu (500) tak bonus-adjustovanou (525 při 5% bonusu)
-  // — zpětná kompatibilita s položkami v localStorage
   let baseCredit = credit;
 
   if (!ALLOWED_CREDITS.includes(credit as any) && userDiscount > 0) {
@@ -32,7 +30,6 @@ function resolveItemPrice(item: any, userDiscount: number) {
   const shippingFee = item.delivery ? (SHIPPING_FEES[item.shipping] ?? 0) : 0;
   const safePrice = baseCredit + shippingFee;
 
-  // Bonus se aplikuje na kredity, zákazník platí plnou cenu
   const safeCredit = Math.round(baseCredit * (1 + userDiscount / 100));
 
   return { safeName: item.name, safePrice, safeCredit };

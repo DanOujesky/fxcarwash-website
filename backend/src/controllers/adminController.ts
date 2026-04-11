@@ -4,7 +4,6 @@ import { logger } from "../utils/logger.js";
 
 export const getAdminStats = async (req: Request, res: Response) => {
   try {
-    // Cards stats
     const cardGroups = await prisma.card.groupBy({
       by: ["status"],
       _count: true,
@@ -27,7 +26,6 @@ export const getAdminStats = async (req: Request, res: Response) => {
       else if (group.status === "LOST") cardStats.lost = count;
     }
 
-    // Orders stats
     const orderGroups = await prisma.order.groupBy({
       by: ["status"],
       _count: true,
@@ -56,7 +54,6 @@ export const getAdminStats = async (req: Request, res: Response) => {
       else if (group.status === "SHIPPED") orderStats.shipped = count;
     }
 
-    // Users stats
     const usersTotal = await prisma.user.count();
     const newLast30Days = await prisma.user.count({
       where: {
@@ -66,7 +63,6 @@ export const getAdminStats = async (req: Request, res: Response) => {
       },
     });
 
-    // Top products
     const topProductsRaw = await prisma.orderItem.groupBy({
       by: ["name"],
       _count: true,
@@ -81,7 +77,6 @@ export const getAdminStats = async (req: Request, res: Response) => {
       revenue: p._sum.price ?? 0,
     }));
 
-    // Recent orders
     const recentOrdersRaw = await prisma.order.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
@@ -96,7 +91,6 @@ export const getAdminStats = async (req: Request, res: Response) => {
       userEmail: o.user.email,
     }));
 
-    // Credit stats
     const creditAggregate = await prisma.creditLog.aggregate({
       _sum: { amount: true },
       _count: true,
@@ -143,7 +137,6 @@ export const importCards = async (req: Request, res: Response) => {
     let skipped = 0;
 
     for (const line of lines) {
-      // Skip header row
       if (line.toLowerCase().startsWith("number")) {
         continue;
       }

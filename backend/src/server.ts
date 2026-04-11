@@ -1,6 +1,6 @@
 import "dotenv/config";
 import express from "express";
-import helmet from "helmet"; // ← správný import
+import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { spamLimiter } from "./utils/authLimiter.js";
@@ -27,7 +27,6 @@ const ALLOWED_ORIGINS = (process.env.ALLOWED_ORIGINS || process.env.FRONTEND_URL
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Povolit server-to-server požadavky (bez origin) a whitelisted origins
       if (!origin || ALLOWED_ORIGINS.includes(origin)) {
         callback(null, true);
       } else {

@@ -73,7 +73,6 @@ const requestPasswordReset = async (req: Request, res: Response) => {
   });
 
   if (!user) {
-    // Stejná odpověď bez ohledu na existenci emailu — brání email enumeration
     return res.status(200).json({
       status: "success",
       message: "Pokud je email registrován, kód byl odeslán",

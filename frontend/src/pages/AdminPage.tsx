@@ -203,7 +203,6 @@ function AdminPage() {
           </button>
         </div>
 
-        {/* SEKCE 1: Karty */}
         <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 mb-6">
           <h2 className="text-xl font-semibold text-white mb-5">Karty</h2>
           {statsLoading ? (
@@ -234,7 +233,6 @@ function AdminPage() {
           )}
         </div>
 
-        {/* SEKCE 2: Import karet */}
         <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 mb-6">
           <h2 className="text-xl font-semibold text-white mb-5">Import karet</h2>
           <textarea
@@ -261,7 +259,6 @@ function AdminPage() {
           </div>
         </div>
 
-        {/* SEKCE 3: Odebrat kartu */}
         <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 mb-6">
           <h2 className="text-xl font-semibold text-white mb-5">Odebrat kartu z účtu</h2>
           <div className="flex gap-3 flex-wrap">
@@ -283,7 +280,6 @@ function AdminPage() {
           </div>
         </div>
 
-        {/* SEKCE 4: Statistiky e-shopu */}
         <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 mb-6">
           <h2 className="text-xl font-semibold text-white mb-5">Statistiky e-shopu</h2>
 
@@ -291,7 +287,6 @@ function AdminPage() {
             <div className="text-white/40 text-sm">Načítám...</div>
           ) : (
             <>
-              {/* Stat boxy */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
                 <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
                   <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Celkem objednávek</div>
@@ -313,7 +308,6 @@ function AdminPage() {
                 </div>
               </div>
 
-              {/* Top produkty */}
               {stats && stats.topProducts.length > 0 && (
                 <div className="mb-8">
                   <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">Top produkty</h3>
@@ -342,7 +336,6 @@ function AdminPage() {
                 </div>
               )}
 
-              {/* Poslední objednávky */}
               {stats && stats.recentOrders.length > 0 && (
                 <div>
                   <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">Poslední objednávky</h3>
