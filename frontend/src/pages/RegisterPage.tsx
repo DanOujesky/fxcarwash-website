@@ -80,7 +80,7 @@ function RegisterPage() {
         >
           <h2 className="text-lg font-semibold text-center">Registrace</h2>
 
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="flex flex-col">
               <Inputlabel white text="Jméno" />
               <input

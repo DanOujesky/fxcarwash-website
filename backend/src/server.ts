@@ -12,6 +12,7 @@ import webhookRoutes from "./routes/webhookRoutes.js";
 import nayaxRoutes from "./routes/nayaxRoutes.js";
 import waitlistRoutes from "./routes/waitlistRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 import { connectDB, disconnectDB } from "./config/db.js";
 
 const app = express();
@@ -51,6 +52,7 @@ app.use("/payment", paymentRoutes);
 app.use("/nayax", nayaxRoutes);
 app.use("/waitlist", waitlistRoutes);
 app.use("/admin", adminRoutes);
+app.use("/contact", contactRoutes);
 
 const PORT = process.env.PORT || 5001;
 

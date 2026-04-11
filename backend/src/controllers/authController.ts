@@ -97,10 +97,8 @@ const requestPasswordReset = async (req: Request, res: Response) => {
       message: "Pokud je email registrován, kód byl odeslán",
     });
   } catch (err) {
-    const error = err as Error;
     res.status(500).json({
-      error: "Failed to send verification email",
-      details: error.message,
+      error: "Nepodařilo se odeslat ověřovací e-mail. Zkuste to prosím znovu.",
     });
   }
 };
@@ -115,7 +113,7 @@ const register = async (req: Request, res: Response) => {
   if (userExists) {
     return res
       .status(400)
-      .json({ error: "User already exists with this email" });
+      .json({ error: "Registrace se nezdařila. Zkontrolujte zadané údaje." });
   }
 
   const salt = await bcrypt.genSalt(10);
@@ -169,6 +167,8 @@ const logout = async (req: Request, res: Response) => {
   res.cookie("jwt", "", {
     expires: new Date(0),
     httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
   });
   res.status(200).json({
     status: "success",

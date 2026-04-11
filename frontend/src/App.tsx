@@ -28,6 +28,7 @@ import OverviewPage from "./pages/OverviewPage";
 import ScrollToTop from "./components/ScrollToTop";
 import BussinessConditions from "./pages/BussinessConditions";
 import AdminPage from "./pages/AdminPage";
+import EshopGate from "./components/EshopGate";
 
 function App() {
   return (
@@ -47,20 +48,20 @@ function App() {
         <Route path="obchodni-podminky" element={<BussinessConditions />} />
 
         <Route element={<AuthRedirectHandler />}>
-          <Route path="login" element={<LoginPage />} />
-          <Route path="register" element={<RegisterPage />} />
-          <Route path="forgotPassword" element={<ForgetPasswordPage />} />
-          <Route path="resetPassword" element={<ResetPasswordSentPage />} />
-          <Route path="newPassword" element={<NewPasswordPage />} />
+          <Route path="login" element={<EshopGate><LoginPage /></EshopGate>} />
+          <Route path="register" element={<EshopGate><RegisterPage /></EshopGate>} />
+          <Route path="forgotPassword" element={<EshopGate><ForgetPasswordPage /></EshopGate>} />
+          <Route path="resetPassword" element={<EshopGate><ResetPasswordSentPage /></EshopGate>} />
+          <Route path="newPassword" element={<EshopGate><NewPasswordPage /></EshopGate>} />
         </Route>
 
-        <Route path="souhrn" element={<OverviewPage />} />
-        <Route path="doprava" element={<DeliveryPage />} />
-        <Route path="kosik" element={<CartPage />} />
-        <Route path="dobit-kartu" element={<GetCreditPage />} />
-        <Route path="objednat-kartu" element={<GetCardPage />} />
-        <Route path="moje-karty" element={<AccountPage />} />
-        <Route path="profil" element={<ProfilePage />} />
+        <Route path="souhrn" element={<EshopGate><OverviewPage /></EshopGate>} />
+        <Route path="doprava" element={<EshopGate><DeliveryPage /></EshopGate>} />
+        <Route path="kosik" element={<EshopGate><CartPage /></EshopGate>} />
+        <Route path="dobit-kartu" element={<EshopGate><GetCreditPage /></EshopGate>} />
+        <Route path="objednat-kartu" element={<EshopGate><GetCardPage /></EshopGate>} />
+        <Route path="moje-karty" element={<EshopGate><AccountPage /></EshopGate>} />
+        <Route path="profil" element={<EshopGate><ProfilePage /></EshopGate>} />
         <Route path="admin" element={<AdminPage />} />
       </Routes>
     </AuthProvider>

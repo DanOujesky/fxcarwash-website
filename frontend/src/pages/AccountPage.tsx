@@ -26,7 +26,7 @@ function AccountPage() {
   }, [loading]);
 
   if (loading || !user) {
-    return <div className={`bg-black min-h-screen]`} />;
+    return <div className="bg-black min-h-screen" />;
   }
   return (
     <div className={`min-h-screen pt-[121px] sm:pt-[185px] body-bg-color`}>

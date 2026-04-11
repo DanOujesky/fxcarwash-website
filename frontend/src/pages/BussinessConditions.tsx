@@ -20,7 +20,7 @@ function BussinessConditions() {
 
       <div className="body-bg-color py-16 px-10 lg:px-40 flex flex-col gap-14">
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">I. Vymezení základních pojmů</h3>
+          <h3 className="text-xl sm:text-3xl">I. Vymezení základních pojmů</h3>
 
           <p className="text-[14px] text-justify">
             VOP se rozumí tyto všeobecné obchodní podmínky. Provozovatelem je
@@ -42,7 +42,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">II. Úvodní ustanovení</h3>
+          <h3 className="text-xl sm:text-3xl">II. Úvodní ustanovení</h3>
 
           <p className="text-[14px] text-justify">
             Tyto obchodní podmínky upravují práva a povinnosti mezi
@@ -58,7 +58,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">III. Uživatelský účet</h3>
+          <h3 className="text-xl sm:text-3xl">III. Uživatelský účet</h3>
 
           <p className="text-[14px] text-justify">
             Zákazník si může vytvořit uživatelský účet v e-shopu provozovatele,
@@ -74,7 +74,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">IV. Zákaznické karty</h3>
+          <h3 className="text-xl sm:text-3xl">IV. Zákaznické karty</h3>
 
           <p className="text-[14px] text-justify">
             Zákaznické karty slouží k úhradě služeb poskytovaných v mycím
@@ -88,7 +88,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">V. Platební podmínky</h3>
+          <h3 className="text-xl sm:text-3xl">V. Platební podmínky</h3>
 
           <p className="text-[14px] text-justify">
             Zákaznické karty lze objednat prostřednictvím e-shopu Provozovatele.
@@ -102,7 +102,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">VI. Kredit na kartě</h3>
+          <h3 className="text-xl sm:text-3xl">VI. Kredit na kartě</h3>
 
           <p className="text-[14px] text-justify">
             Kredit je evidován elektronicky v systému Provozovatele a je vázán
@@ -117,7 +117,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">VII. Provoz mycího centra</h3>
+          <h3 className="text-xl sm:text-3xl">VII. Provoz mycího centra</h3>
 
           <p className="text-[14px] text-justify">
             Mycí centrum je provozováno nepřetržitě 24 hodin denně, 7 dní v
@@ -132,7 +132,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">VIII. Reklamace</h3>
+          <h3 className="text-xl sm:text-3xl">VIII. Reklamace</h3>
 
           <p className="text-[14px] text-justify">
             Reklamace je možné uplatnit elektronicky prostřednictvím e-mailu
@@ -142,7 +142,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">IX. Ochrana osobních údajů</h3>
+          <h3 className="text-xl sm:text-3xl">IX. Ochrana osobních údajů</h3>
 
           <p className="text-[14px] text-justify">
             Provozovatel zpracovává osobní údaje zákazníků v souladu s GDPR
@@ -152,7 +152,7 @@ function BussinessConditions() {
         </div>
 
         <div className="flex flex-col gap-5">
-          <h3 className="text-3xl">X. Závěrečná ustanovení</h3>
+          <h3 className="text-xl sm:text-3xl">X. Závěrečná ustanovení</h3>
 
           <p className="text-[14px] text-justify">
             Tyto obchodní podmínky se řídí právním řádem České republiky.

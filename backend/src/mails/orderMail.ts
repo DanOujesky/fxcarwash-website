@@ -3,6 +3,16 @@ import { transporter } from "../utils/mailer";
 import { generateInvoice } from "../services/invoiceService";
 import { logger } from "../utils/logger.js";
 
+const escapeHtml = (value: string | null | undefined): string => {
+  if (!value) return "";
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 type OrderWithItems = Order & {
   items: OrderItem[];
 };
@@ -19,9 +29,9 @@ export const sendOrderEmailToUser = async (
       (item) => `
   <tr>
     <td style="padding: 12px; border-bottom: 1px solid #eee;">
-      <strong style="color: #333;">${item.name}</strong>
+      <strong style="color: #333;">${escapeHtml(item.name)}</strong>
     ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small> <br><small style="color: #666;">Způsob dopravy: ${item.shipping === "cp" ? "Česká pošta" : "Osobní převzetí"}</small>` : ""}
-    ${item.cardNumber ? `<br><small style="color: #666;">Číslo karty: ${item.cardNumber}</small>` : ""}
+    ${item.cardNumber ? `<br><small style="color: #666;">Číslo karty: ${escapeHtml(item.cardNumber)}</small>` : ""}
     </td>
     <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right; white-space: nowrap;">
       ${item.price.toLocaleString("cs-CZ")} Kč
@@ -36,9 +46,9 @@ export const sendOrderEmailToUser = async (
     <div style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
       <h3 style="margin: 0 0 10px 0; font-size: 16px;">Doručovací adresa</h3>
       <p style="margin: 0; color: #555; line-height: 1.5;">
-        ${user.firstName} ${user.lastName}<br>
-        ${order.address}, ${order.zipCode} ${order.city}<br>
-        ${order.country}
+        ${escapeHtml(user.firstName)} ${escapeHtml(user.lastName)}<br>
+        ${escapeHtml(order.address)}, ${escapeHtml(order.zipCode)} ${escapeHtml(order.city)}<br>
+        ${escapeHtml(order.country)}
       </p>
     </div>`
     : "";
@@ -107,9 +117,9 @@ export const sendOrderEmailToCompany = async (
       (item) => `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #eee;">
-        <strong style="color: #333;">${item.name}</strong>
+        <strong style="color: #333;">${escapeHtml(item.name)}</strong>
         ${item.delivery ? `<br><small style="color: #666;">Množství: ${item.quantity} ks</small> <br><small style="color: #666;">Způsob dopravy: ${item.shipping === "cp" ? "Česká pošta" : "Osobní převzetí"}</small>` : ""}
-        ${item.cardNumber ? `<br><small style="color: #666;">Číslo karty: ${item.cardNumber}</small>` : ""}
+        ${item.cardNumber ? `<br><small style="color: #666;">Číslo karty: ${escapeHtml(item.cardNumber)}</small>` : ""}
       </td>
       <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">
         ${item.price.toLocaleString("cs-CZ")} Kč
@@ -135,9 +145,9 @@ export const sendOrderEmailToCompany = async (
         <div style="padding: 20px;">
           <h3 style="border-bottom: 2px solid ${adminColor}; padding-bottom: 5px; color: ${adminColor};">Detail zákazníka</h3>
           <p style="line-height: 1.6;">
-            <strong>Jméno:</strong> ${user.firstName} ${user.lastName}<br>
-            <strong>E-mail:</strong> ${user.email}<br>
-            <strong>Telefon:</strong> ${order.phone || "Neuvedeno"}
+            <strong>Jméno:</strong> ${escapeHtml(user.firstName)} ${escapeHtml(user.lastName)}<br>
+            <strong>E-mail:</strong> ${escapeHtml(user.email)}<br>
+            <strong>Telefon:</strong> ${escapeHtml(order.phone) || "Neuvedeno"}
           </p>
 
           ${
@@ -145,9 +155,9 @@ export const sendOrderEmailToCompany = async (
               ? `
           <h3 style="border-bottom: 2px solid ${adminColor}; padding-bottom: 5px; color: ${adminColor}; margin-top: 25px;">Doručovací údaje</h3>
           <p style="line-height: 1.6;">
-            ${order.address}<br>
-            ${order.zipCode} ${order.city}<br>
-            ${order.country}
+            ${escapeHtml(order.address)}<br>
+            ${escapeHtml(order.zipCode)} ${escapeHtml(order.city)}<br>
+            ${escapeHtml(order.country)}
           </p>`
               : `<p style="color: #e67e22; font-weight: bold;">(Digitální dobití - bez dopravy)</p>`
           }

@@ -103,14 +103,14 @@ function CartPage() {
 
               <button
                 onClick={handleContinue}
-                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-lg transition cursor-pointer self-center w-55 sm:w-80 "
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-lg transition cursor-pointer"
               >
                 Pokračovat
               </button>
 
               <Link
                 to="/moje-karty"
-                className="w-full border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition self-center w-55 sm:w-80"
+                className="w-full border border-white/20 text-white py-3 rounded-lg text-center hover:bg-white/5 transition"
               >
                 Zpět k nákupu
               </Link>

@@ -201,7 +201,7 @@ function OverviewPage() {
           {order.items.map((item) => (
             <div
               key={item.temp_id}
-              className="flex justify-between items-center header-color border border-white/10 rounded-xl p-6"
+              className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 header-color border border-white/10 rounded-xl p-6"
             >
               <div className="flex flex-col gap-1">
                 <p className="font-medium">

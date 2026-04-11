@@ -15,6 +15,7 @@ import {
   newPasswordSchema,
   forgetPasswordSchema,
   resetPasswordSchema,
+  updateProfileSchema,
 } from "@shared/index";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { authMiddleware, softAuth } from "../middleware/authMiddleware.js";
@@ -37,7 +38,7 @@ router.post(
 router.post("/login", loginLimiter, validateRequest(loginSchema), login);
 router.post("/logout", logout);
 router.get("/me", softAuth, getMe);
-router.patch("/profile", authMiddleware, updateProfile);
+router.patch("/profile", authMiddleware, validateRequest(updateProfileSchema), updateProfile);
 
 router.post(
   "/email-verification",

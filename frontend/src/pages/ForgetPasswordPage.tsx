@@ -56,13 +56,8 @@ function ForgetPasswordPage() {
         return;
       }
 
-      if (result.exists === false) {
-        setServerError("Tento e-mail není registrován");
-        return;
-      }
-
       navigate("/resetPassword", {
-        state: { email: result.email, message: result.message },
+        state: { email: data.email },
       });
     } catch (err) {
       console.error(err);

@@ -11,7 +11,7 @@ export const refreshCards = async (req: Request, res: Response) => {
     }
 
     const cards = await fetchNayax(
-      `/operational/v1/cards?CardEmail=${user.email}`,
+      `/operational/v1/cards?CardEmail=${encodeURIComponent(user.email)}`,
       { method: "GET" },
     );
 
@@ -46,8 +46,8 @@ export const toggleCardStatus = async (req: Request, res: Response) => {
     const cardNumber = String(req.params.cardNumber);
     const user = req.user;
 
-    // Validace formátu cardNumber — pouze číslice, 8–20 znaků
-    if (!/^\d{8,20}$/.test(cardNumber)) {
+    // Validace formátu cardNumber — pouze číslice, 1–20 znaků
+    if (!/^\d{1,20}$/.test(cardNumber)) {
       return res.status(400).json({ error: "Neplatný formát čísla karty" });
     }
 
@@ -100,6 +100,6 @@ export const toggleCardStatus = async (req: Request, res: Response) => {
     logger.error({ error: error.message }, "Chyba při změně stavu karty");
     res
       .status(500)
-      .json({ error: error.message || "Failed to update card status" });
+      .json({ error: "Nepodařilo se změnit stav karty. Zkuste to prosím znovu." });
   }
 };

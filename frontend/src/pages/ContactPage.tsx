@@ -20,9 +20,9 @@ function ContactPage() {
           src="/images/Image-13.jpg"
           alt="image-1"
         />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col">
-          <p className="textContact font-medium">+420 603 159 572</p>
-          <p className="textContact font-medium">SALES@FXCARWASH.CZ</p>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex justify-center items-center flex-col w-full px-4">
+          <p className="textContact font-medium text-center">+420 603 159 572</p>
+          <p className="textContact font-medium text-center">SALES@FXCARWASH.CZ</p>
         </div>
       </div>
       <div className="w-full h-60 lg:h-79 body-bg-color flex flex-col justify-center items-center gap-1">
@@ -35,7 +35,7 @@ function ContactPage() {
       <div className="w-full h-60 lg:h-180">
         <MyMap></MyMap>
       </div>
-      <div className="w-full h-180 body-bg-color flex flex-col justify-center items-center gap-10">
+      <div className="w-full min-h-[40rem] body-bg-color flex flex-col justify-center items-center gap-10 py-16">
         <h3 className="text-4xl text-center">KONTAKTUJTE NÁS</h3>
         <ContactForm />
       </div>

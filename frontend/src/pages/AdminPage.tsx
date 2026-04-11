@@ -75,7 +75,7 @@ const statusBadge = (status: string) => {
 };
 
 function AdminPage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -88,6 +88,7 @@ function AdminPage() {
 
   const [reclaimNumber, setReclaimNumber] = useState("");
   const [reclaimLoading, setReclaimLoading] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -182,16 +183,29 @@ function AdminPage() {
 
   return (
     <div className="min-h-screen pt-[121px] sm:pt-[185px] body-bg-color">
-      <Header account={true} homePage={false} logo={false} withoutPadding={true} />
+      <Header account={false} homePage={false} logo={false} withoutPadding={true} />
 
       <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-12">
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-10 tracking-wide">
-          Admin panel
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-wide">
+            Admin panel
+          </h1>
+          <button
+            onClick={async () => {
+              setLogoutLoading(true);
+              await logout();
+              navigate("/login", { replace: true });
+            }}
+            disabled={logoutLoading}
+            className="bg-white/10 hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed text-white/80 px-5 py-2 rounded-lg text-sm font-medium transition"
+          >
+            {logoutLoading ? "Odhlašuji..." : "Odhlásit se"}
+          </button>
+        </div>
 
-        {/* SEKCE 1: Pool karet */}
+        {/* SEKCE 1: Karty */}
         <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 mb-6">
-          <h2 className="text-xl font-semibold text-white mb-5">Pool karet</h2>
+          <h2 className="text-xl font-semibold text-white mb-5">Karty</h2>
           {statsLoading ? (
             <div className="text-white/40 text-sm">Načítám...</div>
           ) : (
@@ -279,23 +293,23 @@ function AdminPage() {
             <>
               {/* Stat boxy */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4">
-                  <div className="text-white/50 text-xs uppercase tracking-wider mb-1">Celkem objednávek</div>
-                  <div className="text-2xl font-bold text-white">{stats?.orders.total ?? 0}</div>
+                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
+                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Celkem objednávek</div>
+                  <div className="text-2xl font-bold text-white mt-2">{stats?.orders.total ?? 0}</div>
                 </div>
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4">
-                  <div className="text-white/50 text-xs uppercase tracking-wider mb-1">Zaplaceno</div>
-                  <div className="text-2xl font-bold text-green-400">{stats?.orders.paid ?? 0}</div>
+                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
+                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Zaplaceno</div>
+                  <div className="text-2xl font-bold text-green-400 mt-2">{stats?.orders.paid ?? 0}</div>
                 </div>
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4">
-                  <div className="text-white/50 text-xs uppercase tracking-wider mb-1">Celkový obrat</div>
-                  <div className="text-2xl font-bold text-white">
+                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
+                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Celkový obrat</div>
+                  <div className="text-2xl font-bold text-white mt-2">
                     {(stats?.orders.totalRevenue ?? 0).toLocaleString("cs-CZ")} Kč
                   </div>
                 </div>
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4">
-                  <div className="text-white/50 text-xs uppercase tracking-wider mb-1">Noví uživatelé (30 dní)</div>
-                  <div className="text-2xl font-bold text-blue-400">{stats?.users.newLast30Days ?? 0}</div>
+                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
+                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Uživatelé celkem</div>
+                  <div className="text-2xl font-bold text-blue-400 mt-2">{stats?.users.total ?? 0}</div>
                 </div>
               </div>
 

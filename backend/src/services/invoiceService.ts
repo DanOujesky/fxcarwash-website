@@ -3,6 +3,16 @@ import { User, Order, OrderItem } from "@prisma/client";
 
 type OrderWithItems = Order & { items: OrderItem[] };
 
+const escapeHtml = (value: string | null | undefined): string => {
+  if (!value) return "";
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
+
 export const generateInvoice = async (user: User, order: OrderWithItems) => {
   const totalAll = order.totalPrice;
   const totalBase = Math.round((totalAll / 1.21) * 100) / 100;
@@ -276,7 +286,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
     </div>
     <div class="invoice-title-block">
       <div class="invoice-label">Faktura — daňový doklad</div>
-      <div class="invoice-number">${order.orderFullNumber}</div>
+      <div class="invoice-number">${escapeHtml(order.orderFullNumber)}</div>
     </div>
   </div>
 
@@ -291,7 +301,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
     </div>
     <div class="meta-cell">
       <div class="meta-label">Variabilní symbol</div>
-      <div class="meta-value">${order.orderIdentifier}</div>
+      <div class="meta-value">${escapeHtml(order.orderIdentifier)}</div>
     </div>
     <div class="meta-cell">
       <div class="meta-label">Forma úhrady</div>
@@ -316,19 +326,19 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
     <div class="party-box">
       <div class="party-heading">Odběratel</div>
       <div class="party-name">
-        ${order.companyName ? order.companyName : `${user.firstName} ${user.lastName}`}
+        ${order.companyName ? escapeHtml(order.companyName) : `${escapeHtml(user.firstName)} ${escapeHtml(user.lastName)}`}
       </div>
       <div class="party-detail">
-        ${order.companyAddress || order.address || user.address || ""}<br>
-        ${order.companyCity || order.city || user.city || ""}${order.companyZipCode || order.zipCode || user.zipCode ? `, ${order.companyZipCode || order.zipCode || user.zipCode}` : ""}
+        ${escapeHtml(order.companyAddress || order.address || user.address || "")}<br>
+        ${escapeHtml(order.companyCity || order.city || user.city || "")}${order.companyZipCode || order.zipCode || user.zipCode ? `, ${escapeHtml(order.companyZipCode || order.zipCode || user.zipCode || "")}` : ""}
       </div>
       ${
         order.companyICO || order.companyDIC
           ? `
       <div class="party-tax">
-        ${order.companyICO ? `IČ: ${order.companyICO}` : ""}
+        ${order.companyICO ? `IČ: ${escapeHtml(order.companyICO)}` : ""}
         ${order.companyICO && order.companyDIC ? "&nbsp;·&nbsp;" : ""}
-        ${order.companyDIC ? `DIČ: ${order.companyDIC}` : ""}
+        ${order.companyDIC ? `DIČ: ${escapeHtml(order.companyDIC)}` : ""}
       </div>`
           : ""
       }
@@ -354,7 +364,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
           const vat = total - base;
           return `
         <tr>
-          <td class="item-name">${item.name}</td>
+          <td class="item-name">${escapeHtml(item.name)}</td>
           <td>${item.quantity}</td>
           <td>${formatCurrency(base)} Kč</td>
           <td>21 %</td>
