@@ -36,10 +36,6 @@ function AboutPage() {
               <p className="mt-5 text-justify text-[14px]">
                 Přijeďte se k nám podívat. Máme otevřeno 24/7.
               </p>
-              <p className="mt-5 text-justify text-[14px]">
-                Předběžný termín otevření: 17.12.2025. Při změně termínu Vás
-                budeme informovat.
-              </p>
             </div>
           </div>
         </div>

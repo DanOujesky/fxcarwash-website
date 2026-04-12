@@ -35,7 +35,7 @@ function OfferPage() {
                       PROGRAMOVÁ FLEXIBILITA:
                     </strong>{" "}
                     Kombinace různých mycích programů podle stupně znečištění
-                    vozu.
+                    vozu. Speciální program na mytí disků kol.
                   </li>
                   <li className="text-[14px] mb-2 lg:mb-0">
                     <strong className="font-medium">
