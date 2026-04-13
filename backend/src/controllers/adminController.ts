@@ -1,6 +1,36 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
 import { logger } from "../utils/logger.js";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const UPLOADS_DIR = path.join(__dirname, "../uploads");
+
+export const uploadMiddleware = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Pouze obrázky"));
+  },
+}).array("images", 10);
+
+export const uploadImages = (req: Request, res: Response) => {
+  uploadMiddleware(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    const files = (req.files as Express.Multer.File[]) ?? [];
+    const urls = files.map((f) => f.filename);
+    return res.json({ urls });
+  });
+};
 
 export const getAdminStats = async (req: Request, res: Response) => {
   try {
@@ -78,7 +108,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
     }));
 
     const recentOrdersRaw = await prisma.order.findMany({
-      take: 5,
+      take: 15,
       orderBy: { createdAt: "desc" },
       include: { user: { select: { email: true } } },
     });
@@ -170,6 +200,119 @@ export const importCards = async (req: Request, res: Response) => {
     return res.json({ imported, skipped });
   } catch (error) {
     logger.error({ error }, "importCards error");
+    return res.status(500).json({ error: "Chyba serveru" });
+  }
+};
+
+const LEGACY_NEWS = [
+  {
+    title: "Slavnostní otevření mycího centra v sobotu 18.4.2026 od 10 hodin",
+    text: "Přijeďte se k nám podívat, klobásy z grilu a nápoje zdarma pro všechny zákazníky do vyčerpání zásob. Rádi se s vámi setkáme osobně. Těšíme se na vás!",
+    images: ["IMG_3217.jpg", "IMG_3167.jpg", "IMG_3250.jpg", "IMG_3184.jpg", "IMG_3174.jpg"],
+  },
+  {
+    title: "Online nákup a dobití fx karet",
+    text: "Již brzy pro vás spustíme možnost nakoupit si online zvýhodněné věrnostní fx karty.",
+    images: ["IMG_3217.jpg", "IMG_3167.jpg", "IMG_3250.jpg", "IMG_3184.jpg", "IMG_3174.jpg"],
+  },
+  {
+    title: "Máme otevřeno!",
+    text: "Po týdnu zkušebního provozu máme otevřeno pro všechny zákazníky nonstop. Můžete u nás platit v hotovosti i platební kartou. Mycí centrum je vybaveno měničkou peněz. K dispozici je výkonný vysavač a možnost doplnění nemrznoucí směsi do ostřikovačů ( -20 °C).",
+    images: ["IMG_3217.jpg", "IMG_3167.jpg", "IMG_3250.jpg", "IMG_3184.jpg", "IMG_3174.jpg"],
+  },
+  {
+    title: "Otevření se blíží",
+    text: "Už finišujeme, ladíme poslední detaily a testujeme kvalitu mytí pro 100% spokojenost našich budoucích zákazníků. Předběžný termín otevření mycího centra je 17.12.2025.",
+    images: ["Image-10.jpg", "Image-12.jpg", "Image-16.jpg", "Image-13.jpg", "Image-15.jpg"],
+  },
+  {
+    title: "Práce finišují. Plán dokončení: prosinec 2025",
+    text: "Vše běží dle plánu a v prosinci 2025 bychom měli mít kompletně hotovo. Čeká nás dodávka samotné konstrukce mycího centra a její napojení na sítě. Finalizujeme také úpravy okolí, které bychom Vám rádi zpříjemnili. O termínu otevření Vás budeme brzy informovat.",
+    images: ["IMG_2523.jpg", "image_3.jpg", "image_1.jpg", "image_2.jpg", "image_5.jpg"],
+  },
+  {
+    title: "Zahájení výstavby mycího centra",
+    text: "Projekt výstavby mycího centra v Horní Bříze začal v průběhu roku 2024, kdy jsme se intenzivně věnovali výběru kvalitního a spolehlivého partnera pro realizaci výstavby. Tímto partnerem se pro nás stala společnost MY WASH Technology s.r.o. Stavební práce přímo na místě začaly v létě 2025 a již koncem srpna se podařilo dokončit a kompletně připravit základy. Už to pro Vás chystáme!",
+    images: ["car-news-image-2.jpg", "car-news-image-1.jpg"],
+  },
+];
+
+export const seedLegacyNews = async (req: Request, res: Response) => {
+  try {
+    const creatorId = req.user?.id;
+    if (!creatorId) return res.status(401).json({ error: "Unauthorized" });
+
+    const existing = await prisma.news.count();
+    if (existing > 0) return res.json({ skipped: true, message: "DB již obsahuje novinky" });
+
+    for (const item of LEGACY_NEWS) {
+      await prisma.news.create({
+        data: {
+          title: item.title,
+          text: item.text,
+          imagePath: JSON.stringify(item.images),
+          creatorId,
+        },
+      });
+    }
+    return res.json({ imported: LEGACY_NEWS.length });
+  } catch (error) {
+    logger.error({ error }, "seedLegacyNews error");
+    return res.status(500).json({ error: "Chyba serveru" });
+  }
+};
+
+export const getNews = async (req: Request, res: Response) => {
+  try {
+    const news = await prisma.news.findMany({
+      orderBy: { createdAt: "desc" },
+      select: { id: true, title: true, text: true, imagePath: true, createdAt: true },
+    });
+    const mapped = news.map((n) => ({
+      id: n.id,
+      title: n.title,
+      text: n.text,
+      image: (() => { try { return JSON.parse(n.imagePath); } catch { return [n.imagePath]; } })(),
+      createdAt: n.createdAt,
+    }));
+    return res.json(mapped);
+  } catch (error) {
+    logger.error({ error }, "getNews error");
+    return res.status(500).json({ error: "Chyba serveru" });
+  }
+};
+
+export const createNews = async (req: Request, res: Response) => {
+  try {
+    const { title, text, images } = req.body as { title: string; text: string; images: string[] };
+    if (!title?.trim() || !text?.trim()) {
+      return res.status(400).json({ error: "Název a text jsou povinné" });
+    }
+    const creatorId = req.user?.id;
+    if (!creatorId) return res.status(401).json({ error: "Unauthorized" });
+
+    const news = await prisma.news.create({
+      data: {
+        title: title.trim(),
+        text: text.trim(),
+        imagePath: JSON.stringify(Array.isArray(images) && images.length ? images : []),
+        creatorId,
+      },
+    });
+    return res.json({ success: true, id: news.id });
+  } catch (error) {
+    logger.error({ error }, "createNews error");
+    return res.status(500).json({ error: "Chyba serveru" });
+  }
+};
+
+export const deleteNews = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await prisma.news.delete({ where: { id } });
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error({ error }, "deleteNews error");
     return res.status(500).json({ error: "Chyba serveru" });
   }
 };

@@ -76,7 +76,7 @@ function GetCreditPage() {
           <div className="flex flex-col">
             <Inputlabel white text="Vyberte Kartu" />
             <div className="flex flex-col gap-2">
-              {user.cards.map((card) => (
+              {[...user.cards].sort((a, b) => Number(a.number) - Number(b.number)).map((card) => (
                 <div
                   key={card.id}
                   onClick={() =>

@@ -39,7 +39,7 @@ function ImageSelector({ image }: ImageSelectorProps) {
     >
       <img
         className="h-full w-full object-cover select-none"
-        src={`/images/${image[imageIndex]}`}
+        src={`${import.meta.env.VITE_API_URL}/uploads/${image[imageIndex]}`}
         alt="image"
         draggable={false}
       />

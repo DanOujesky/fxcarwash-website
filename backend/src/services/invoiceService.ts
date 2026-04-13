@@ -301,7 +301,7 @@ export const generateInvoice = async (user: User, order: OrderWithItems) => {
     </div>
     <div class="meta-cell">
       <div class="meta-label">Variabilní symbol</div>
-      <div class="meta-value">${escapeHtml(order.orderIdentifier)}</div>
+      <div class="meta-value">${String(order.orderIdentifier)}</div>
     </div>
     <div class="meta-cell">
       <div class="meta-label">Forma úhrady</div>

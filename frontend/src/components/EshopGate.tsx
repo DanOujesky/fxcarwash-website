@@ -1,21 +1,32 @@
+import { useLocation } from "react-router-dom";
 import Footer from "./Footer";
 import Header from "./Header";
 
 const STORAGE_KEY = "eshop_preview_granted";
 const ESHOP_ENABLED = import.meta.env.VITE_ESHOP_ENABLED === "true";
-const PREVIEW_CODE = import.meta.env.VITE_ESHOP_PREVIEW_CODE as
-  | string
-  | undefined;
+const PREVIEW_CODE = import.meta.env.VITE_ESHOP_PREVIEW_CODE as string | undefined;
 
-let granted = false;
+function isGranted(search: string): boolean {
+  // 1. Check current URL for preview param
+  if (PREVIEW_CODE) {
+    const params = new URLSearchParams(search);
+    if (params.get("preview") === PREVIEW_CODE) {
+      localStorage.setItem(STORAGE_KEY, PREVIEW_CODE);
+      return true;
+    }
+  }
+  // 2. Check localStorage (persists across tabs, reloads, Stripe redirects)
+  if (PREVIEW_CODE && localStorage.getItem(STORAGE_KEY) === PREVIEW_CODE) {
+    return true;
+  }
+  return false;
+}
 
+// Module-level: runs once on initial page load — seed localStorage from URL
 if (PREVIEW_CODE) {
   const params = new URLSearchParams(window.location.search);
   if (params.get("preview") === PREVIEW_CODE) {
-    granted = true;
-    sessionStorage.setItem(STORAGE_KEY, "1");
-  } else if (sessionStorage.getItem(STORAGE_KEY) === "1") {
-    granted = true;
+    localStorage.setItem(STORAGE_KEY, PREVIEW_CODE);
   }
 }
 
@@ -51,8 +62,9 @@ function ComingSoon() {
 }
 
 export default function EshopGate({ children }: { children: React.ReactNode }) {
-  if (ESHOP_ENABLED || granted || sessionStorage.getItem(STORAGE_KEY) === "1") {
-    return <>{children}</>;
-  }
+  const location = useLocation();
+
+  if (ESHOP_ENABLED) return <>{children}</>;
+  if (isGranted(location.search)) return <>{children}</>;
   return <ComingSoon />;
 }

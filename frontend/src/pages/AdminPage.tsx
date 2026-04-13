@@ -37,6 +37,14 @@ interface RecentOrder {
   userEmail: string;
 }
 
+interface NewsItem {
+  id: string;
+  title: string;
+  text: string;
+  image: string[];
+  createdAt: string;
+}
+
 interface AdminStats {
   cards: CardStats;
   orders: OrderStats;
@@ -90,6 +98,13 @@ function AdminPage() {
   const [reclaimLoading, setReclaimLoading] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const [newsList, setNewsList] = useState<NewsItem[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
+  const [newsTitle, setNewsTitle] = useState("");
+  const [newsText, setNewsText] = useState("");
+  const [newsFiles, setNewsFiles] = useState<File[]>([]);
+  const [newsSaving, setNewsSaving] = useState(false);
+
   useEffect(() => {
     if (!loading && !user) {
       navigate("/login", { replace: true });
@@ -103,6 +118,7 @@ function AdminPage() {
   useEffect(() => {
     if (!loading && user && user.role === "ADMIN") {
       fetchStats();
+      fetchNews();
     }
   }, [loading, user]);
 
@@ -119,6 +135,74 @@ function AdminPage() {
       showToast({ type: "error", title: "Chyba", message: "Nepodařilo se načíst statistiky" });
     } finally {
       setStatsLoading(false);
+    }
+  };
+
+  const fetchNews = async () => {
+    setNewsLoading(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/news`, { credentials: "include" });
+      if (!res.ok) throw new Error();
+      setNewsList(await res.json());
+    } catch {
+      showToast({ type: "error", title: "Chyba", message: "Nepodařilo se načíst novinky" });
+    } finally {
+      setNewsLoading(false);
+    }
+  };
+
+  const handleCreateNews = async () => {
+    if (!newsTitle.trim() || !newsText.trim()) {
+      showToast({ type: "warning", title: "Chybí údaje", message: "Vyplňte název a text novinky" });
+      return;
+    }
+    setNewsSaving(true);
+    try {
+      let images: string[] = [];
+      if (newsFiles.length > 0) {
+        const formData = new FormData();
+        newsFiles.forEach((f) => formData.append("images", f));
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/news/upload`, {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        });
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadData.error || "Chyba uploadu");
+        images = uploadData.urls;
+      }
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/news`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: newsTitle, text: newsText, images }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Chyba");
+      showToast({ type: "success", title: "Novinka přidána", message: newsTitle });
+      setNewsTitle("");
+      setNewsText("");
+      setNewsFiles([]);
+      fetchNews();
+    } catch (err: any) {
+      showToast({ type: "error", title: "Chyba", message: err.message });
+    } finally {
+      setNewsSaving(false);
+    }
+  };
+
+  const handleDeleteNews = async (id: string, title: string) => {
+    if (!window.confirm(`Smazat novinku "${title}"?`)) return;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/news/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error();
+      showToast({ type: "success", title: "Smazáno", message: title });
+      fetchNews();
+    } catch {
+      showToast({ type: "error", title: "Chyba", message: "Nepodařilo se smazat novinku" });
     }
   };
 
@@ -287,18 +371,14 @@ function AdminPage() {
             <div className="text-white/40 text-sm">Načítám...</div>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+              <div className="grid grid-cols-4 gap-4 mb-8">
                 <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
                   <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Celkem objednávek</div>
                   <div className="text-2xl font-bold text-white mt-2">{stats?.orders.total ?? 0}</div>
                 </div>
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
-                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Zaplaceno</div>
-                  <div className="text-2xl font-bold text-green-400 mt-2">{stats?.orders.paid ?? 0}</div>
-                </div>
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
-                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Celkový obrat</div>
-                  <div className="text-2xl font-bold text-white mt-2">
+                <div className="col-span-2 bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
+                  <div className="text-white/50 text-xs uppercase tracking-wider mb-2">Celkový obrat</div>
+                  <div className="text-3xl font-bold text-green-400">
                     {(stats?.orders.totalRevenue ?? 0).toLocaleString("cs-CZ")} Kč
                   </div>
                 </div>
@@ -370,6 +450,83 @@ function AdminPage() {
                 </div>
               )}
             </>
+          )}
+        </div>
+        <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 mb-6">
+          <h2 className="text-xl font-semibold text-white mb-5">Správa novinky</h2>
+
+          <div className="flex flex-col gap-3 mb-6">
+            <input
+              type="text"
+              value={newsTitle}
+              onChange={(e) => setNewsTitle(e.target.value)}
+              placeholder="Název novinky"
+              className="w-full bg-[#252525] border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30"
+            />
+            <textarea
+              value={newsText}
+              onChange={(e) => setNewsText(e.target.value)}
+              placeholder="Text novinky"
+              rows={4}
+              className="w-full bg-[#252525] border border-white/10 rounded-lg px-4 py-3 text-white/80 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 resize-y"
+            />
+            <div className="flex flex-col gap-1">
+              <label className="w-full bg-[#252525] border border-white/10 rounded-lg px-4 py-2.5 text-white/50 text-sm cursor-pointer hover:border-white/30 transition">
+                {newsFiles.length > 0
+                  ? `${newsFiles.length} obrázek vybrán: ${newsFiles.map((f) => f.name).join(", ")}`
+                  : "Vyberte obrázky (volitelné)"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => setNewsFiles(Array.from(e.target.files ?? []))}
+                />
+              </label>
+              {newsFiles.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setNewsFiles([])}
+                  className="self-start text-white/40 hover:text-white/70 text-xs transition"
+                >
+                  Zrušit výběr
+                </button>
+              )}
+            </div>
+            <button
+              onClick={handleCreateNews}
+              disabled={newsSaving}
+              className="self-start bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2.5 rounded-lg text-sm font-medium transition"
+            >
+              {newsSaving ? "Ukládám..." : "Přidat novinku"}
+            </button>
+          </div>
+
+          <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3">Existující novinky</h3>
+          {newsLoading ? (
+            <div className="text-white/40 text-sm">Načítám...</div>
+          ) : newsList.length === 0 ? (
+            <div className="text-white/40 text-sm">Žádné novinky</div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {newsList.map((n) => (
+                <div key={n.id} className="flex items-start justify-between gap-4 bg-[#252525] border border-white/10 rounded-lg px-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-white text-sm font-medium truncate">{n.title}</div>
+                    <div className="text-white/40 text-xs mt-0.5">
+                      {new Date(n.createdAt).toLocaleDateString("cs-CZ")}
+                      {n.image.length > 0 && ` · ${n.image.length} obrázek`}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteNews(n.id, n.title)}
+                    className="text-red-400 hover:text-red-300 text-xs whitespace-nowrap transition"
+                  >
+                    Smazat
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </div>

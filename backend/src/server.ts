@@ -3,6 +3,10 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import { spamLimiter } from "./utils/authLimiter.js";
 import { logger } from "./utils/logger.js";
 import newsRoutes from "./routes/newsRoutes.js";
@@ -37,6 +41,10 @@ app.use(
   }),
 );
 
+app.use("/uploads", (_req, res, next) => {
+  res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+  next();
+}, express.static(path.join(process.cwd(), "uploads")));
 app.use("/api", webhookRoutes);
 
 app.use(express.json({ limit: "10kb" }));

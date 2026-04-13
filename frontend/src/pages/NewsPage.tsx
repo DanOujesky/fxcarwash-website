@@ -15,10 +15,16 @@ function NewsPage() {
   const [news, setNews] = useState<News[]>([]);
 
   useEffect(() => {
-    fetch(`/news.json`)
+    fetch(`${API_URL}/news`)
       .then((res) => res.json())
-      .then((data) => setNews(data));
-    console.log(API_URL);
+      .then((data: News[]) => {
+        if (data.length > 0) {
+          setNews(data);
+        } else {
+          return fetch("/news.json").then((r) => r.json()).then(setNews);
+        }
+      })
+      .catch(() => fetch("/news.json").then((r) => r.json()).then(setNews));
   }, []);
 
   return (

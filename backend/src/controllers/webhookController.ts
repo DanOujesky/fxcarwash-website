@@ -157,9 +157,15 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
             },
           });
         }
-      } catch (itemError) {
+      } catch (itemError: any) {
         logger.error(
-          { orderId, itemId: item.id, error: itemError },
+          {
+            orderId,
+            itemId: item.id,
+            itemName: item.name,
+            errorMessage: itemError?.message,
+            errorStack: itemError?.stack,
+          },
           "KRITICKÉ: Selhalo zpracování položky objednávky",
         );
       }

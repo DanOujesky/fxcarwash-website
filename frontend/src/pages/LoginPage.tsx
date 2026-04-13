@@ -56,8 +56,18 @@ function LoginPage() {
         return;
       }
 
+      const previewParam = new URLSearchParams(window.location.search).get("preview");
+      const previewCode = import.meta.env.VITE_ESHOP_PREVIEW_CODE as string | undefined;
+      // Save existing grant before clearing (user may have arrived at /login without the param)
+      const existingGrant = previewCode ? localStorage.getItem("eshop_preview_granted") : null;
       localStorage.clear();
-      window.location.href = "/moje-karty";
+      // Restore preview grant after clear so EshopGate works post-login
+      if (previewCode && (previewParam === previewCode || existingGrant === previewCode)) {
+        localStorage.setItem("eshop_preview_granted", previewCode);
+      }
+      window.location.href = previewParam
+        ? `/moje-karty?preview=${encodeURIComponent(previewParam)}`
+        : "/moje-karty";
     } catch (err) {
       console.error(err);
       setServerError("Chyba spojení se serverem");

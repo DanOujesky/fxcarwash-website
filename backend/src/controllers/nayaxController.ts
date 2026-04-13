@@ -22,7 +22,7 @@ export const refreshCards = async (req: Request, res: Response) => {
     for (const card of cards) {
       await prisma.card.update({
         where: { identifier: card.CardDetails.CardUniqueIdentifier },
-        data: { credit: card.CardCreditAttributes.Credit },
+        data: { credit: Math.round(card.CardCreditAttributes.Credit) },
       });
     }
 
