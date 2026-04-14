@@ -316,7 +316,7 @@ export const updateNews = async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Název a text jsou povinné" });
     }
     await prisma.news.update({
-      where: { id },
+      where: { id: String(id) },
       data: {
         title: title.trim(),
         text: text.trim(),
@@ -333,7 +333,7 @@ export const updateNews = async (req: Request, res: Response) => {
 export const deleteNews = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await prisma.news.delete({ where: { id } });
+    await prisma.news.delete({ where: { id: String(id) } });
     return res.json({ success: true });
   } catch (error) {
     logger.error({ error }, "deleteNews error");

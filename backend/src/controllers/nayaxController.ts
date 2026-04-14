@@ -11,7 +11,7 @@ export const refreshCards = async (req: Request, res: Response) => {
     }
 
     const cards = await fetchNayax(
-      `/operational/v1/cards?CardEmail=${encodeURIComponent(user.email)}`,
+      `/operational/v1/cards?CardEmail=${encodeURIComponent(user.email ?? "")}`,
       { method: "GET" },
     );
 
