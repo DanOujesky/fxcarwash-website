@@ -19,10 +19,11 @@ export const generateToken = (userId: string, res: Response): string => {
   const days = parseInt(process.env.JWT_COOKIE_EXPIRES_IN || "30", 10);
   const maxAge = days * 24 * 60 * 60 * 1000;
 
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie("jwt", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: isProd,
+    sameSite: isProd ? "none" : "strict",
     maxAge: maxAge,
   });
 
