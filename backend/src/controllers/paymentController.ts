@@ -140,7 +140,7 @@ export const payment = async (req: Request, res: Response) => {
       metadata: {
         userId: String(userId),
       },
-      success_url: `${process.env.FRONTEND_URL}/payment/success`,
+      success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
     });
 
@@ -185,5 +185,26 @@ export const payment = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error({ error, userId }, "Chyba při inicializaci platby");
     res.status(500).json({ error: "Chyba při inicializaci platby" });
+  }
+};
+
+export const getOrderBySession = async (req: Request, res: Response) => {
+  const { sessionId } = req.params;
+  const userId = req.user?.id;
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { stripeId: sessionId },
+      select: { orderFullNumber: true, totalPrice: true, userId: true },
+    });
+
+    if (!order || order.userId !== userId) {
+      return res.status(404).json({ error: "Objednávka nenalezena" });
+    }
+
+    return res.json({ orderFullNumber: order.orderFullNumber, totalPrice: order.totalPrice });
+  } catch (error) {
+    logger.error({ error, sessionId }, "Chyba při načítání objednávky");
+    return res.status(500).json({ error: "Chyba serveru" });
   }
 };

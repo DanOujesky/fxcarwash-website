@@ -1,13 +1,45 @@
-import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 function PaymentSuccessPage() {
+  const [searchParams] = useSearchParams();
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const sessionId = searchParams.get("session_id");
+
   useEffect(() => {
     localStorage.removeItem("order");
     localStorage.removeItem("cart");
   }, []);
+
+  useEffect(() => {
+    if (!sessionId) return;
+
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    const fetchOrder = async () => {
+      try {
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/payment/order-by-session/${sessionId}`,
+          { credentials: "include" },
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setOrderNumber(data.orderFullNumber);
+          return;
+        }
+      } catch {}
+
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(fetchOrder, 2000);
+      }
+    };
+
+    fetchOrder();
+  }, [sessionId]);
 
   return (
     <div className="min-h-screen body-bg-color pt-[121px] sm:pt-[185px] text-white">
@@ -21,6 +53,13 @@ function PaymentSuccessPage() {
           />
 
           <p className="text-lg font-medium">Platba proběhla úspěšně</p>
+
+          {orderNumber && (
+            <div className="bg-white/5 border border-white/10 rounded-lg px-6 py-3">
+              <p className="text-sm text-white/60">Číslo objednávky</p>
+              <p className="text-white font-semibold text-lg">{orderNumber}</p>
+            </div>
+          )}
 
           <div>
             <p className="text-sm text-white/70 max-w-md">
