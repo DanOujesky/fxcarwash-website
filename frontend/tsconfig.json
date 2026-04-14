@@ -4,6 +4,8 @@
     "outDir": "./dist",
     "baseUrl": ".",
     "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "paths": {
       "@shared/*": ["../shared/src/*"]
     }
