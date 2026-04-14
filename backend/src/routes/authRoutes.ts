@@ -16,7 +16,7 @@ import {
   forgetPasswordSchema,
   resetPasswordSchema,
   updateProfileSchema,
-} from "@shared/index";
+} from "@shared/index.js";
 import { validateRequest } from "../middleware/validateRequest.js";
 import { authMiddleware, softAuth } from "../middleware/authMiddleware.js";
 import {
