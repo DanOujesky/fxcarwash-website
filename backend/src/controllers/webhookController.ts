@@ -35,51 +35,110 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
   }
 
   const session = event.data.object as Stripe.Checkout.Session;
-  const orderId = session.metadata?.orderId;
   const metaUserId = session.metadata?.userId;
 
-  if (!orderId || !metaUserId) {
+  if (!metaUserId) {
     logger.error(
       { sessionId: session.id },
-      "Webhook: chybí orderId nebo userId v metadata",
+      "Webhook: chybí userId v metadata",
     );
     return res.status(400).send("Missing metadata");
   }
 
   try {
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: { items: true, user: true },
+    // Idempotency: zkontrolovat jestli objednávka již existuje (duplikátní webhook)
+    const existingOrder = await prisma.order.findUnique({
+      where: { stripeId: session.id },
     });
-
-    if (!order) {
-      logger.error({ orderId }, "Webhook: objednávka nenalezena");
-      return res.status(200).json({ message: "Order not found" });
+    if (existingOrder) {
+      logger.info({ sessionId: session.id }, "Webhook: objednávka již zpracována (duplikát)");
+      return res.status(200).json({ message: "Already processed" });
     }
 
-    if (order.userId !== metaUserId) {
+    // Načíst dočasná data objednávky
+    const checkout = await (prisma as any).pendingCheckout.findUnique({
+      where: { id: session.id },
+    });
+
+    if (!checkout) {
+      logger.error({ sessionId: session.id }, "Webhook: PendingCheckout nenalezena");
+      return res.status(200).json({ message: "Checkout not found" });
+    }
+
+    if (checkout.userId !== metaUserId) {
       logger.error(
-        { orderId, metaUserId, actualUserId: order.userId },
-        "Webhook: userId v metadata neodpovídá objednávce — možný podvod",
+        { sessionId: session.id, metaUserId, checkoutUserId: checkout.userId },
+        "Webhook: userId v metadata neodpovídá checkoutu — možný podvod",
       );
       return res.status(400).send("User mismatch");
     }
 
-    if (order.status === "PAID") {
-      logger.info({ orderId }, "Webhook: objednávka již zpracována (duplikát)");
-      return res.status(200).json({ message: "Already processed" });
-    }
+    const orderData = JSON.parse(checkout.data);
 
-    await prisma.order.update({
-      where: { id: orderId },
-      data: { status: "PAID" },
+    // Vytvořit objednávku v transakci + smazat PendingCheckout
+    const order = await prisma.$transaction(async (tx) => {
+      const yearShort = new Date().getFullYear().toString().slice(-2);
+      const fullYear = new Date().getFullYear();
+
+      const lastOrder = await tx.order.findFirst({
+        where: { orderFullNumber: { startsWith: `${yearShort}FVE` } },
+        orderBy: { orderNumberCount: "desc" },
+        select: { orderNumberCount: true },
+      });
+
+      const nextNumber = (lastOrder?.orderNumberCount ?? 0) + 1;
+      const paddedNumber = nextNumber.toString().padStart(4, "0");
+      const identifierNumber = `${fullYear}${paddedNumber}`;
+      const fullNumber = `${yearShort}FVE${paddedNumber}`;
+
+      const newOrder = await tx.order.create({
+        data: {
+          userId: checkout.userId,
+          totalPrice: orderData.totalPrice,
+          orderIdentifier: Number(identifierNumber),
+          orderNumberCount: nextNumber,
+          orderFullNumber: fullNumber,
+          stripeId: session.id,
+          status: "PAID",
+          address: orderData.address,
+          city: orderData.city,
+          zipCode: orderData.zipCode,
+          country: orderData.country,
+          phone: orderData.phone,
+          companyName: orderData.companyName,
+          companyAddress: orderData.companyAddress,
+          companyCity: orderData.companyCity,
+          companyDIC: orderData.companyDIC,
+          companyICO: orderData.companyICO,
+          companyZipCode: orderData.companyZipCode,
+          items: {
+            create: orderData.items.map((item: any) => ({
+              productId: item.productId || null,
+              name: item.name,
+              price: item.price,
+              credit: item.credit,
+              quantity: item.quantity,
+              delivery: item.delivery,
+              cardNumber: item.cardNumber || null,
+              shipping: item.shipping || null,
+            })),
+          },
+        },
+        include: { items: true, user: true },
+      });
+
+      // Smazat dočasná data
+      await (tx as any).pendingCheckout.delete({ where: { id: session.id } });
+
+      return newOrder;
     });
 
     logger.info(
-      { orderId, userId: order.userId },
-      "Objednávka označena jako PAID",
+      { orderId: order.id, userId: order.userId },
+      "Objednávka vytvořena a označena jako PAID",
     );
 
+    // Zpracovat položky (přiřadit karty, dobít kredit)
     for (const item of order.items) {
       try {
         let card;
@@ -92,7 +151,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
 
           if (!card) {
             logger.error(
-              { orderId, itemId: item.id },
+              { orderId: order.id, itemId: item.id },
               "KRITICKÉ: Žádná karta v poolu — zákazník zaplatil, karta nepřiřazena",
             );
             await sendCardPoolEmptyAlert(order, item).catch((mailErr: any) =>
@@ -112,7 +171,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
           newBalance = cardCreated.credit;
 
           logger.info(
-            { orderId, cardId: card.id, cardNumber: card.number },
+            { orderId: order.id, cardId: card.id, cardNumber: card.number },
             "Nová karta přiřazena a synchronizována s Nayax",
           );
         } else {
@@ -127,7 +186,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
             item.credit === null
           ) {
             logger.error(
-              { orderId, itemId: item.id, cardNumber: item.cardNumber },
+              { orderId: order.id, itemId: item.id, cardNumber: item.cardNumber },
               "KRITICKÉ: Karta nenalezena nebo nepatří uživateli",
             );
             continue;
@@ -141,7 +200,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
           });
 
           logger.info(
-            { orderId, cardId: card.id, addedCredit: item.credit, newBalance },
+            { orderId: order.id, cardId: card.id, addedCredit: item.credit, newBalance },
             "Kredit dobito na kartu",
           );
         }
@@ -160,7 +219,7 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
       } catch (itemError: any) {
         logger.error(
           {
-            orderId,
+            orderId: order.id,
             itemId: item.id,
             itemName: item.name,
             errorMessage: itemError?.message,
@@ -179,16 +238,16 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
     emailResults.forEach((result, i) => {
       if (result.status === "rejected") {
         logger.error(
-          { orderId, emailIndex: i, error: result.reason },
+          { orderId: order.id, emailIndex: i, error: result.reason },
           "Nepodařilo se odeslat potvrzovací email",
         );
       }
     });
 
-    logger.info({ orderId }, "Webhook zpracován úspěšně");
+    logger.info({ orderId: order.id }, "Webhook zpracován úspěšně");
     res.status(200).json({ received: true });
   } catch (err) {
-    logger.error({ orderId, err }, "Kritická chyba při zpracování webhooku");
+    logger.error({ sessionId: session.id, err }, "Kritická chyba při zpracování webhooku");
     res.status(500).send("Internal Server Error");
   }
 };

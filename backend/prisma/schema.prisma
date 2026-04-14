@@ -11,7 +11,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  // url      = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -162,6 +162,15 @@ model News {
   createdAt DateTime @default(now())
 
   creator User @relation("NewsCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+}
+
+model PendingCheckout {
+  id        String   @id // Stripe checkout session ID
+  userId    String
+  data      String   // JSON: order fields + items
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model CardWaitlist {

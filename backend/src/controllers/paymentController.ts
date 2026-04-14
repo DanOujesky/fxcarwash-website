@@ -123,89 +123,65 @@ export const payment = async (req: Request, res: Response) => {
       },
     });
 
-    const result = await prisma.$transaction(async (tx) => {
-      const yearShort = new Date().getFullYear().toString().slice(-2);
-      const fullYear = new Date().getFullYear();
-
-      const lastOrder = await tx.order.findFirst({
-        where: { orderFullNumber: { startsWith: `${yearShort}FVE` } },
-        orderBy: { orderNumberCount: "desc" },
-        select: { orderNumberCount: true },
-      });
-
-      const nextNumber = (lastOrder?.orderNumberCount ?? 0) + 1;
-      const paddedNumber = nextNumber.toString().padStart(4, "0");
-      const identifierNumber = `${fullYear}${paddedNumber}`;
-      const fullNumber = `${yearShort}FVE${paddedNumber}`;
-
-      const newOrder = await tx.order.create({
-        data: {
-          userId: userId as string,
-          totalPrice: serverTotal,
-          orderIdentifier: Number(identifierNumber),
-          orderNumberCount: nextNumber,
-          orderFullNumber: fullNumber,
-          address: order.address,
-          city: order.city,
-          zipCode: order.zipCode,
-          country: order.country,
-          phone: order.phone,
-          companyName: order.companyName,
-          companyAddress: order.companyAddress,
-          companyCity: order.companyCity,
-          companyDIC: order.companyDIC,
-          companyICO: order.companyICO,
-          companyZipCode: order.companyZipCode,
-          status: "PENDING",
-          items: {
-            create: resolvedItems.map((i) => ({
-              productId: i.original.id || null,
-              name: i.safeName,
-              price: i.safePrice,
-              credit: i.safeCredit,
-              quantity: Number(i.original.quantity) || 1,
-              delivery: !!i.original.delivery,
-              cardNumber: i.original.cardNumber || null,
-              shipping: i.original.shipping || null,
-            })),
-          },
+    // Stripe session vytvoříme BEZ uložení objednávky do DB.
+    // Objednávka se vytvoří až po potvrzení platby webhookem.
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      customer_email: order.email,
+      line_items: resolvedItems.map((i) => ({
+        price_data: {
+          currency: "czk",
+          unit_amount: Math.round(i.safePrice * 100),
+          product_data: { name: i.safeName },
         },
-      });
-
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        customer_email: order.email,
-        line_items: resolvedItems.map((i) => ({
-          price_data: {
-            currency: "czk",
-            unit_amount: Math.round(i.safePrice * 100),
-            product_data: { name: i.safeName },
-          },
-          quantity: Number(i.original.quantity) || 1,
-        })),
-        mode: "payment",
-        metadata: {
-          orderId: newOrder.id,
-          userId: String(userId),
-        },
-        success_url: `${process.env.FRONTEND_URL}/payment/success?id=${newOrder.orderIdentifier}`,
-        cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
-      });
-
-      await tx.order.update({
-        where: { id: newOrder.id },
-        data: { stripeId: session.id },
-      });
-
-      logger.info(
-        { orderId: newOrder.id, total: serverTotal, userId },
-        "Objednávka vytvořena, Stripe session zahájena",
-      );
-
-      return session.url;
+        quantity: Number(i.original.quantity) || 1,
+      })),
+      mode: "payment",
+      metadata: {
+        userId: String(userId),
+      },
+      success_url: `${process.env.FRONTEND_URL}/payment/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`,
     });
 
-    res.json({ url: result });
+    // Uložíme data objednávky dočasně — webhook je použije po zaplacení
+    await (prisma as any).pendingCheckout.create({
+      data: {
+        id: session.id,
+        userId: userId as string,
+        data: JSON.stringify({
+          totalPrice: serverTotal,
+          address: order.address || null,
+          city: order.city || null,
+          zipCode: order.zipCode || null,
+          country: order.country || null,
+          phone: order.phone || null,
+          companyName: order.companyName || null,
+          companyAddress: order.companyAddress || null,
+          companyCity: order.companyCity || null,
+          companyDIC: order.companyDIC || null,
+          companyICO: order.companyICO || null,
+          companyZipCode: order.companyZipCode || null,
+          items: resolvedItems.map((i) => ({
+            productId: i.original.id || null,
+            name: i.safeName,
+            price: i.safePrice,
+            credit: i.safeCredit,
+            quantity: Number(i.original.quantity) || 1,
+            delivery: !!i.original.delivery,
+            cardNumber: i.original.cardNumber || null,
+            shipping: i.original.shipping || null,
+          })),
+        }),
+      },
+    });
+
+    logger.info(
+      { sessionId: session.id, total: serverTotal, userId },
+      "Stripe session zahájena, čeká na platbu",
+    );
+
+    res.json({ url: session.url });
   } catch (error) {
     logger.error({ error, userId }, "Chyba při inicializaci platby");
     res.status(500).json({ error: "Chyba při inicializaci platby" });

@@ -3,10 +3,10 @@ import { prisma } from "../config/db.js";
 import { logger } from "../utils/logger.js";
 import multer from "multer";
 import path from "path";
-import { fileURLToPath } from "url";
+import fs from "fs";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const UPLOADS_DIR = path.join(__dirname, "../uploads");
+const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 
 export const uploadMiddleware = multer({
   storage: multer.diskStorage({
@@ -65,7 +65,6 @@ export const getAdminStats = async (req: Request, res: Response) => {
     const orderStats = {
       total: 0,
       paid: 0,
-      pending: 0,
       cancelled: 0,
       refunded: 0,
       shipped: 0,
@@ -73,13 +72,14 @@ export const getAdminStats = async (req: Request, res: Response) => {
     };
 
     for (const group of orderGroups) {
+      // Nezahrnovat PENDING objednávky (nezaplacené) do statistik
+      if (group.status === "PENDING") continue;
       const count = group._count;
       orderStats.total += count;
       if (group.status === "PAID") {
         orderStats.paid = count;
         orderStats.totalRevenue = group._sum.totalPrice ?? 0;
-      } else if (group.status === "PENDING") orderStats.pending = count;
-      else if (group.status === "CANCELLED") orderStats.cancelled = count;
+      } else if (group.status === "CANCELLED") orderStats.cancelled = count;
       else if (group.status === "REFUNDED") orderStats.refunded = count;
       else if (group.status === "SHIPPED") orderStats.shipped = count;
     }
@@ -95,6 +95,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
 
     const topProductsRaw = await prisma.orderItem.groupBy({
       by: ["name"],
+      where: { order: { status: { not: "PENDING" } } },
       _count: true,
       _sum: { price: true },
       orderBy: { _count: { name: "desc" } },
@@ -108,6 +109,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
     }));
 
     const recentOrdersRaw = await prisma.order.findMany({
+      where: { status: { not: "PENDING" } },
       take: 15,
       orderBy: { createdAt: "desc" },
       include: { user: { select: { email: true } } },
@@ -302,6 +304,28 @@ export const createNews = async (req: Request, res: Response) => {
     return res.json({ success: true, id: news.id });
   } catch (error) {
     logger.error({ error }, "createNews error");
+    return res.status(500).json({ error: "Chyba serveru" });
+  }
+};
+
+export const updateNews = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, text, images } = req.body as { title: string; text: string; images: string[] };
+    if (!title?.trim() || !text?.trim()) {
+      return res.status(400).json({ error: "Název a text jsou povinné" });
+    }
+    await prisma.news.update({
+      where: { id },
+      data: {
+        title: title.trim(),
+        text: text.trim(),
+        imagePath: JSON.stringify(Array.isArray(images) ? images : []),
+      },
+    });
+    return res.json({ success: true });
+  } catch (error) {
+    logger.error({ error }, "updateNews error");
     return res.status(500).json({ error: "Chyba serveru" });
   }
 };

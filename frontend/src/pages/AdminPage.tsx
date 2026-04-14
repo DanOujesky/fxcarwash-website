@@ -16,7 +16,6 @@ interface CardStats {
 interface OrderStats {
   total: number;
   paid: number;
-  pending: number;
   cancelled: number;
   refunded: number;
   shipped: number;
@@ -62,21 +61,19 @@ interface AdminStats {
 
 const statusBadge = (status: string) => {
   const map: Record<string, string> = {
-    PAID: "bg-green-500/20 text-green-400",
-    PENDING: "bg-yellow-500/20 text-yellow-400",
     CANCELLED: "bg-red-500/20 text-red-400",
     REFUNDED: "bg-purple-500/20 text-purple-400",
     SHIPPED: "bg-blue-500/20 text-blue-400",
   };
   const statusLabels: Record<string, string> = {
-    PAID: "Zaplaceno",
-    PENDING: "Čeká",
     CANCELLED: "Zrušeno",
     REFUNDED: "Vráceno",
     SHIPPED: "Odesláno",
   };
+  const cls = map[status];
+  if (!cls) return null;
   return (
-    <span className={`px-2 py-0.5 rounded text-xs font-medium ${map[status] ?? "bg-white/10 text-white/60"}`}>
+    <span className={`px-2 py-0.5 rounded text-xs font-medium ${cls}`}>
       {statusLabels[status] ?? status}
     </span>
   );
@@ -104,6 +101,15 @@ function AdminPage() {
   const [newsText, setNewsText] = useState("");
   const [newsFiles, setNewsFiles] = useState<File[]>([]);
   const [newsSaving, setNewsSaving] = useState(false);
+  const [seedingNews, setSeedingNews] = useState(false);
+
+  // Editace novinky
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editText, setEditText] = useState("");
+  const [editImages, setEditImages] = useState<string[]>([]);
+  const [editNewFiles, setEditNewFiles] = useState<File[]>([]);
+  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -151,6 +157,28 @@ function AdminPage() {
     }
   };
 
+  const handleSeedNews = async () => {
+    setSeedingNews(true);
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/news/seed`, {
+        method: "POST",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Chyba");
+      if (data.skipped) {
+        showToast({ type: "warning", title: "Přeskočeno", message: "Novinky již existují v databázi" });
+      } else {
+        showToast({ type: "success", title: "Importováno", message: `Načteno ${data.imported} novinky` });
+        fetchNews();
+      }
+    } catch (err: any) {
+      showToast({ type: "error", title: "Chyba", message: err.message });
+    } finally {
+      setSeedingNews(false);
+    }
+  };
+
   const handleCreateNews = async () => {
     if (!newsTitle.trim() || !newsText.trim()) {
       showToast({ type: "warning", title: "Chybí údaje", message: "Vyplňte název a text novinky" });
@@ -191,6 +219,53 @@ function AdminPage() {
     }
   };
 
+  const handleStartEdit = (n: NewsItem) => {
+    setEditingId(n.id);
+    setEditTitle(n.title);
+    setEditText(n.text);
+    setEditImages([...n.image]);
+    setEditNewFiles([]);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId) return;
+    if (!editTitle.trim() || !editText.trim()) {
+      showToast({ type: "warning", title: "Chybí údaje", message: "Vyplňte název a text novinky" });
+      return;
+    }
+    setEditSaving(true);
+    try {
+      let images = [...editImages];
+      if (editNewFiles.length > 0) {
+        const formData = new FormData();
+        editNewFiles.forEach((f) => formData.append("images", f));
+        const uploadRes = await fetch(`${import.meta.env.VITE_API_URL}/admin/news/upload`, {
+          method: "POST",
+          credentials: "include",
+          body: formData,
+        });
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) throw new Error(uploadData.error || "Chyba uploadu");
+        images = [...images, ...uploadData.urls];
+      }
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/news/${editingId}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: editTitle, text: editText, images }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Chyba");
+      showToast({ type: "success", title: "Uloženo", message: editTitle });
+      setEditingId(null);
+      fetchNews();
+    } catch (err: any) {
+      showToast({ type: "error", title: "Chyba", message: err.message });
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
   const handleDeleteNews = async (id: string, title: string) => {
     if (!window.confirm(`Smazat novinku "${title}"?`)) return;
     try {
@@ -200,6 +275,7 @@ function AdminPage() {
       });
       if (!res.ok) throw new Error();
       showToast({ type: "success", title: "Smazáno", message: title });
+      if (editingId === id) setEditingId(null);
       fetchNews();
     } catch {
       showToast({ type: "error", title: "Chyba", message: "Nepodařilo se smazat novinku" });
@@ -452,6 +528,7 @@ function AdminPage() {
             </>
           )}
         </div>
+
         <div className="bg-[#1b1b1b] border border-white/10 rounded-xl p-6 mb-6">
           <h2 className="text-xl font-semibold text-white mb-5">Správa novinky</h2>
 
@@ -506,24 +583,126 @@ function AdminPage() {
           {newsLoading ? (
             <div className="text-white/40 text-sm">Načítám...</div>
           ) : newsList.length === 0 ? (
-            <div className="text-white/40 text-sm">Žádné novinky</div>
+            <div className="flex flex-col gap-3">
+              <div className="text-white/40 text-sm">Žádné novinky v databázi</div>
+              <button
+                onClick={handleSeedNews}
+                disabled={seedingNews}
+                className="self-start bg-white/10 hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed text-white/80 px-5 py-2 rounded-lg text-sm font-medium transition"
+              >
+                {seedingNews ? "Importuji..." : "Importovat výchozí novinky"}
+              </button>
+            </div>
           ) : (
             <div className="flex flex-col gap-2">
               {newsList.map((n) => (
-                <div key={n.id} className="flex items-start justify-between gap-4 bg-[#252525] border border-white/10 rounded-lg px-4 py-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="text-white text-sm font-medium truncate">{n.title}</div>
-                    <div className="text-white/40 text-xs mt-0.5">
-                      {new Date(n.createdAt).toLocaleDateString("cs-CZ")}
-                      {n.image.length > 0 && ` · ${n.image.length} obrázek`}
+                <div key={n.id} className="bg-[#252525] border border-white/10 rounded-lg px-4 py-3">
+                  {editingId === n.id ? (
+                    // Editační formulář
+                    <div className="flex flex-col gap-3">
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Název novinky"
+                        className="w-full bg-[#1b1b1b] border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/30 text-sm focus:outline-none focus:border-white/30"
+                      />
+                      <textarea
+                        value={editText}
+                        onChange={(e) => setEditText(e.target.value)}
+                        placeholder="Text novinky"
+                        rows={4}
+                        className="w-full bg-[#1b1b1b] border border-white/10 rounded-lg px-3 py-2 text-white/80 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 resize-y"
+                      />
+
+                      {editImages.length > 0 && (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-white/40 text-xs">Aktuální obrázky:</span>
+                          <div className="flex flex-wrap gap-2">
+                            {editImages.map((img, i) => (
+                              <div key={i} className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-1">
+                                <span className="text-xs text-white/60 truncate max-w-[140px]">{img}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditImages(editImages.filter((_, j) => j !== i))}
+                                  className="text-red-400 hover:text-red-300 text-sm leading-none ml-1 transition"
+                                  title="Odebrat obrázek"
+                                >
+                                  ×
+                                </button>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-1">
+                        <label className="w-full bg-[#1b1b1b] border border-white/10 rounded-lg px-3 py-2 text-white/50 text-sm cursor-pointer hover:border-white/30 transition">
+                          {editNewFiles.length > 0
+                            ? `${editNewFiles.length} nový obrázek: ${editNewFiles.map((f) => f.name).join(", ")}`
+                            : "Přidat nové obrázky (volitelné)"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={(e) => setEditNewFiles(Array.from(e.target.files ?? []))}
+                          />
+                        </label>
+                        {editNewFiles.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setEditNewFiles([])}
+                            className="self-start text-white/40 hover:text-white/70 text-xs transition"
+                          >
+                            Zrušit výběr
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleSaveEdit}
+                          disabled={editSaving}
+                          className="bg-green-500 hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2 rounded-lg text-sm font-medium transition"
+                        >
+                          {editSaving ? "Ukládám..." : "Uložit změny"}
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          disabled={editSaving}
+                          className="bg-white/10 hover:bg-white/15 disabled:opacity-50 text-white/80 px-5 py-2 rounded-lg text-sm font-medium transition"
+                        >
+                          Zrušit
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    onClick={() => handleDeleteNews(n.id, n.title)}
-                    className="text-red-400 hover:text-red-300 text-xs whitespace-nowrap transition"
-                  >
-                    Smazat
-                  </button>
+                  ) : (
+                    // Zobrazení novinky
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="text-white text-sm font-medium truncate">{n.title}</div>
+                        <div className="text-white/40 text-xs mt-0.5">
+                          {new Date(n.createdAt).toLocaleDateString("cs-CZ")}
+                          {n.image.length > 0 && ` · ${n.image.length} ${n.image.length === 1 ? "obrázek" : n.image.length < 5 ? "obrázky" : "obrázků"}`}
+                        </div>
+                      </div>
+                      <div className="flex gap-3 shrink-0">
+                        <button
+                          onClick={() => handleStartEdit(n)}
+                          className="text-blue-400 hover:text-blue-300 text-xs whitespace-nowrap transition"
+                        >
+                          Upravit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteNews(n.id, n.title)}
+                          className="text-red-400 hover:text-red-300 text-xs whitespace-nowrap transition"
+                        >
+                          Smazat
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

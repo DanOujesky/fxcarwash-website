@@ -11,22 +11,22 @@ function isGranted(search: string): boolean {
   if (PREVIEW_CODE) {
     const params = new URLSearchParams(search);
     if (params.get("preview") === PREVIEW_CODE) {
-      localStorage.setItem(STORAGE_KEY, PREVIEW_CODE);
+      sessionStorage.setItem(STORAGE_KEY, PREVIEW_CODE);
       return true;
     }
   }
-  // 2. Check localStorage (persists across tabs, reloads, Stripe redirects)
-  if (PREVIEW_CODE && localStorage.getItem(STORAGE_KEY) === PREVIEW_CODE) {
+  // 2. Check sessionStorage (persists within the same tab session, clears on new tab/window)
+  if (PREVIEW_CODE && sessionStorage.getItem(STORAGE_KEY) === PREVIEW_CODE) {
     return true;
   }
   return false;
 }
 
-// Module-level: runs once on initial page load — seed localStorage from URL
+// Module-level: runs once on initial page load — seed sessionStorage from URL
 if (PREVIEW_CODE) {
   const params = new URLSearchParams(window.location.search);
   if (params.get("preview") === PREVIEW_CODE) {
-    localStorage.setItem(STORAGE_KEY, PREVIEW_CODE);
+    sessionStorage.setItem(STORAGE_KEY, PREVIEW_CODE);
   }
 }
 

@@ -1,12 +1,9 @@
 import { useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 
 function PaymentSuccessPage() {
-  const [searchParams] = useSearchParams();
-  const orderId = searchParams.get("id");
-
   useEffect(() => {
     localStorage.removeItem("order");
     localStorage.removeItem("cart");
@@ -34,12 +31,6 @@ function PaymentSuccessPage() {
               váš email.
             </p>
           </div>
-
-          {orderId && (
-            <p className="text-xs text-white/50">
-              Vaše číslo objednávky: {orderId}
-            </p>
-          )}
 
           <div className="flex flex-col gap-4 pt-6 w-full">
             <Link
