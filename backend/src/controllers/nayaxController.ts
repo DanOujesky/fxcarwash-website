@@ -4,41 +4,46 @@ import { fetchNayax } from "../services/nayaxService.js";
 import { logger } from "../utils/logger.js";
 
 export const refreshCards = async (req: Request, res: Response) => {
-  try {
-    const user = req.user;
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
+  const user = req.user;
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
 
+  try {
     const cards = await fetchNayax(
       `/operational/v1/cards?CardEmail=${encodeURIComponent(user.email ?? "")}`,
       { method: "GET" },
     );
 
-    if (!cards || cards.length === 0) {
-      return res.status(404).json({ error: "No cards found for this email" });
+    if (Array.isArray(cards) && cards.length > 0) {
+      for (const card of cards) {
+        const identifier = card.CardDetails?.CardUniqueIdentifier;
+        const credit = card.CardCreditAttributes?.Credit;
+        if (!identifier || credit == null) continue;
+
+        await prisma.card.updateMany({
+          where: { identifier, userId: user.id },
+          data: { credit: Math.round(credit) },
+        });
+      }
+
+      logger.info(
+        { userId: user.id, count: cards.length },
+        "Karty synchronizovány z Nayax",
+      );
     }
-
-    for (const card of cards) {
-      await prisma.card.update({
-        where: { identifier: card.CardDetails.CardUniqueIdentifier },
-        data: { credit: Math.round(card.CardCreditAttributes.Credit) },
-      });
-    }
-
-    const updatedCards = await prisma.card.findMany({
-      where: { userId: user.id },
-    });
-
-    logger.info(
-      { userId: user.id, count: updatedCards.length },
-      "Karty synchronizovány z Nayax",
-    );
-    res.json({ cards: updatedCards });
   } catch (error: any) {
-    logger.error({ error: error.message }, "Chyba při synchronizaci karet");
-    res.status(500).json({ error: "Failed to refresh cards" });
+    logger.warn(
+      { userId: user.id, error: error.message },
+      "Nayax sync selhal — vracím karty z DB",
+    );
   }
+
+  const dbCards = await prisma.card.findMany({
+    where: { userId: user.id },
+  });
+
+  return res.json({ cards: dbCards });
 };
 
 export const toggleCardStatus = async (req: Request, res: Response) => {

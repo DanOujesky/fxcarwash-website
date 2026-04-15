@@ -20,7 +20,7 @@ function AccountPage() {
   }, [loading, user, navigate]);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && user.role !== "ADMIN") {
       refreshCards();
     }
   }, [loading]);

@@ -103,6 +103,8 @@ function AdminPage() {
   const [newsSaving, setNewsSaving] = useState(false);
   const [seedingNews, setSeedingNews] = useState(false);
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
   // Editace novinky
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -266,15 +268,15 @@ function AdminPage() {
     }
   };
 
-  const handleDeleteNews = async (id: string, title: string) => {
-    if (!window.confirm(`Smazat novinku "${title}"?`)) return;
+  const handleDeleteNews = async (id: string) => {
+    setConfirmDeleteId(null);
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/news/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
       if (!res.ok) throw new Error();
-      showToast({ type: "success", title: "Smazáno", message: title });
+      showToast({ type: "success", title: "Smazáno", message: "Novinka byla smazána" });
       if (editingId === id) setEditingId(null);
       fetchNews();
     } catch {
@@ -447,20 +449,20 @@ function AdminPage() {
             <div className="text-white/40 text-sm">Načítám...</div>
           ) : (
             <>
-              <div className="grid grid-cols-4 gap-4 mb-8">
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
-                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Celkem objednávek</div>
-                  <div className="text-2xl font-bold text-white mt-2">{stats?.orders.total ?? 0}</div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col justify-between">
+                  <div className="text-white/50 text-xs uppercase tracking-wider">Celkem objednávek</div>
+                  <div className="text-2xl font-bold text-white">{stats?.orders.total ?? 0}</div>
                 </div>
-                <div className="col-span-2 bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
-                  <div className="text-white/50 text-xs uppercase tracking-wider mb-2">Celkový obrat</div>
-                  <div className="text-3xl font-bold text-green-400">
+                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col justify-between">
+                  <div className="text-white/50 text-xs uppercase tracking-wider">Uživatelé celkem</div>
+                  <div className="text-2xl font-bold text-blue-400">{stats?.users.total ?? 0}</div>
+                </div>
+                <div className="col-span-2 bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col justify-between">
+                  <div className="text-white/50 text-xs uppercase tracking-wider">Celkový obrat</div>
+                  <div className="text-2xl font-bold text-green-400">
                     {(stats?.orders.totalRevenue ?? 0).toLocaleString("cs-CZ")} Kč
                   </div>
-                </div>
-                <div className="bg-[#252525] border border-white/10 rounded-lg p-4 flex flex-col">
-                  <div className="text-white/50 text-xs uppercase tracking-wider flex-1">Uživatelé celkem</div>
-                  <div className="text-2xl font-bold text-blue-400 mt-2">{stats?.users.total ?? 0}</div>
                 </div>
               </div>
 
@@ -500,9 +502,8 @@ function AdminPage() {
                       <thead>
                         <tr className="border-b border-white/10">
                           <th className="text-left text-white/40 font-normal pb-2 pr-4">Číslo</th>
-                          <th className="text-left text-white/40 font-normal pb-2 pr-4">Uživatel</th>
+                          <th className="hidden sm:table-cell text-left text-white/40 font-normal pb-2 pr-4">Uživatel</th>
                           <th className="text-right text-white/40 font-normal pb-2 pr-4">Cena</th>
-                          <th className="text-left text-white/40 font-normal pb-2 pr-4">Status</th>
                           <th className="text-right text-white/40 font-normal pb-2">Datum</th>
                         </tr>
                       </thead>
@@ -510,11 +511,10 @@ function AdminPage() {
                         {stats.recentOrders.map((o, i) => (
                           <tr key={i} className="border-b border-white/5">
                             <td className="py-2.5 pr-4 text-white font-mono text-xs">{o.orderFullNumber}</td>
-                            <td className="py-2.5 pr-4 text-white/60 truncate max-w-[150px]">{o.userEmail}</td>
-                            <td className="py-2.5 pr-4 text-right text-white/80">
+                            <td className="hidden sm:table-cell py-2.5 pr-4 text-white/60 truncate max-w-[150px]">{o.userEmail}</td>
+                            <td className="py-2.5 pr-4 text-right text-white/80 whitespace-nowrap">
                               {o.totalPrice.toLocaleString("cs-CZ")} Kč
                             </td>
-                            <td className="py-2.5 pr-4">{statusBadge(o.status)}</td>
                             <td className="py-2.5 text-right text-white/40 text-xs whitespace-nowrap">
                               {new Date(o.createdAt).toLocaleDateString("cs-CZ")}
                             </td>
@@ -611,7 +611,7 @@ function AdminPage() {
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
                         placeholder="Text novinky"
-                        rows={4}
+                        rows={8}
                         className="w-full bg-[#1b1b1b] border border-white/10 rounded-lg px-3 py-2 text-white/80 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 resize-y"
                       />
 
@@ -687,19 +687,39 @@ function AdminPage() {
                           {n.image.length > 0 && ` · ${n.image.length} ${n.image.length === 1 ? "obrázek" : n.image.length < 5 ? "obrázky" : "obrázků"}`}
                         </div>
                       </div>
-                      <div className="flex gap-3 shrink-0">
-                        <button
-                          onClick={() => handleStartEdit(n)}
-                          className="text-blue-400 hover:text-blue-300 text-xs whitespace-nowrap transition"
-                        >
-                          Upravit
-                        </button>
-                        <button
-                          onClick={() => handleDeleteNews(n.id, n.title)}
-                          className="text-red-400 hover:text-red-300 text-xs whitespace-nowrap transition"
-                        >
-                          Smazat
-                        </button>
+                      <div className="flex items-center gap-3 shrink-0">
+                        {confirmDeleteId === n.id ? (
+                          <>
+                            <span className="text-white/50 text-xs">Opravdu smazat?</span>
+                            <button
+                              onClick={() => handleDeleteNews(n.id)}
+                              className="text-red-400 hover:text-red-300 text-xs font-medium whitespace-nowrap transition"
+                            >
+                              Ano
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-white/40 hover:text-white/70 text-xs whitespace-nowrap transition"
+                            >
+                              Ne
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleStartEdit(n)}
+                              className="text-blue-400 hover:text-blue-300 text-xs whitespace-nowrap transition"
+                            >
+                              Upravit
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(n.id)}
+                              className="text-red-400 hover:text-red-300 text-xs whitespace-nowrap transition"
+                            >
+                              Smazat
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}

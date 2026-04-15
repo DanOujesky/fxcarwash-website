@@ -1,5 +1,34 @@
 @import "tailwindcss";
 
+@keyframes heroFadeIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.hero-fade-in {
+  opacity: 0;
+  animation: heroFadeIn 1s ease forwards;
+}
+
+/* Exterior: zoom out + drift left */
+@keyframes kb1 {
+  0%   { transform: scale(1.12) translate(2%, 0.5%); }
+  100% { transform: scale(1.0)  translate(-0.5%, 0%); }
+}
+/* Action inside: zoom in + drift right */
+@keyframes kb2 {
+  0%   { transform: scale(1.0) translate(-1.5%, 1%); }
+  100% { transform: scale(1.1) translate(0.5%, -0.5%); }
+}
+/* Aerial: slow zoom out from center */
+@keyframes kb3 {
+  0%   { transform: scale(1.1) translate(0%, 1.5%); }
+  100% { transform: scale(1.0) translate(0%, 0%); }
+}
+
+.kb-1 { animation: kb1 8s ease-in-out forwards; }
+.kb-2 { animation: kb2 8s ease-in-out forwards; }
+.kb-3 { animation: kb3 8s ease-in-out forwards; }
+
 body {
   font-family: "Ethnocentric", sans-serif;
   color: white;

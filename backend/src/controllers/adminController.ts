@@ -110,7 +110,7 @@ export const getAdminStats = async (req: Request, res: Response) => {
 
     const recentOrdersRaw = await prisma.order.findMany({
       where: { status: { not: "PENDING" } },
-      take: 15,
+      take: 10,
       orderBy: { createdAt: "desc" },
       include: { user: { select: { email: true } } },
     });
