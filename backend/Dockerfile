@@ -12,9 +12,9 @@ RUN npm install
 COPY shared/ ./shared/
 COPY backend/ ./backend/
 
-# Build
+# Build (DATABASE_URL is only needed at runtime, dummy value for prisma generate)
 WORKDIR /app/backend
-RUN npm run build
+RUN DATABASE_URL=dummy npm run build
 
 EXPOSE 8080
 
