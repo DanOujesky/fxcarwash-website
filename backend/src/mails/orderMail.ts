@@ -53,6 +53,18 @@ export const sendOrderEmailToUser = async (
     </div>`
     : "";
 
+  const billingHtml = order.companyName
+    ? `
+    <div style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+      <h3 style="margin: 0 0 10px 0; font-size: 16px;">Fakturační údaje</h3>
+      <p style="margin: 0; color: #555; line-height: 1.5;">
+        <strong>${escapeHtml(order.companyName)}</strong><br>
+        ${escapeHtml(order.companyAddress)}, ${escapeHtml(order.companyZipCode)} ${escapeHtml(order.companyCity)}<br>
+        IČO: ${escapeHtml(order.companyICO)}${order.companyDIC ? `<br>DIČ: ${escapeHtml(order.companyDIC)}` : ""}
+      </p>
+    </div>`
+    : "";
+
   const invoicePdf: Buffer = await generateInvoice(user, order);
 
   await transporter.sendMail({
@@ -81,6 +93,8 @@ export const sendOrderEmailToUser = async (
           </table>
 
           ${addressHtml}
+
+          ${billingHtml}
 
           <div style="margin-top: 40px; text-align: center;">
             <a href="${process.env.FRONTEND_URL}/moje-karty" 
@@ -160,6 +174,19 @@ export const sendOrderEmailToCompany = async (
             ${escapeHtml(order.country)}
           </p>`
               : `<p style="color: #e67e22; font-weight: bold;">(Digitální dobití - bez dopravy)</p>`
+          }
+
+          ${
+            order.companyName
+              ? `
+          <h3 style="border-bottom: 2px solid ${adminColor}; padding-bottom: 5px; color: ${adminColor}; margin-top: 25px;">Fakturační údaje</h3>
+          <p style="line-height: 1.6;">
+            <strong>${escapeHtml(order.companyName)}</strong><br>
+            ${escapeHtml(order.companyAddress)}<br>
+            ${escapeHtml(order.companyZipCode)} ${escapeHtml(order.companyCity)}<br>
+            IČO: ${escapeHtml(order.companyICO)}${order.companyDIC ? `<br>DIČ: ${escapeHtml(order.companyDIC)}` : ""}
+          </p>`
+              : ""
           }
 
           <h3 style="border-bottom: 2px solid ${adminColor}; padding-bottom: 5px; color: ${adminColor}; margin-top: 25px;">Položky objednávky</h3>
