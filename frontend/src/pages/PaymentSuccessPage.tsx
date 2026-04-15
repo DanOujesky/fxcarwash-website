@@ -5,7 +5,7 @@ import Footer from "../components/Footer";
 
 function PaymentSuccessPage() {
   const [searchParams] = useSearchParams();
-  const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState<number | null>(null);
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
@@ -27,7 +27,7 @@ function PaymentSuccessPage() {
         );
         if (res.ok) {
           const data = await res.json();
-          setOrderNumber(data.orderFullNumber);
+          setOrderNumber(data.orderIdentifier);
           return;
         }
       } catch {}
@@ -54,13 +54,6 @@ function PaymentSuccessPage() {
 
           <p className="text-lg font-medium">Platba proběhla úspěšně</p>
 
-          {orderNumber && (
-            <div className="bg-white/5 border border-white/10 rounded-lg px-6 py-3">
-              <p className="text-sm text-white/60">Číslo objednávky</p>
-              <p className="text-white font-semibold text-lg">{orderNumber}</p>
-            </div>
-          )}
-
           <div>
             <p className="text-sm text-white/70 max-w-md">
               Děkujeme za váš nákup na fxcarwash!
@@ -70,6 +63,13 @@ function PaymentSuccessPage() {
               váš email.
             </p>
           </div>
+
+          {orderNumber && (
+            <div className="w-full border-t border-white/10 pt-5 flex flex-col items-center gap-2">
+              <p className="text-[11px] text-white/40 uppercase tracking-[0.2em]">Číslo objednávky</p>
+              <p className="text-3xl font-semibold text-green-400 tracking-wider">{orderNumber}</p>
+            </div>
+          )}
 
           <div className="flex flex-col gap-4 pt-6 w-full">
             <Link

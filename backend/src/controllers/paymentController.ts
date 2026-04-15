@@ -195,14 +195,14 @@ export const getOrderBySession = async (req: Request, res: Response) => {
   try {
     const order = await prisma.order.findUnique({
       where: { stripeId: sessionId },
-      select: { orderFullNumber: true, totalPrice: true, userId: true },
+      select: { orderFullNumber: true, orderIdentifier: true, totalPrice: true, userId: true },
     });
 
     if (!order || order.userId !== userId) {
       return res.status(404).json({ error: "Objednávka nenalezena" });
     }
 
-    return res.json({ orderFullNumber: order.orderFullNumber, totalPrice: order.totalPrice });
+    return res.json({ orderFullNumber: order.orderFullNumber, orderIdentifier: order.orderIdentifier, totalPrice: order.totalPrice });
   } catch (error) {
     logger.error({ error, sessionId }, "Chyba při načítání objednávky");
     return res.status(500).json({ error: "Chyba serveru" });
