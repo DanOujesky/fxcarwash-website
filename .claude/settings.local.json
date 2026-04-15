@@ -10,7 +10,12 @@
       "Bash(/c/Users/danyo/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1-full_build/bin/ffmpeg.exe -ss 0 -i C:/Users/danyo/Downloads/zasilka-UZHNMYRJLH6YVZW3/bříza4/DJI_0752.MP4 -t 15 -vf scale=1920:1080 -c:v libx264 -crf 23 -preset fast -an -y C:/Users/danyo/Documents/fxcarwash-website/frontend/public/videos/hero1.mp4)",
       "Bash(/c/Users/danyo/AppData/Local/Microsoft/WinGet/Packages/Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe/ffmpeg-8.1-full_build/bin/ffmpeg.exe -ss 0 -i C:/Users/danyo/Downloads/zasilka-UZHNMYRJLH6YVZW3/bříza4/DJI_0754.MP4 -t 15 -vf scale=1920:1080 -c:v libx264 -crf 23 -preset fast -an -y C:/Users/danyo/Documents/fxcarwash-website/frontend/public/videos/hero2.mp4)",
       "Bash(grep -iv \"\\\\.dng$\")",
-      "Bash(grep -r \"raw\\\\|exec\\\\|\\\\`\\\\|query\\\\|sql\" /c/Users/danyo/Documents/fxcarwash-website/backend/src --include=\"*.ts\" -i)"
+      "Bash(grep -r \"raw\\\\|exec\\\\|\\\\`\\\\|query\\\\|sql\" /c/Users/danyo/Documents/fxcarwash-website/backend/src --include=\"*.ts\" -i)",
+      "Bash(ls C:/Users/danyo/Documents/fxcarwash-website/frontend/public/*.jpg)",
+      "Bash(npx prisma:*)",
+      "Bash(node -e ':*)",
+      "Bash(npx ts-node --esm -e ':*)",
+      "Bash(ls C:/Users/danyo/Documents/fxcarwash-website/backend/.env*)"
     ]
   }
 }
