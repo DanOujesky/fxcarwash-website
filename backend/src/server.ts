@@ -41,10 +41,12 @@ app.use(
   }),
 );
 
+const uploadsPath = path.join(__dirname, "..", "uploads");
+logger.info({ uploadsPath }, "Serving uploads from");
 app.use("/uploads", (_req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
-}, express.static(path.join(__dirname, "..", "uploads")));
+}, express.static(uploadsPath));
 app.use("/api", webhookRoutes);
 
 app.use(express.json({ limit: "10kb" }));
