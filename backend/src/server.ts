@@ -4,7 +4,6 @@ import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
-import fs from "fs";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -43,20 +42,6 @@ app.use(
 );
 
 const uploadsPath = path.join(__dirname, "..", "uploads");
-app.get("/debug-uploads", (_req, res) => {
-  const p1 = uploadsPath;
-  const p2 = path.join(process.cwd(), "uploads");
-  res.json({
-    __dirname,
-    cwd: process.cwd(),
-    uploadsPath: p1,
-    exists: fs.existsSync(p1),
-    files: fs.existsSync(p1) ? fs.readdirSync(p1).slice(0, 5) : [],
-    altPath: p2,
-    altExists: fs.existsSync(p2),
-    altFiles: fs.existsSync(p2) ? fs.readdirSync(p2).slice(0, 5) : [],
-  });
-});
 app.use("/uploads", (_req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
