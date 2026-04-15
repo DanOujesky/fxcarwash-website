@@ -43,11 +43,20 @@ app.use(
 );
 
 const uploadsPath = path.join(__dirname, "..", "uploads");
-console.log("DEBUG cwd:", process.cwd());
-console.log("DEBUG __dirname:", __dirname);
-console.log("DEBUG uploadsPath:", uploadsPath);
-console.log("DEBUG uploads exists:", fs.existsSync(uploadsPath));
-console.log("DEBUG uploads files:", fs.existsSync(uploadsPath) ? fs.readdirSync(uploadsPath).slice(0, 5) : "N/A");
+app.get("/debug-uploads", (_req, res) => {
+  const p1 = uploadsPath;
+  const p2 = path.join(process.cwd(), "uploads");
+  res.json({
+    __dirname,
+    cwd: process.cwd(),
+    uploadsPath: p1,
+    exists: fs.existsSync(p1),
+    files: fs.existsSync(p1) ? fs.readdirSync(p1).slice(0, 5) : [],
+    altPath: p2,
+    altExists: fs.existsSync(p2),
+    altFiles: fs.existsSync(p2) ? fs.readdirSync(p2).slice(0, 5) : [],
+  });
+});
 app.use("/uploads", (_req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
