@@ -1,5 +1,2 @@
-[build]
-dockerfilePath = "backend/Dockerfile"
-
 [deploy]
-startCommand = "node dist/server.js"
+startCommand = "node backend/dist/server.js"
