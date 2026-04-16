@@ -118,7 +118,7 @@ export const createCardInNayax = async (
       CardHolderName: `${user.firstName} ${user.lastName}`,
       UserIdentity: null,
       CountryID: null,
-      MobileNumber: user.phone || null,
+      MobileNumber: user.phone ? user.phone.replace(/\s+/g, "") : null,
       Email: user.email,
       MemberTypeID: null,
     },
@@ -195,7 +195,7 @@ export const updateCardInNayax = async (
       ...existingCard.CardHolderDetails,
       CardHolderName: `${user.firstName} ${user.lastName}`,
       Email: user.email,
-      MobileNumber: user.phone || null,
+      MobileNumber: user.phone ? user.phone.replace(/\s+/g, "") : null,
       MemberTypeID: null,
     },
     CardCreditAttributes: {
