@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(ls \"C:\\\\Users\\\\danyo\\\\Documents\\\\fxcarwash-website\"/*.json)",
-      "Bash(node -e \"const l = require\\('./package-lock.json'\\); console.log\\('lockfileVersion:', l.lockfileVersion\\); console.log\\('workspaces in lock:', Object.keys\\(l.packages || {}\\).filter\\(k => k.startsWith\\('frontend'\\)\\).slice\\(0, 5\\)\\)\")"
+      "Bash(node -e \"const l = require\\('./package-lock.json'\\); console.log\\('lockfileVersion:', l.lockfileVersion\\); console.log\\('workspaces in lock:', Object.keys\\(l.packages || {}\\).filter\\(k => k.startsWith\\('frontend'\\)\\).slice\\(0, 5\\)\\)\")",
+      "Bash(bun add:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

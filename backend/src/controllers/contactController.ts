@@ -1,14 +1,14 @@
 import { Request, Response } from "express";
-import { transporter } from "../utils/mailer.js";
+import { resend } from "../utils/mailer.js";
 import { logger } from "../utils/logger.js";
 
 export const sendContactEmail = async (req: Request, res: Response) => {
   const { email, telephone, message } = req.body;
 
   try {
-    await transporter.sendMail({
-      from: `"FX Carwash web" <${process.env.EMAIL_FROM}>`,
-      to: process.env.FXCARWASH_EMAIL,
+    const { data, error } = await resend.emails.send({
+      from: `FX Carwash web <${process.env.EMAIL_FROM}>`,
+      to: process.env.FXCARWASH_EMAIL!,
       replyTo: email,
       subject: `Nová zpráva z kontaktního formuláře`,
       html: `
@@ -39,10 +39,15 @@ export const sendContactEmail = async (req: Request, res: Response) => {
       `,
     });
 
-    logger.info({ email }, "Kontaktní formulář odeslán");
+    if (error) {
+      logger.error({ error }, "Resend API vrátila chybu");
+      return res.status(500).json({ error: "Nepodařilo se odeslat zprávu. Zkuste to prosím znovu." });
+    }
+
+    logger.info({ email, messageId: data?.id }, "Kontaktní formulář odeslán");
     res.status(200).json({ status: "success", message: "Zpráva byla úspěšně odeslána." });
-  } catch (err) {
-    logger.error({ err }, "Chyba při odesílání kontaktního emailu");
+  } catch (err: any) {
+    logger.error({ err, message: err?.message }, "Chyba při odesílání kontaktního emailu");
     res.status(500).json({ error: "Nepodařilo se odeslat zprávu. Zkuste to prosím znovu." });
   }
 };

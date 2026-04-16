@@ -1,4 +1,5 @@
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 export const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
@@ -12,3 +13,5 @@ export const transporter = nodemailer.createTransport({
     rejectUnauthorized: true,
   },
 });
+
+export const resend = new Resend(process.env.EMAIL_PASS);
