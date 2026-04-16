@@ -1,12 +1,11 @@
-import { User } from "@prisma/client";
-import { transporter } from "../utils/mailer";
+import { resend } from "../utils/mailer.js";
 
 export const sendVerificationEmail = async (email: string, code: string) => {
   const brandColor = "#2ecc71";
   const darkBg = "#252525";
 
-  await transporter.sendMail({
-    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "Ověřovací kód",
     html: `
@@ -18,7 +17,7 @@ export const sendVerificationEmail = async (email: string, code: string) => {
         <div style="padding: 40px 30px; text-align: center; background-color: #ffffff;">
           <h3 style="color: #333; margin-bottom: 10px;">Ověření identity</h3>
           <p style="color: #666; font-size: 15px; line-height: 1.5;">
-            Obdrželi jsme žádost o obnovu hesla k Vašemu účtu. <br> 
+            Obdrželi jsme žádost o obnovu hesla k Vašemu účtu. <br>
             Pro pokračování použijte prosím následující kód:
           </p>
 

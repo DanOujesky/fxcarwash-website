@@ -1,5 +1,5 @@
 import { User, Order, OrderItem } from "@prisma/client";
-import { transporter } from "../utils/mailer";
+import { resend } from "../utils/mailer.js";
 import { generateInvoice } from "../services/invoiceService";
 import { logger } from "../utils/logger.js";
 
@@ -67,8 +67,8 @@ export const sendOrderEmailToUser = async (
 
   const invoicePdf: Buffer = await generateInvoice(user, order);
 
-  await transporter.sendMail({
-    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: user.email,
     subject: `Potvrzení objednávky č. ${order.orderIdentifier}`,
     html: `
@@ -113,7 +113,6 @@ export const sendOrderEmailToUser = async (
       {
         filename: `faktura_${order.orderIdentifier}.pdf`,
         content: invoicePdf,
-        contentType: "application/pdf",
       },
     ],
   });
@@ -145,9 +144,9 @@ export const sendOrderEmailToCompany = async (
 
   const invoicePdf: Buffer = await generateInvoice(user, order);
 
-  await transporter.sendMail({
-    from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
-    to: process.env.FXCARWASH_EMAIL,
+  await resend.emails.send({
+    from: `Systém FX Carwash <${process.env.EMAIL_FROM}>`,
+    to: process.env.FXCARWASH_EMAIL!,
     subject: `NOVÁ OBJEDNÁVKA: ${user.lastName} (${order.orderIdentifier})`,
     html: `
       <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #ddd;">
@@ -206,7 +205,6 @@ export const sendOrderEmailToCompany = async (
       {
         filename: `faktura_${order.orderIdentifier}.pdf`,
         content: invoicePdf,
-        contentType: "application/pdf",
       },
     ],
   });
@@ -215,9 +213,9 @@ export const sendOrderEmailToCompany = async (
 export const sendLowStockAlert = async (remainingCards: number) => {
   logger.warn({ remainingCards }, "Odesílám upozornění na nízkou zásobu karet");
 
-  await transporter.sendMail({
-    from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
-    to: process.env.FXCARWASH_EMAIL,
+  await resend.emails.send({
+    from: `Systém FX Carwash <${process.env.EMAIL_FROM}>`,
+    to: process.env.FXCARWASH_EMAIL!,
     subject: `⚠️ UPOZORNĚNÍ: Nízká zásoba karet (zbývá ${remainingCards} ks)`,
     html: `
       <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #f39c12; border-radius: 8px;">
@@ -240,8 +238,8 @@ export const sendWaitlistAvailabilityEmail = async (
   const brandColor = "#2ecc71";
   const darkBg = "#252525";
 
-  await transporter.sendMail({
-    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "FX Karty jsou opět skladem!",
     html: `
@@ -284,9 +282,9 @@ export const sendCardPoolEmptyAlert = async (order: any, item: any) => {
     "KRITICKÉ: Pool karet prázdný po platbě",
   );
 
-  await transporter.sendMail({
-    from: `"Systém FX Carwash" <${process.env.EMAIL_FROM}>`,
-    to: process.env.FXCARWASH_EMAIL,
+  await resend.emails.send({
+    from: `Systém FX Carwash <${process.env.EMAIL_FROM}>`,
+    to: process.env.FXCARWASH_EMAIL!,
     subject: `🚨 KRITICKÉ: Zákazník zaplatil ale karta není k dispozici! Objednávka ${order.orderIdentifier}`,
     html: `
       <div style="font-family: 'Segoe UI', sans-serif; max-width: 600px; margin: 0 auto; border: 2px solid #e74c3c; border-radius: 8px;">
