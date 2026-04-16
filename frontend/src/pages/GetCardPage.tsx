@@ -53,8 +53,7 @@ function GetCardPage() {
       temp_id: crypto.randomUUID(),
       name: "Objednání nové FX karty",
       price: creditValue,
-      delivery:
-        data.shipping === "cp" || (data.shipping === "op" && !user.address),
+      delivery: true,
       shipping: data.shipping,
       quantity: quantityValue,
       credit: creditValue,
