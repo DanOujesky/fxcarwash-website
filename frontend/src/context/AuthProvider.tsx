@@ -47,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/me`, {
         credentials: "include",
+        cache: "no-store",
       });
 
       if (res.status === 401) {
