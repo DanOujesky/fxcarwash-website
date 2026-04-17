@@ -7,4 +7,4 @@ export const SHIPPING_FEES: Record<string, number> = {
   op: 0,
 };
 
-export const LOW_STOCK_THRESHOLD = 10;
+export const LOW_STOCK_THRESHOLD = 6;

@@ -7,7 +7,6 @@ import {
   LOW_STOCK_THRESHOLD,
   ALLOWED_CREDITS,
 } from "../constants/products.js";
-import { sendLowStockAlert } from "../mails/orderMail.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 
@@ -89,19 +88,6 @@ export const payment = async (req: Request, res: Response) => {
         availableCards,
         outOfStock: true,
       });
-    }
-
-    if (availableCards - deliveryCount <= LOW_STOCK_THRESHOLD) {
-      logger.warn(
-        { remaining: availableCards - deliveryCount },
-        "Nízká zásoba karet",
-      );
-      sendLowStockAlert(availableCards - deliveryCount).catch((err: any) =>
-        logger.error(
-          { err },
-          "Nepodařilo se odeslat upozornění na nízkou zásobu",
-        ),
-      );
     }
   }
 
@@ -188,20 +174,29 @@ export const payment = async (req: Request, res: Response) => {
 };
 
 export const getOrderBySession = async (req: Request, res: Response) => {
-  const { sessionId } = req.params;
+  const sessionId = req.params.sessionId as string;
   const userId = req.user?.id;
 
   try {
     const order = await prisma.order.findUnique({
       where: { stripeId: sessionId },
-      select: { orderFullNumber: true, orderIdentifier: true, totalPrice: true, userId: true },
+      select: {
+        orderFullNumber: true,
+        orderIdentifier: true,
+        totalPrice: true,
+        userId: true,
+      },
     });
 
     if (!order || order.userId !== userId) {
       return res.status(404).json({ error: "Objednávka nenalezena" });
     }
 
-    return res.json({ orderFullNumber: order.orderFullNumber, orderIdentifier: order.orderIdentifier, totalPrice: order.totalPrice });
+    return res.json({
+      orderFullNumber: order.orderFullNumber,
+      orderIdentifier: order.orderIdentifier,
+      totalPrice: order.totalPrice,
+    });
   } catch (error) {
     logger.error({ error, sessionId }, "Chyba při načítání objednávky");
     return res.status(500).json({ error: "Chyba serveru" });

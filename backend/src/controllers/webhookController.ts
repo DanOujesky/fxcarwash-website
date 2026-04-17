@@ -10,7 +10,9 @@ import {
   sendOrderEmailToUser,
   sendOrderEmailToCompany,
   sendCardPoolEmptyAlert,
+  sendLowStockAlert,
 } from "../mails/orderMail.js";
+import { LOW_STOCK_THRESHOLD } from "../constants/products.js";
 import { logger } from "../utils/logger.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -226,6 +228,21 @@ export const handleStripeWebhook = async (req: Request, res: Response) => {
             errorStack: itemError?.stack,
           },
           "KRITICKÉ: Selhalo zpracování položky objednávky",
+        );
+      }
+    }
+
+    const deliveryItemCount = order.items
+      .filter((i) => i.delivery)
+      .reduce((sum, i) => sum + i.quantity, 0);
+
+    if (deliveryItemCount > 0) {
+      const remainingCards = await prisma.card.count({
+        where: { userId: null, status: "IN_STOCK" },
+      });
+      if (remainingCards <= LOW_STOCK_THRESHOLD) {
+        sendLowStockAlert(remainingCards).catch((err: any) =>
+          logger.error({ err }, "Nepodařilo se odeslat upozornění na nízkou zásobu"),
         );
       }
     }
