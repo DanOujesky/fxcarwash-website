@@ -163,11 +163,12 @@ const login = async (req: Request, res: Response) => {
 };
 
 const logout = async (req: Request, res: Response) => {
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie("jwt", "", {
     expires: new Date(0),
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    secure: isProd,
+    sameSite: isProd ? "none" : "strict",
   });
   res.status(200).json({
     status: "success",

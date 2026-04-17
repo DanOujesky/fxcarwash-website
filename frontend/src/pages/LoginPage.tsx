@@ -115,23 +115,7 @@ function LoginPage() {
           </div>
 
           <div className="flex flex-col">
-            <div className="flex justify-between items-center">
-              <Inputlabel white text="Heslo" />
-
-              <button
-                type="button"
-                className="text-white text-sm hover:underline"
-                onClick={() => {
-                  const currentEmail = getValues("email");
-                  navigate("/forgotPassword", {
-                    state: { email: currentEmail },
-                  });
-                }}
-              >
-                Zapomenuté heslo?
-              </button>
-            </div>
-
+            <Inputlabel white text="Heslo" />
             <input
               {...register("password")}
               type="password"
@@ -157,6 +141,19 @@ function LoginPage() {
           >
             Nemáte účet? Zaregistrujte se
           </Link>
+
+          <button
+            type="button"
+            className="text-white text-sm hover:underline text-center"
+            onClick={() => {
+              const currentEmail = getValues("email");
+              navigate("/forgotPassword", {
+                state: { email: currentEmail },
+              });
+            }}
+          >
+            Zapomenuté heslo?
+          </button>
 
           <div className="flex flex-col gap-4 pt-4">
             <button
