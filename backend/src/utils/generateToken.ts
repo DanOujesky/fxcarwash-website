@@ -23,7 +23,7 @@ export const generateToken = (userId: string, res: Response): string => {
   res.cookie("jwt", token, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : "strict",
+    sameSite: isProd ? "lax" : "strict",
     maxAge: maxAge,
   });
 

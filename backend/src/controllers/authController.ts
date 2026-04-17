@@ -168,7 +168,7 @@ const logout = async (req: Request, res: Response) => {
     expires: new Date(0),
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : "strict",
+    sameSite: isProd ? "lax" : "strict",
   });
   res.status(200).json({
     status: "success",
