@@ -126,7 +126,7 @@ export const payment = async (req: Request, res: Response) => {
     // Stripe session vytvoříme BEZ uložení objednávky do DB.
     // Objednávka se vytvoří až po potvrzení platby webhookem.
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
+      automatic_payment_methods: { enabled: true },
       customer_email: order.email,
       line_items: resolvedItems.map((i) => ({
         price_data: {
