@@ -58,10 +58,21 @@ function OverviewPage() {
       if (res.ok) {
         window.location.href = data.url;
       } else if (data.outOfStock) {
+        const availableCards = data.availableCards ?? 0;
         setStockError({
           message: data.error,
-          availableCards: data.availableCards ?? 0,
+          availableCards,
         });
+        showToast({
+          type: "error",
+          title:
+            availableCards === 0
+              ? "Karty nejsou momentálně na skladě"
+              : "Nedostatek karet na skladě",
+          message: data.error,
+          duration: 8000,
+        });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         showToast({
           type: "error",
