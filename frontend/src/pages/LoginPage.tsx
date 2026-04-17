@@ -128,7 +128,7 @@ function LoginPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
                 tabIndex={-1}
                 aria-label={showPassword ? "Skrýt heslo" : "Zobrazit heslo"}
               >
