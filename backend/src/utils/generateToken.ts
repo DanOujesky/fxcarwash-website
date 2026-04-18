@@ -25,6 +25,9 @@ export const generateToken = (userId: string, res: Response): string => {
     secure: isProd,
     sameSite: isProd ? "lax" : "strict",
     maxAge: maxAge,
+    ...(isProd && process.env.COOKIE_DOMAIN
+      ? { domain: process.env.COOKIE_DOMAIN }
+      : {}),
   });
 
   return token;

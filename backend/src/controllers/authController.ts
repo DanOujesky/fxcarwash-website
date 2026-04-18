@@ -169,6 +169,9 @@ const logout = async (req: Request, res: Response) => {
     httpOnly: true,
     secure: isProd,
     sameSite: isProd ? "lax" : "strict",
+    ...(isProd && process.env.COOKIE_DOMAIN
+      ? { domain: process.env.COOKIE_DOMAIN }
+      : {}),
   });
   res.status(200).json({
     status: "success",
