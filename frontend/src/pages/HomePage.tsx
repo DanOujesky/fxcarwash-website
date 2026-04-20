@@ -44,8 +44,9 @@ function HomePage() {
         ))}
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-black/5 to-transparent" />
+        <div className="absolute inset-0 sm:bg-black/40" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 sm:from-black/85 via-black/10 sm:via-black/15 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 sm:from-black/60 via-transparent sm:via-black/10 to-transparent" />
 
         {/* Text */}
         <div className="absolute bottom-12 left-6 sm:bottom-16 sm:left-16 flex flex-col gap-3 sm:gap-4 max-w-[85vw] sm:max-w-2xl">
