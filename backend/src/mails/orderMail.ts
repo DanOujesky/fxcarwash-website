@@ -3,16 +3,6 @@ import { resend } from "../utils/mailer.js";
 import { generateInvoice } from "../services/invoiceService";
 import { logger } from "../utils/logger.js";
 
-const sendWithLog = async (payload: Parameters<typeof resend.emails.send>[0], context: string) => {
-  const { data, error } = await resend.emails.send(payload);
-  if (error) {
-    logger.error({ error, to: payload.to, subject: payload.subject }, `Resend chyba: ${context}`);
-    throw new Error(`Email se nepodařilo odeslat (${context}): ${error.message}`);
-  }
-  logger.info({ messageId: data?.id, to: payload.to }, `Email odeslán: ${context}`);
-  return data;
-};
-
 const escapeHtml = (value: string | null | undefined): string => {
   if (!value) return "";
   return value
@@ -77,7 +67,7 @@ export const sendOrderEmailToUser = async (
 
   const invoicePdf: Buffer = await generateInvoice(user, order);
 
-  await sendWithLog({
+  await resend.emails.send({
     from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: user.email,
     subject: `Potvrzení objednávky č. ${order.orderIdentifier}`,
@@ -154,7 +144,7 @@ export const sendOrderEmailToCompany = async (
 
   const invoicePdf: Buffer = await generateInvoice(user, order);
 
-  await sendWithLog({
+  await resend.emails.send({
     from: `Systém FX Carwash <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL!,
     subject: `NOVÁ OBJEDNÁVKA: ${user.lastName} (${order.orderIdentifier})`,
@@ -223,7 +213,7 @@ export const sendOrderEmailToCompany = async (
 export const sendLowStockAlert = async (remainingCards: number) => {
   logger.warn({ remainingCards }, "Odesílám upozornění na nízkou zásobu karet");
 
-  await sendWithLog({
+  await resend.emails.send({
     from: `Systém FX Carwash <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL!,
     subject: `⚠️ UPOZORNĚNÍ: Nízká zásoba karet (zbývá ${remainingCards} ks)`,
@@ -248,7 +238,7 @@ export const sendWaitlistAvailabilityEmail = async (
   const brandColor = "#2ecc71";
   const darkBg = "#252525";
 
-  await sendWithLog({
+  await resend.emails.send({
     from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "FX Karty jsou opět skladem!",
@@ -292,7 +282,7 @@ export const sendCardPoolEmptyAlert = async (order: any, item: any) => {
     "KRITICKÉ: Pool karet prázdný po platbě",
   );
 
-  await sendWithLog({
+  await resend.emails.send({
     from: `Systém FX Carwash <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL!,
     subject: `🚨 KRITICKÉ: Zákazník zaplatil ale karta není k dispozici! Objednávka ${order.orderIdentifier}`,
