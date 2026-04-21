@@ -4,8 +4,6 @@ import express9 from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import path2 from "path";
-import { fileURLToPath } from "url";
 
 // src/utils/authLimiter.ts
 import rateLimit from "express-rate-limit";
@@ -66,6 +64,62 @@ var logger = pino({
   transport: process.env.NODE_ENV !== "production" ? { target: "pino-pretty" } : void 0
 });
 
+// src/utils/uploads.ts
+import path from "path";
+import fs from "fs/promises";
+import fsSync from "fs";
+import crypto from "crypto";
+import sharp from "sharp";
+import { fileURLToPath } from "url";
+var __filename = fileURLToPath(import.meta.url);
+var __dirname = path.dirname(__filename);
+var UPLOADS_DIR = process.env.UPLOADS_DIR ? path.resolve(process.env.UPLOADS_DIR) : path.resolve(__dirname, "..", "uploads");
+var MAX_IMAGE_WIDTH = 1920;
+var WEBP_QUALITY = 82;
+sharp.cache(false);
+sharp.concurrency(1);
+fsSync.mkdirSync(UPLOADS_DIR, { recursive: true });
+function randomName() {
+  return `${Date.now()}-${crypto.randomBytes(6).toString("hex")}.webp`;
+}
+async function processImageToWebp(buffer) {
+  const filename = randomName();
+  const target = path.join(UPLOADS_DIR, filename);
+  await sharp(buffer, { failOn: "error" }).rotate().resize({
+    width: MAX_IMAGE_WIDTH,
+    withoutEnlargement: true,
+    fit: "inside"
+  }).webp({ quality: WEBP_QUALITY, effort: 4 }).toFile(target);
+  return filename;
+}
+function isManagedUploadName(name) {
+  if (typeof name !== "string") return false;
+  if (name.startsWith("/") || name.startsWith("http://") || name.startsWith("https://")) {
+    return false;
+  }
+  return /^[A-Za-z0-9._-]+$/.test(name) && !name.includes("..");
+}
+async function deleteUploadedImage(name) {
+  if (!isManagedUploadName(name)) return;
+  const target = path.join(UPLOADS_DIR, name);
+  const resolved = path.resolve(target);
+  if (!resolved.startsWith(path.resolve(UPLOADS_DIR) + path.sep)) return;
+  try {
+    await fs.unlink(resolved);
+  } catch (err) {
+    if (err?.code !== "ENOENT") {
+      logger.warn({ err, name }, "deleteUploadedImage failed");
+    }
+  }
+}
+async function deleteUploadedImages(names) {
+  await Promise.all(names.map((n) => deleteUploadedImage(n)));
+}
+function diffRemovedImages(oldList, newList) {
+  const keep = new Set(newList);
+  return oldList.filter((n) => !keep.has(n));
+}
+
 // src/routes/newsRoutes.ts
 import express from "express";
 
@@ -120,7 +174,7 @@ import express2 from "express";
 
 // src/controllers/authController.ts
 import bcrypt from "bcrypt";
-import crypto from "crypto";
+import crypto2 from "crypto";
 
 // src/utils/generateToken.ts
 import jwt from "jsonwebtoken";
@@ -266,7 +320,7 @@ var requestPasswordReset = async (req, res) => {
       message: "Pokud je email registrov\xE1n, k\xF3d byl odesl\xE1n"
     });
   }
-  const resetCode = crypto.randomInt(1e5, 1e6).toString();
+  const resetCode = crypto2.randomInt(1e5, 1e6).toString();
   await prisma.user.update({
     where: { email },
     data: {
@@ -2367,61 +2421,6 @@ var adminMiddleware = (req, res, next) => {
 
 // src/controllers/adminController.ts
 import multer from "multer";
-
-// src/utils/uploads.ts
-import path from "path";
-import fs from "fs/promises";
-import fsSync from "fs";
-import crypto2 from "crypto";
-import sharp from "sharp";
-var UPLOADS_DIR = path.join(process.cwd(), "uploads");
-var MAX_IMAGE_WIDTH = 1920;
-var WEBP_QUALITY = 82;
-sharp.cache(false);
-sharp.concurrency(1);
-fsSync.mkdirSync(UPLOADS_DIR, { recursive: true });
-function randomName() {
-  return `${Date.now()}-${crypto2.randomBytes(6).toString("hex")}.webp`;
-}
-async function processImageToWebp(buffer) {
-  const filename = randomName();
-  const target = path.join(UPLOADS_DIR, filename);
-  await sharp(buffer, { failOn: "error" }).rotate().resize({
-    width: MAX_IMAGE_WIDTH,
-    withoutEnlargement: true,
-    fit: "inside"
-  }).webp({ quality: WEBP_QUALITY, effort: 4 }).toFile(target);
-  return filename;
-}
-function isManagedUploadName(name) {
-  if (typeof name !== "string") return false;
-  if (name.startsWith("/") || name.startsWith("http://") || name.startsWith("https://")) {
-    return false;
-  }
-  return /^[A-Za-z0-9._-]+$/.test(name) && !name.includes("..");
-}
-async function deleteUploadedImage(name) {
-  if (!isManagedUploadName(name)) return;
-  const target = path.join(UPLOADS_DIR, name);
-  const resolved = path.resolve(target);
-  if (!resolved.startsWith(path.resolve(UPLOADS_DIR) + path.sep)) return;
-  try {
-    await fs.unlink(resolved);
-  } catch (err) {
-    if (err?.code !== "ENOENT") {
-      logger.warn({ err, name }, "deleteUploadedImage failed");
-    }
-  }
-}
-async function deleteUploadedImages(names) {
-  await Promise.all(names.map((n) => deleteUploadedImage(n)));
-}
-function diffRemovedImages(oldList, newList) {
-  const keep = new Set(newList);
-  return oldList.filter((n) => !keep.has(n));
-}
-
-// src/controllers/adminController.ts
 var MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 var MAX_UPLOAD_COUNT = 10;
 var uploadMiddleware = multer({
@@ -2879,7 +2878,6 @@ router8.post("/", contactLimiter, validateRequest(contactSchema), sendContactEma
 var contactRoutes_default = router8;
 
 // src/server.ts
-var __dirname = path2.dirname(fileURLToPath(import.meta.url));
 var app = express9();
 app.set("trust proxy", 1);
 app.use(helmet());
@@ -2896,11 +2894,14 @@ app.use(
     credentials: true
   })
 );
-var uploadsPath = path2.join(__dirname, "..", "uploads");
+logger.info({ UPLOADS_DIR }, "serving uploads from");
 app.use("/uploads", (_req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
-}, express9.static(uploadsPath));
+}, express9.static(UPLOADS_DIR, {
+  fallthrough: false,
+  maxAge: "7d"
+}));
 app.use("/api", webhookRoutes_default);
 app.use(express9.json({ limit: "10kb" }));
 app.use(cookieParser());

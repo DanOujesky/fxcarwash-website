@@ -7,7 +7,8 @@
       "Bash(npm run *)",
       "Bash(npx prisma *)",
       "Bash(node -e \"const net = require\\('net'\\); const s = net.createConnection\\({host: 'ep-weathered-river-agzrg2lt-pooler.c-2.eu-central-1.aws.neon.tech', port: 5432, timeout: 8000}\\); s.on\\('connect', \\(\\) => { console.log\\('TCP connect OK'\\); s.end\\(\\); }\\); s.on\\('timeout', \\(\\) => { console.log\\('TCP TIMEOUT \\(port blocked or host unreachable\\)'\\); s.destroy\\(\\); }\\); s.on\\('error', e => console.log\\('TCP ERROR:', e.code, e.message\\)\\);\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(DATABASE_URL=postgresql://dummy:dummy@localhost:5432/dummy npx tsup)"
     ]
   }
 }

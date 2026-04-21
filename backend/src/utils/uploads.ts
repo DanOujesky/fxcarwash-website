@@ -3,9 +3,17 @@ import fs from "fs/promises";
 import fsSync from "fs";
 import crypto from "crypto";
 import sharp from "sharp";
+import { fileURLToPath } from "url";
 import { logger } from "./logger.js";
 
-export const UPLOADS_DIR = path.join(process.cwd(), "uploads");
+// Anchor to the compiled file location (backend/dist), not process.cwd(),
+// so the path is stable regardless of where `node` is invoked from
+// (Railway starts with `node backend/dist/server.js` from the repo root).
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+export const UPLOADS_DIR = process.env.UPLOADS_DIR
+  ? path.resolve(process.env.UPLOADS_DIR)
+  : path.resolve(__dirname, "..", "uploads");
 export const MAX_IMAGE_WIDTH = 1920;
 export const WEBP_QUALITY = 82;
 
