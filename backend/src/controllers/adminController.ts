@@ -2,35 +2,48 @@ import { Request, Response } from "express";
 import { prisma } from "../config/db.js";
 import { logger } from "../utils/logger.js";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import {
+  processImageToWebp,
+  deleteUploadedImages,
+  diffRemovedImages,
+} from "../utils/uploads.js";
 
-const UPLOADS_DIR = path.join(process.cwd(), "uploads");
-fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+const MAX_UPLOAD_COUNT = 10;
 
-export const uploadMiddleware = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-    },
-  }),
-  limits: { fileSize: 10 * 1024 * 1024 },
+const uploadMiddleware = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: MAX_UPLOAD_COUNT },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith("image/")) cb(null, true);
     else cb(new Error("Pouze obrázky"));
   },
-}).array("images", 10);
+}).array("images", MAX_UPLOAD_COUNT);
 
 export const uploadImages = (req: Request, res: Response) => {
-  uploadMiddleware(req, res, (err) => {
+  uploadMiddleware(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
     const files = (req.files as Express.Multer.File[]) ?? [];
-    const urls = files.map((f) => f.filename);
-    return res.json({ urls });
+    if (files.length === 0) return res.json({ urls: [] });
+
+    try {
+      const urls: string[] = [];
+      for (const file of files) {
+        const filename = await processImageToWebp(file.buffer);
+        urls.push(filename);
+      }
+      return res.json({ urls });
+    } catch (error) {
+      logger.error({ error }, "uploadImages: konverze do WebP selhala");
+      return res.status(400).json({ error: "Obrázek nelze zpracovat" });
+    }
   });
 };
+
+function sanitizeImageList(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  return input.filter((s): s is string => typeof s === "string" && s.length > 0 && s.length < 512);
+}
 
 export const getAdminStats = async (req: Request, res: Response) => {
   try {
@@ -247,24 +260,21 @@ export const seedLegacyNews = async (req: Request, res: Response) => {
     const legacyTitles = new Set(LEGACY_NEWS.map((n) => n.title));
 
     const existing = await prisma.news.findMany({
-      select: { id: true, title: true, imagePath: true },
+      select: { id: true, title: true, images: true },
     });
 
     if (existing.length > 0) {
-      // Oprav cesty obrázků u legacy novinek (ty nemají /images/ prefix)
       let fixed = 0;
       for (const item of existing) {
         if (!legacyTitles.has(item.title)) continue;
-        let images: string[];
-        try { images = JSON.parse(item.imagePath); } catch { images = [item.imagePath]; }
-        const hasWrongPaths = images.some((img) => !img.startsWith("/") && !img.startsWith("http"));
+        const hasWrongPaths = item.images.some((img) => !img.startsWith("/") && !img.startsWith("http"));
         if (hasWrongPaths) {
-          const fixedImages = images.map((img) =>
-            !img.startsWith("/") && !img.startsWith("http") ? `/images/${img}` : img
+          const fixedImages = item.images.map((img) =>
+            !img.startsWith("/") && !img.startsWith("http") ? `/images/${img}` : img,
           );
           await prisma.news.update({
             where: { id: item.id },
-            data: { imagePath: JSON.stringify(fixedImages) },
+            data: { images: fixedImages },
           });
           fixed++;
         }
@@ -277,7 +287,7 @@ export const seedLegacyNews = async (req: Request, res: Response) => {
         data: {
           title: item.title,
           text: item.text,
-          imagePath: JSON.stringify(item.images),
+          images: item.images,
           creatorId,
         },
       });
@@ -293,13 +303,13 @@ export const getNews = async (req: Request, res: Response) => {
   try {
     const news = await prisma.news.findMany({
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, text: true, imagePath: true, createdAt: true },
+      select: { id: true, title: true, text: true, images: true, createdAt: true },
     });
     const mapped = news.map((n) => ({
       id: n.id,
       title: n.title,
       text: n.text,
-      image: (() => { try { return JSON.parse(n.imagePath); } catch { return [n.imagePath]; } })(),
+      image: n.images,
       createdAt: n.createdAt,
     }));
     return res.json(mapped);
@@ -311,18 +321,21 @@ export const getNews = async (req: Request, res: Response) => {
 
 export const createNews = async (req: Request, res: Response) => {
   try {
-    const { title, text, images } = req.body as { title: string; text: string; images: string[] };
-    if (!title?.trim() || !text?.trim()) {
+    const { title, text, images } = req.body as { title: unknown; text: unknown; images: unknown };
+    const titleStr = typeof title === "string" ? title.trim() : "";
+    const textStr = typeof text === "string" ? text.trim() : "";
+    if (!titleStr || !textStr) {
       return res.status(400).json({ error: "Název a text jsou povinné" });
     }
     const creatorId = req.user?.id;
     if (!creatorId) return res.status(401).json({ error: "Unauthorized" });
 
+    const cleanImages = sanitizeImageList(images);
     const news = await prisma.news.create({
       data: {
-        title: title.trim(),
-        text: text.trim(),
-        imagePath: JSON.stringify(Array.isArray(images) && images.length ? images : []),
+        title: titleStr,
+        text: textStr,
+        images: cleanImages,
         creatorId,
       },
     });
@@ -336,18 +349,37 @@ export const createNews = async (req: Request, res: Response) => {
 export const updateNews = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { title, text, images } = req.body as { title: string; text: string; images: string[] };
-    if (!title?.trim() || !text?.trim()) {
+    const { title, text, images } = req.body as { title: unknown; text: unknown; images: unknown };
+    const titleStr = typeof title === "string" ? title.trim() : "";
+    const textStr = typeof text === "string" ? text.trim() : "";
+    if (!titleStr || !textStr) {
       return res.status(400).json({ error: "Název a text jsou povinné" });
     }
+
+    const existing = await prisma.news.findUnique({
+      where: { id: String(id) },
+      select: { images: true },
+    });
+    if (!existing) return res.status(404).json({ error: "Novinka nenalezena" });
+
+    const nextImages = sanitizeImageList(images);
+    const removed = diffRemovedImages(existing.images, nextImages);
+
     await prisma.news.update({
       where: { id: String(id) },
       data: {
-        title: title.trim(),
-        text: text.trim(),
-        imagePath: JSON.stringify(Array.isArray(images) ? images : []),
+        title: titleStr,
+        text: textStr,
+        images: nextImages,
       },
     });
+
+    if (removed.length > 0) {
+      deleteUploadedImages(removed).catch((err) =>
+        logger.warn({ err, removed }, "updateNews: úklid starých souborů selhal"),
+      );
+    }
+
     return res.json({ success: true });
   } catch (error) {
     logger.error({ error }, "updateNews error");
@@ -358,7 +390,21 @@ export const updateNews = async (req: Request, res: Response) => {
 export const deleteNews = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    const existing = await prisma.news.findUnique({
+      where: { id: String(id) },
+      select: { images: true },
+    });
+    if (!existing) return res.status(404).json({ error: "Novinka nenalezena" });
+
+    const images = existing.images;
     await prisma.news.delete({ where: { id: String(id) } });
+
+    if (images.length > 0) {
+      deleteUploadedImages(images).catch((err) =>
+        logger.warn({ err, images }, "deleteNews: úklid souborů selhal"),
+      );
+    }
+
     return res.json({ success: true });
   } catch (error) {
     logger.error({ error }, "deleteNews error");

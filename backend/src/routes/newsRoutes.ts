@@ -3,17 +3,17 @@ import { prisma } from "../config/db.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", async (_req, res) => {
   try {
     const news = await prisma.news.findMany({
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, text: true, imagePath: true },
+      select: { id: true, title: true, text: true, images: true },
     });
     const mapped = news.map((n) => ({
       id: n.id,
       title: n.title,
       text: n.text,
-      image: (() => { try { return JSON.parse(n.imagePath); } catch { return [n.imagePath]; } })(),
+      image: n.images,
     }));
     return res.json(mapped);
   } catch {

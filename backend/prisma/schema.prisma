@@ -157,7 +157,7 @@ model News {
   id        String   @id @default(uuid())
   title     String
   text      String
-  imagePath String
+  images    String[] @default([])
   creatorId String
   createdAt DateTime @default(now())
 

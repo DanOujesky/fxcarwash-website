@@ -1,9 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useToast } from "../context/ToastContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+function resolveImageUrl(name: string): string {
+  if (name.startsWith("/") || name.startsWith("http://") || name.startsWith("https://")) {
+    return name;
+  }
+  return `${API_URL}/uploads/${name}`;
+}
 
 interface CardStats {
   inStock: number;
@@ -547,27 +556,32 @@ function AdminPage() {
               rows={4}
               className="w-full bg-[#252525] border border-white/10 rounded-lg px-4 py-3 text-white/80 text-sm placeholder-white/30 focus:outline-none focus:border-white/30 resize-y"
             />
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-2">
               <label className="w-full bg-[#252525] border border-white/10 rounded-lg px-4 py-2.5 text-white/50 text-sm cursor-pointer hover:border-white/30 transition">
                 {newsFiles.length > 0
-                  ? `${newsFiles.length} obrázek vybrán: ${newsFiles.map((f) => f.name).join(", ")}`
+                  ? `${newsFiles.length} obrázek vybrán (bude převeden na WebP)`
                   : "Vyberte obrázky (volitelné)"}
                 <input
                   type="file"
                   accept="image/*"
                   multiple
                   className="hidden"
-                  onChange={(e) => setNewsFiles(Array.from(e.target.files ?? []))}
+                  onChange={(e) => {
+                    const picked = Array.from(e.target.files ?? []);
+                    setNewsFiles((prev) => [...prev, ...picked]);
+                    e.target.value = "";
+                  }}
                 />
               </label>
               {newsFiles.length > 0 && (
-                <button
-                  type="button"
-                  onClick={() => setNewsFiles([])}
-                  className="self-start text-white/40 hover:text-white/70 text-xs transition"
-                >
-                  Zrušit výběr
-                </button>
+                <>
+                  <span className="text-white/40 text-xs">Přetáhni pro změnu pořadí:</span>
+                  <EditNewFilesPreview
+                    files={newsFiles}
+                    setFiles={setNewsFiles}
+                    onClear={() => setNewsFiles([])}
+                  />
+                </>
               )}
             </div>
             <button
@@ -616,47 +630,38 @@ function AdminPage() {
                       />
 
                       {editImages.length > 0 && (
-                        <div className="flex flex-col gap-1">
-                          <span className="text-white/40 text-xs">Aktuální obrázky:</span>
-                          <div className="flex flex-wrap gap-2">
-                            {editImages.map((img, i) => (
-                              <div key={i} className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-1">
-                                <span className="text-xs text-white/60 truncate max-w-[140px]">{img}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => setEditImages(editImages.filter((_, j) => j !== i))}
-                                  className="text-red-400 hover:text-red-300 text-sm leading-none ml-1 transition"
-                                  title="Odebrat obrázek"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="flex flex-col gap-2">
+                          <span className="text-white/40 text-xs">Aktuální obrázky ({editImages.length}) — přetáhni pro změnu pořadí:</span>
+                          <SavedImagesGrid
+                            images={editImages}
+                            setImages={setEditImages}
+                          />
                         </div>
                       )}
 
-                      <div className="flex flex-col gap-1">
+                      <div className="flex flex-col gap-2">
                         <label className="w-full bg-[#1b1b1b] border border-white/10 rounded-lg px-3 py-2 text-white/50 text-sm cursor-pointer hover:border-white/30 transition">
                           {editNewFiles.length > 0
-                            ? `${editNewFiles.length} nový obrázek: ${editNewFiles.map((f) => f.name).join(", ")}`
+                            ? `${editNewFiles.length} nový obrázek k nahrání (klikni pro přidání dalších)`
                             : "Přidat nové obrázky (volitelné)"}
                           <input
                             type="file"
                             accept="image/*"
                             multiple
                             className="hidden"
-                            onChange={(e) => setEditNewFiles(Array.from(e.target.files ?? []))}
+                            onChange={(e) => {
+                              const picked = Array.from(e.target.files ?? []);
+                              setEditNewFiles((prev) => [...prev, ...picked]);
+                              e.target.value = "";
+                            }}
                           />
                         </label>
                         {editNewFiles.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => setEditNewFiles([])}
-                            className="self-start text-white/40 hover:text-white/70 text-xs transition"
-                          >
-                            Zrušit výběr
-                          </button>
+                          <EditNewFilesPreview
+                            files={editNewFiles}
+                            setFiles={setEditNewFiles}
+                            onClear={() => setEditNewFiles([])}
+                          />
                         )}
                       </div>
 
@@ -731,6 +736,154 @@ function AdminPage() {
       </div>
 
       <Footer />
+    </div>
+  );
+}
+
+type ReorderHandlers = {
+  draggable: true;
+  onDragStart: (e: React.DragEvent) => void;
+  onDragOver: (e: React.DragEvent) => void;
+  onDragEnter: (e: React.DragEvent) => void;
+  onDrop: (e: React.DragEvent) => void;
+  onDragEnd: (e: React.DragEvent) => void;
+  "data-dragging": boolean;
+  "data-over": boolean;
+};
+
+function useReorder<T>(items: T[], setItems: (next: T[]) => void) {
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [overIndex, setOverIndex] = useState<number | null>(null);
+
+  function handlersFor(index: number): ReorderHandlers {
+    return {
+      draggable: true,
+      onDragStart: (e) => {
+        setDragIndex(index);
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", String(index));
+      },
+      onDragOver: (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+      },
+      onDragEnter: () => {
+        if (dragIndex !== null && dragIndex !== index) setOverIndex(index);
+      },
+      onDrop: (e) => {
+        e.preventDefault();
+        const from = dragIndex;
+        setDragIndex(null);
+        setOverIndex(null);
+        if (from === null || from === index) return;
+        const next = [...items];
+        const [moved] = next.splice(from, 1);
+        next.splice(index, 0, moved);
+        setItems(next);
+      },
+      onDragEnd: () => {
+        setDragIndex(null);
+        setOverIndex(null);
+      },
+      "data-dragging": dragIndex === index,
+      "data-over": overIndex === index,
+    };
+  }
+
+  return { handlersFor };
+}
+
+const tileClass =
+  "relative group aspect-square bg-[#1b1b1b] border border-white/10 rounded overflow-hidden cursor-move transition data-[dragging=true]:opacity-40 data-[over=true]:ring-2 data-[over=true]:ring-blue-400";
+
+type SavedImagesGridProps = {
+  images: string[];
+  setImages: (next: string[]) => void;
+};
+
+function SavedImagesGrid({ images, setImages }: SavedImagesGridProps) {
+  const { handlersFor } = useReorder(images, setImages);
+  return (
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+      {images.map((img, i) => (
+        <div key={`${img}-${i}`} className={tileClass} {...handlersFor(i)}>
+          <img
+            src={resolveImageUrl(img)}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+            className="w-full h-full object-cover pointer-events-none"
+          />
+          <button
+            type="button"
+            onClick={() => setImages(images.filter((_, j) => j !== i))}
+            className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 hover:bg-red-500 text-white text-sm leading-none flex items-center justify-center transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+            title="Odebrat obrázek"
+            aria-label="Odebrat obrázek"
+          >
+            ×
+          </button>
+          <div className="absolute bottom-0 left-0 bg-black/60 text-white/80 text-[10px] font-medium px-1.5 py-0.5 rounded-tr">
+            #{i + 1}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+type EditNewFilesPreviewProps = {
+  files: File[];
+  setFiles: (next: File[]) => void;
+  onClear: () => void;
+};
+
+function EditNewFilesPreview({ files, setFiles, onClear }: EditNewFilesPreviewProps) {
+  const urls = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
+  useEffect(() => {
+    return () => {
+      urls.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [urls]);
+
+  const { handlersFor } = useReorder(files, setFiles);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        {files.map((file, i) => (
+          <div key={`${file.name}-${i}`} className={tileClass} {...handlersFor(i)}>
+            <img
+              src={urls[i]}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+              className="w-full h-full object-cover pointer-events-none"
+            />
+            <button
+              type="button"
+              onClick={() => setFiles(files.filter((_, j) => j !== i))}
+              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/70 hover:bg-red-500 text-white text-sm leading-none flex items-center justify-center transition opacity-0 group-hover:opacity-100 focus:opacity-100"
+              title={`Odebrat ${file.name}`}
+              aria-label="Odebrat soubor"
+            >
+              ×
+            </button>
+            <div className="absolute bottom-0 inset-x-0 bg-black/60 text-white/80 text-[10px] px-1 py-0.5 truncate">
+              #{i + 1} {file.name}
+            </div>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        onClick={onClear}
+        className="self-start text-white/40 hover:text-white/70 text-xs transition"
+      >
+        Zrušit výběr
+      </button>
     </div>
   );
 }

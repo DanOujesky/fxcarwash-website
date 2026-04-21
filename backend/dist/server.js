@@ -96,23 +96,17 @@ var disconnectDB = async () => {
 
 // src/routes/newsRoutes.ts
 var router = express.Router();
-router.get("/", async (req, res) => {
+router.get("/", async (_req, res) => {
   try {
     const news = await prisma.news.findMany({
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, text: true, imagePath: true }
+      select: { id: true, title: true, text: true, images: true }
     });
     const mapped = news.map((n) => ({
       id: n.id,
       title: n.title,
       text: n.text,
-      image: (() => {
-        try {
-          return JSON.parse(n.imagePath);
-        } catch {
-          return [n.imagePath];
-        }
-      })()
+      image: n.images
     }));
     return res.json(mapped);
   } catch {
@@ -147,14 +141,16 @@ var generateToken = (userId, res) => {
   res.cookie("jwt", token, {
     httpOnly: true,
     secure: isProd,
-    sameSite: isProd ? "none" : "strict",
-    maxAge
+    sameSite: isProd ? "lax" : "strict",
+    maxAge,
+    ...isProd && process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}
   });
   return token;
 };
 
 // src/utils/mailer.ts
 import nodemailer from "nodemailer";
+import { Resend } from "resend";
 var transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT) || 587,
@@ -167,13 +163,14 @@ var transporter = nodemailer.createTransport({
     rejectUnauthorized: true
   }
 });
+var resend = new Resend(process.env.EMAIL_PASS);
 
 // src/mails/verificationCodeMail.ts
 var sendVerificationEmail = async (email, code) => {
   const brandColor = "#2ecc71";
   const darkBg = "#252525";
-  await transporter.sendMail({
-    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "Ov\u011B\u0159ovac\xED k\xF3d",
     html: `
@@ -185,7 +182,7 @@ var sendVerificationEmail = async (email, code) => {
         <div style="padding: 40px 30px; text-align: center; background-color: #ffffff;">
           <h3 style="color: #333; margin-bottom: 10px;">Ov\u011B\u0159en\xED identity</h3>
           <p style="color: #666; font-size: 15px; line-height: 1.5;">
-            Obdr\u017Eeli jsme \u017E\xE1dost o obnovu hesla k Va\u0161emu \xFA\u010Dtu. <br> 
+            Obdr\u017Eeli jsme \u017E\xE1dost o obnovu hesla k Va\u0161emu \xFA\u010Dtu. <br>
             Pro pokra\u010Dov\xE1n\xED pou\u017Eijte pros\xEDm n\xE1sleduj\xEDc\xED k\xF3d:
           </p>
 
@@ -336,11 +333,13 @@ var login = async (req, res) => {
   });
 };
 var logout = async (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
   res.cookie("jwt", "", {
     expires: /* @__PURE__ */ new Date(0),
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict"
+    secure: isProd,
+    sameSite: isProd ? "lax" : "strict",
+    ...isProd && process.env.COOKIE_DOMAIN ? { domain: process.env.COOKIE_DOMAIN } : {}
   });
   res.status(200).json({
     status: "success",
@@ -348,6 +347,7 @@ var logout = async (req, res) => {
   });
 };
 var getMe = (req, res) => {
+  res.setHeader("Cache-Control", "no-store");
   res.status(200).json({ status: "success", user: req.user });
 };
 var updateProfile = async (req, res) => {
@@ -780,7 +780,532 @@ var SHIPPING_FEES = {
   cp: 0,
   op: 0
 };
-var LOW_STOCK_THRESHOLD = 10;
+var LOW_STOCK_THRESHOLD = 6;
+
+// src/controllers/paymentController.ts
+var stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+function resolveItemPrice(item, userDiscount) {
+  const credit = Number(item.credit);
+  let baseCredit = credit;
+  if (!ALLOWED_CREDITS.includes(credit) && userDiscount > 0) {
+    const derived = Math.round(credit / (1 + userDiscount / 100));
+    if (ALLOWED_CREDITS.includes(derived)) {
+      baseCredit = derived;
+    }
+  }
+  if (!ALLOWED_CREDITS.includes(baseCredit)) {
+    return null;
+  }
+  const shippingFee = item.delivery ? SHIPPING_FEES[item.shipping] ?? 0 : 0;
+  const safePrice = baseCredit + shippingFee;
+  const safeCredit = Math.round(baseCredit * (1 + userDiscount / 100));
+  return { safeName: item.name, safePrice, safeCredit };
+}
+var payment = async (req, res) => {
+  const { order } = req.body;
+  if (!req.user) {
+    return res.status(401).json({ error: "U\u017Eivatel nen\xED autentizov\xE1n" });
+  }
+  const userId = req.user.id;
+  const userDiscount = req.user.discount ?? 0;
+  const resolvedItems = [];
+  for (const item of order.items) {
+    const resolved = resolveItemPrice(item, userDiscount);
+    if (!resolved) {
+      return res.status(400).json({ error: `Neplatn\xE1 polo\u017Eka objedn\xE1vky: ${item.name}` });
+    }
+    resolvedItems.push({ original: item, ...resolved });
+  }
+  const serverTotal = resolvedItems.reduce(
+    (sum, i) => sum + i.safePrice * (Number(i.original.quantity) || 1),
+    0
+  );
+  const deliveryCount = resolvedItems.filter((i) => i.original.delivery).reduce((sum, i) => sum + (Number(i.original.quantity) || 1), 0);
+  if (deliveryCount > 0) {
+    const availableCards = await prisma.card.count({
+      where: { userId: null, status: "IN_STOCK" }
+    });
+    if (availableCards < deliveryCount) {
+      logger.error(
+        { availableCards, needed: deliveryCount },
+        "Nedostatek karet v poolu"
+      );
+      return res.status(400).json({
+        error: availableCards === 0 ? "Karty moment\xE1ln\u011B nejsou na sklad\u011B." : `Na sklad\u011B zb\xFDv\xE1 pouze ${availableCards} ${availableCards === 1 ? "karta" : availableCards < 5 ? "karty" : "karet"}.`,
+        availableCards,
+        outOfStock: true
+      });
+    }
+  }
+  try {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        phone: order.phone,
+        address: order.address || void 0,
+        city: order.city || void 0,
+        zipCode: order.zipCode || void 0,
+        country: order.country || void 0,
+        companyName: order.companyName || void 0,
+        companyICO: order.companyICO || void 0,
+        companyDIC: order.companyDIC || void 0,
+        companyAddress: order.companyAddress || void 0,
+        companyCity: order.companyCity || void 0,
+        companyZipCode: order.companyZipCode || void 0
+      }
+    });
+    const session = await stripe.checkout.sessions.create({
+      customer_email: order.email,
+      line_items: resolvedItems.map((i) => ({
+        price_data: {
+          currency: "czk",
+          unit_amount: Math.round(i.safePrice * 100),
+          product_data: { name: i.safeName }
+        },
+        quantity: Number(i.original.quantity) || 1
+      })),
+      mode: "payment",
+      metadata: {
+        userId: String(userId)
+      },
+      success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`
+    });
+    await prisma.pendingCheckout.create({
+      data: {
+        id: session.id,
+        userId,
+        data: JSON.stringify({
+          totalPrice: serverTotal,
+          address: order.address || null,
+          city: order.city || null,
+          zipCode: order.zipCode || null,
+          country: order.country || null,
+          phone: order.phone || null,
+          companyName: order.companyName || null,
+          companyAddress: order.companyAddress || null,
+          companyCity: order.companyCity || null,
+          companyDIC: order.companyDIC || null,
+          companyICO: order.companyICO || null,
+          companyZipCode: order.companyZipCode || null,
+          items: resolvedItems.map((i) => ({
+            productId: i.original.id || null,
+            name: i.safeName,
+            price: i.safePrice,
+            credit: i.safeCredit,
+            quantity: Number(i.original.quantity) || 1,
+            delivery: !!i.original.delivery,
+            cardNumber: i.original.cardNumber || null,
+            shipping: i.original.shipping || null
+          }))
+        })
+      }
+    });
+    logger.info(
+      { sessionId: session.id, total: serverTotal, userId },
+      "Stripe session zah\xE1jena, \u010Dek\xE1 na platbu"
+    );
+    res.json({ url: session.url });
+  } catch (error) {
+    logger.error({ error, userId }, "Chyba p\u0159i inicializaci platby");
+    res.status(500).json({ error: "Chyba p\u0159i inicializaci platby" });
+  }
+};
+var getOrderBySession = async (req, res) => {
+  const sessionId = req.params.sessionId;
+  const userId = req.user?.id;
+  try {
+    const order = await prisma.order.findUnique({
+      where: { stripeId: sessionId },
+      select: {
+        orderFullNumber: true,
+        orderIdentifier: true,
+        totalPrice: true,
+        userId: true
+      }
+    });
+    if (!order || order.userId !== userId) {
+      return res.status(404).json({ error: "Objedn\xE1vka nenalezena" });
+    }
+    return res.json({
+      orderFullNumber: order.orderFullNumber,
+      orderIdentifier: order.orderIdentifier,
+      totalPrice: order.totalPrice
+    });
+  } catch (error) {
+    logger.error({ error, sessionId }, "Chyba p\u0159i na\u010D\xEDt\xE1n\xED objedn\xE1vky");
+    return res.status(500).json({ error: "Chyba serveru" });
+  }
+};
+
+// src/routes/paymentRoutes.ts
+var router3 = express3.Router();
+router3.post(
+  "/create-checkout-session",
+  orderLimiter,
+  authMiddleware,
+  validateRequest(paymentSchema),
+  payment
+);
+router3.get("/order-by-session/:sessionId", authMiddleware, getOrderBySession);
+var paymentRoutes_default = router3;
+
+// src/routes/webhookRoutes.ts
+import express4 from "express";
+
+// src/controllers/webhookController.ts
+import Stripe2 from "stripe";
+
+// src/services/nayaxService.ts
+var BASE_URL = process.env.NAYAX_BASE_URL;
+var NAYAX_TOKEN = process.env.NAYAX_TOKEN;
+var ACTOR_ID = Number(process.env.NAYAX_ACTOR_ID);
+var fetchNayax = async (endpoint, options = {}) => {
+  const url = `${BASE_URL}${endpoint}`;
+  const defaultHeaders = {
+    accept: "application/json",
+    "content-type": "application/json",
+    Authorization: `Bearer ${NAYAX_TOKEN}`
+  };
+  logger.info(
+    { url, method: options.method || "GET" },
+    "Nayax API \u2192 odes\xEDl\xE1m request"
+  );
+  const response = await fetch(url, {
+    ...options,
+    headers: { ...defaultHeaders, ...options.headers }
+  });
+  const responseText = await response.text();
+  if (!response.ok) {
+    logger.error(
+      {
+        url,
+        status: response.status,
+        responseBody: responseText?.substring(0, 2e3)
+      },
+      "Nayax API \u2190 chyba"
+    );
+    throw new Error(
+      `Nayax API Error [${response.status}]: ${responseText || response.statusText}`
+    );
+  }
+  if (!responseText || !responseText.trim()) {
+    logger.info({ url, status: response.status }, "Nayax API \u2190 pr\xE1zdn\xE1 odpov\u011B\u010F");
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(responseText);
+    logger.info(
+      {
+        url,
+        status: response.status,
+        hasCardDetails: !!parsed?.CardDetails,
+        cardID: parsed?.CardDetails?.CardID ?? null
+      },
+      "Nayax API \u2190 odpov\u011B\u010F OK"
+    );
+    return parsed;
+  } catch {
+    logger.warn(
+      { url, responseText: responseText.substring(0, 500) },
+      "Nayax API \u2190 odpov\u011B\u010F nen\xED JSON"
+    );
+    return responseText;
+  }
+};
+var assignCardFromPool = async (tx, userId) => {
+  const card = await tx.card.findFirst({
+    where: { userId: null, status: "IN_STOCK" },
+    orderBy: { createdAt: "asc" }
+  });
+  if (!card) return null;
+  await tx.card.update({
+    where: { id: card.id, userId: null, status: "IN_STOCK" },
+    data: { userId }
+  });
+  return card;
+};
+var getCardByIdentifier = async (identifier) => {
+  return fetchNayax(
+    `/operational/v1/cards?CardUniqueIdentifier=${encodeURIComponent(identifier)}`,
+    { method: "GET" }
+  );
+};
+var createCardInNayax = async (user, credit, card) => {
+  const requestBody = {
+    CardDetails: {
+      ActorID: ACTOR_ID,
+      CardUniqueIdentifier: card.identifier,
+      CardDisplayNumber: card.number,
+      CardTypeID: 33,
+      PhysicalTypeID: 30000530,
+      Notes: null,
+      Status: 1,
+      ExternalApplicationUserID: null
+    },
+    CardHolderDetails: {
+      CardHolderName: `${user.firstName} ${user.lastName}`,
+      UserIdentity: null,
+      CountryID: null,
+      MobileNumber: user.phone ? user.phone.replace(/\s+/g, "") : null,
+      Email: user.email,
+      MemberTypeID: null
+    },
+    CardCreditAttributes: {
+      CurrencyID: null,
+      Credit: credit,
+      RevalueCredit: 0,
+      CreditTypeMoneyBit: true,
+      CreditAccumulateBit: true,
+      CreditSingleUseBit: false,
+      RevalueCashBit: true,
+      RevalueCreditCardBit: true,
+      AmountMonthlyReload: 0,
+      TransactionsMonthlyReload: 0,
+      DiscountTypeBit: 0,
+      DiscountValue: 0
+    },
+    CardCreditLimits: {
+      AmountDailyLimit: 0,
+      AmountWeeklyLimit: 0,
+      AmountMonthlyLimit: 0,
+      TransactionsDailyLimit: 0,
+      TransactionsWeeklyLimit: 0,
+      TransactionsMonthlyLimit: 0,
+      DiscountTransactionsTotalLimit: 0,
+      MaxRevalueAmountLimit: 0,
+      WeekDayLimitEnabledBit: false,
+      WeekDayAmountLimit: "0",
+      WeekDayTransactionLimit: "0"
+    },
+    CardDateRules: {
+      ActivationDate: null,
+      ExpirationDate: null,
+      RevalueExpirationDate: null,
+      SetSingleUseDate: null,
+      RemoveSingleUseDate: null
+    }
+  };
+  logger.info(
+    {
+      cardIdentifier: card.identifier,
+      cardNumber: card.number,
+      actorId: ACTOR_ID,
+      credit,
+      email: user.email
+    },
+    "Nayax: vytv\xE1\u0159\xEDme kartu \u2014 request body"
+  );
+  return fetchNayax(`/operational/v2/cards`, {
+    method: "POST",
+    body: JSON.stringify(requestBody)
+  });
+};
+var updateCardInNayax = async (user, credit, card, existingCard) => {
+  if (!card.cardId)
+    throw new Error("Missing Nayax CardId for update operation.");
+  const requestBody = {
+    CardDetails: {
+      ...existingCard.CardDetails,
+      Status: 1
+    },
+    CardHolderDetails: {
+      ...existingCard.CardHolderDetails,
+      CardHolderName: `${user.firstName} ${user.lastName}`,
+      Email: user.email,
+      MobileNumber: user.phone ? user.phone.replace(/\s+/g, "") : null,
+      MemberTypeID: null
+    },
+    CardCreditAttributes: {
+      ...existingCard.CardCreditAttributes,
+      Credit: credit
+    },
+    CardCreditLimits: existingCard.CardCreditLimits || {},
+    CardDateRules: existingCard.CardDateRules || null,
+    CardRevalueRewardRules: existingCard.CardRevalueRewardRules || null,
+    GroupLocationLimits: existingCard.GroupLocationLimits || null
+  };
+  logger.info(
+    {
+      cardId: card.cardId,
+      cardIdentifier: card.identifier,
+      credit
+    },
+    "Nayax: aktualizujeme kartu \u2014 request body"
+  );
+  return fetchNayax(`/operational/v2/cards/${card.cardId}`, {
+    method: "PUT",
+    body: JSON.stringify(requestBody)
+  });
+};
+var createOrUpdateCardInNayax = async (user, credit, card) => {
+  try {
+    logger.info(
+      {
+        cardId: card.id,
+        cardIdentifier: card.identifier,
+        cardNumber: card.number,
+        existingCardId: card.cardId,
+        credit,
+        userEmail: user.email
+      },
+      "createOrUpdateCardInNayax: start"
+    );
+    let existingCard = null;
+    try {
+      const existingCardResponse = await getCardByIdentifier(card.identifier);
+      logger.info(
+        {
+          cardIdentifier: card.identifier,
+          responseIsArray: Array.isArray(existingCardResponse),
+          responseLength: Array.isArray(existingCardResponse) ? existingCardResponse.length : "N/A",
+          responseType: typeof existingCardResponse
+        },
+        "Nayax lookup: v\xFDsledek"
+      );
+      if (Array.isArray(existingCardResponse) && existingCardResponse.length > 0) {
+        existingCard = existingCardResponse[0];
+      }
+    } catch (lookupErr) {
+      if (lookupErr.message?.includes("[404]")) {
+        logger.info(
+          { cardIdentifier: card.identifier },
+          "Karta nenalezena v Nayax (404) \u2014 vytvo\u0159\xEDme novou"
+        );
+      } else {
+        logger.error(
+          { cardIdentifier: card.identifier, error: lookupErr.message },
+          "Nayax lookup: neo\u010Dek\xE1van\xE1 chyba"
+        );
+        throw lookupErr;
+      }
+    }
+    const cardExists = !!existingCard;
+    let resolvedNayaxCardId;
+    if (!cardExists) {
+      logger.info(
+        { cardIdentifier: card.identifier },
+        "Karta neexistuje v Nayax \u2014 vytv\xE1\u0159\xEDme novou"
+      );
+      const createResponse = await createCardInNayax(user, credit, card);
+      logger.info(
+        {
+          cardIdentifier: card.identifier,
+          responseCardID: createResponse?.CardDetails?.CardID,
+          responseStatus: createResponse?.CardDetails?.Status,
+          responseCredit: createResponse?.CardCreditAttributes?.Credit
+        },
+        "Nayax CREATE: odpov\u011B\u010F"
+      );
+      let cardIdFromResponse = createResponse?.CardDetails?.CardID;
+      if (cardIdFromResponse == null) {
+        logger.warn(
+          { cardIdentifier: card.identifier },
+          "CREATE response missing CardID \u2014 re-fetching"
+        );
+        const refetch = await getCardByIdentifier(card.identifier);
+        const refetchedCard = Array.isArray(refetch) ? refetch[0] : refetch;
+        cardIdFromResponse = refetchedCard?.CardDetails?.CardID;
+        logger.info(
+          { cardIdentifier: card.identifier, refetchedCardID: cardIdFromResponse },
+          "Re-fetch v\xFDsledek"
+        );
+      }
+      if (cardIdFromResponse == null) {
+        throw new Error(
+          `Cannot resolve Nayax CardID for newly created card (identifier: ${card.identifier})`
+        );
+      }
+      resolvedNayaxCardId = String(cardIdFromResponse);
+    } else {
+      const knownCardId = card.cardId ?? existingCard?.CardDetails?.CardID;
+      if (!knownCardId) {
+        throw new Error(
+          `Card exists in Nayax but CardID is missing (identifier: ${card.identifier})`
+        );
+      }
+      logger.info(
+        { cardIdentifier: card.identifier, nayaxCardId: knownCardId },
+        "Karta existuje v Nayax \u2014 aktualizujeme"
+      );
+      const updateResponse = await updateCardInNayax(
+        user,
+        credit,
+        { ...card, cardId: knownCardId },
+        existingCard
+      );
+      resolvedNayaxCardId = String(
+        updateResponse?.CardDetails?.CardID ?? knownCardId
+      );
+    }
+    logger.info(
+      {
+        cardDbId: card.id,
+        cardIdentifier: card.identifier,
+        resolvedNayaxCardId,
+        credit
+      },
+      "Ukl\xE1d\xE1me kartu do DB"
+    );
+    const updatedCard = await prisma.card.update({
+      where: { id: card.id },
+      data: {
+        cardId: resolvedNayaxCardId,
+        email: user.email,
+        assignedAt: /* @__PURE__ */ new Date(),
+        status: "ASSIGNED",
+        userId: user.id,
+        credit
+      }
+    });
+    logger.info(
+      {
+        cardDbId: updatedCard.id,
+        cardId: updatedCard.cardId,
+        status: updatedCard.status,
+        credit: updatedCard.credit,
+        assignedAt: updatedCard.assignedAt
+      },
+      "Karta \xFAsp\u011B\u0161n\u011B ulo\u017Eena do DB"
+    );
+    return updatedCard;
+  } catch (error) {
+    logger.error(
+      {
+        error: error.message,
+        stack: error.stack,
+        cardDbId: card.id,
+        cardIdentifier: card.identifier
+      },
+      "CHYBA: createOrUpdateCardInNayax selhalo"
+    );
+    throw new Error(`Failed to sync card with Nayax: ${error.message}`);
+  }
+};
+var addCreditToCard = async (cardIdentifier, credit) => {
+  const data = await fetchNayax(
+    `/operational/v1/cards/${encodeURIComponent(cardIdentifier)}/credit/add?CardCredit=${credit}`,
+    { method: "POST" }
+  );
+  logger.info(
+    { cardIdentifier, credit, responseValue: data?.value },
+    "addCreditToCard: odpov\u011B\u010F"
+  );
+  if (data?.value != null) return Math.round(data.value);
+  logger.warn(
+    { cardIdentifier },
+    "addCreditToCard: response missing value \u2014 re-fetching balance"
+  );
+  const cardData = await getCardByIdentifier(cardIdentifier);
+  const fetched = Array.isArray(cardData) ? cardData[0] : cardData;
+  const balance = fetched?.CardCreditAttributes?.Credit;
+  if (balance == null) {
+    throw new Error(
+      `Cannot determine new balance for card ${cardIdentifier} after credit add`
+    );
+  }
+  return Math.round(balance);
+};
 
 // src/services/invoiceService.ts
 import puppeteer from "puppeteer";
@@ -1212,9 +1737,18 @@ var sendOrderEmailToUser = async (user, order) => {
         ${escapeHtml2(order.country)}
       </p>
     </div>` : "";
+  const billingHtml = order.companyName ? `
+    <div style="margin-top: 20px; padding: 20px; background: #f9f9f9; border-radius: 8px;">
+      <h3 style="margin: 0 0 10px 0; font-size: 16px;">Faktura\u010Dn\xED \xFAdaje</h3>
+      <p style="margin: 0; color: #555; line-height: 1.5;">
+        <strong>${escapeHtml2(order.companyName)}</strong><br>
+        ${escapeHtml2(order.companyAddress)}, ${escapeHtml2(order.companyZipCode)} ${escapeHtml2(order.companyCity)}<br>
+        I\u010CO: ${escapeHtml2(order.companyICO)}${order.companyDIC ? `<br>DI\u010C: ${escapeHtml2(order.companyDIC)}` : ""}
+      </p>
+    </div>` : "";
   const invoicePdf = await generateInvoice(user, order);
-  await transporter.sendMail({
-    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: user.email,
     subject: `Potvrzen\xED objedn\xE1vky \u010D. ${order.orderIdentifier}`,
     html: `
@@ -1240,6 +1774,8 @@ var sendOrderEmailToUser = async (user, order) => {
 
           ${addressHtml}
 
+          ${billingHtml}
+
           <div style="margin-top: 40px; text-align: center;">
             <a href="${process.env.FRONTEND_URL}/moje-karty" 
                style="background: ${brandColor}; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
@@ -1256,8 +1792,7 @@ var sendOrderEmailToUser = async (user, order) => {
     attachments: [
       {
         filename: `faktura_${order.orderIdentifier}.pdf`,
-        content: invoicePdf,
-        contentType: "application/pdf"
+        content: invoicePdf
       }
     ]
   });
@@ -1280,8 +1815,8 @@ var sendOrderEmailToCompany = async (user, order) => {
 `
   ).join("");
   const invoicePdf = await generateInvoice(user, order);
-  await transporter.sendMail({
-    from: `"Syst\xE9m FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `Syst\xE9m FX Carwash <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL,
     subject: `NOV\xC1 OBJEDN\xC1VKA: ${user.lastName} (${order.orderIdentifier})`,
     html: `
@@ -1307,6 +1842,15 @@ var sendOrderEmailToCompany = async (user, order) => {
             ${escapeHtml2(order.country)}
           </p>` : `<p style="color: #e67e22; font-weight: bold;">(Digit\xE1ln\xED dobit\xED - bez dopravy)</p>`}
 
+          ${order.companyName ? `
+          <h3 style="border-bottom: 2px solid ${adminColor}; padding-bottom: 5px; color: ${adminColor}; margin-top: 25px;">Faktura\u010Dn\xED \xFAdaje</h3>
+          <p style="line-height: 1.6;">
+            <strong>${escapeHtml2(order.companyName)}</strong><br>
+            ${escapeHtml2(order.companyAddress)}<br>
+            ${escapeHtml2(order.companyZipCode)} ${escapeHtml2(order.companyCity)}<br>
+            I\u010CO: ${escapeHtml2(order.companyICO)}${order.companyDIC ? `<br>DI\u010C: ${escapeHtml2(order.companyDIC)}` : ""}
+          </p>` : ""}
+
           <h3 style="border-bottom: 2px solid ${adminColor}; padding-bottom: 5px; color: ${adminColor}; margin-top: 25px;">Polo\u017Eky objedn\xE1vky</h3>
           <table style="width: 100%; border-collapse: collapse;">
             ${itemsHtml}
@@ -1323,16 +1867,15 @@ var sendOrderEmailToCompany = async (user, order) => {
     attachments: [
       {
         filename: `faktura_${order.orderIdentifier}.pdf`,
-        content: invoicePdf,
-        contentType: "application/pdf"
+        content: invoicePdf
       }
     ]
   });
 };
 var sendLowStockAlert = async (remainingCards) => {
   logger.warn({ remainingCards }, "Odes\xEDl\xE1m upozorn\u011Bn\xED na n\xEDzkou z\xE1sobu karet");
-  await transporter.sendMail({
-    from: `"Syst\xE9m FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `Syst\xE9m FX Carwash <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL,
     subject: `\u26A0\uFE0F UPOZORN\u011AN\xCD: N\xEDzk\xE1 z\xE1soba karet (zb\xFDv\xE1 ${remainingCards} ks)`,
     html: `
@@ -1351,8 +1894,8 @@ var sendLowStockAlert = async (remainingCards) => {
 var sendWaitlistAvailabilityEmail = async (firstName, email) => {
   const brandColor = "#2ecc71";
   const darkBg = "#252525";
-  await transporter.sendMail({
-    from: `"FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `FX Carwash <${process.env.EMAIL_FROM}>`,
     to: email,
     subject: "FX Karty jsou op\u011Bt skladem!",
     html: `
@@ -1393,8 +1936,8 @@ var sendCardPoolEmptyAlert = async (order, item) => {
     { orderId: order.id, itemId: item.id },
     "KRITICK\xC9: Pool karet pr\xE1zdn\xFD po platb\u011B"
   );
-  await transporter.sendMail({
-    from: `"Syst\xE9m FX Carwash" <${process.env.EMAIL_FROM}>`,
+  await resend.emails.send({
+    from: `Syst\xE9m FX Carwash <${process.env.EMAIL_FROM}>`,
     to: process.env.FXCARWASH_EMAIL,
     subject: `\u{1F6A8} KRITICK\xC9: Z\xE1kazn\xEDk zaplatil ale karta nen\xED k dispozici! Objedn\xE1vka ${order.orderIdentifier}`,
     html: `
@@ -1425,535 +1968,6 @@ var sendCardPoolEmptyAlert = async (order, item) => {
       </div>
     `
   });
-};
-
-// src/controllers/paymentController.ts
-var stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-function resolveItemPrice(item, userDiscount) {
-  const credit = Number(item.credit);
-  let baseCredit = credit;
-  if (!ALLOWED_CREDITS.includes(credit) && userDiscount > 0) {
-    const derived = Math.round(credit / (1 + userDiscount / 100));
-    if (ALLOWED_CREDITS.includes(derived)) {
-      baseCredit = derived;
-    }
-  }
-  if (!ALLOWED_CREDITS.includes(baseCredit)) {
-    return null;
-  }
-  const shippingFee = item.delivery ? SHIPPING_FEES[item.shipping] ?? 0 : 0;
-  const safePrice = baseCredit + shippingFee;
-  const safeCredit = Math.round(baseCredit * (1 + userDiscount / 100));
-  return { safeName: item.name, safePrice, safeCredit };
-}
-var payment = async (req, res) => {
-  const { order } = req.body;
-  if (!req.user) {
-    return res.status(401).json({ error: "U\u017Eivatel nen\xED autentizov\xE1n" });
-  }
-  const userId = req.user.id;
-  const userDiscount = req.user.discount ?? 0;
-  const resolvedItems = [];
-  for (const item of order.items) {
-    const resolved = resolveItemPrice(item, userDiscount);
-    if (!resolved) {
-      return res.status(400).json({ error: `Neplatn\xE1 polo\u017Eka objedn\xE1vky: ${item.name}` });
-    }
-    resolvedItems.push({ original: item, ...resolved });
-  }
-  const serverTotal = resolvedItems.reduce(
-    (sum, i) => sum + i.safePrice * (Number(i.original.quantity) || 1),
-    0
-  );
-  const deliveryCount = resolvedItems.filter((i) => i.original.delivery).reduce((sum, i) => sum + (Number(i.original.quantity) || 1), 0);
-  if (deliveryCount > 0) {
-    const availableCards = await prisma.card.count({
-      where: { userId: null, status: "IN_STOCK" }
-    });
-    if (availableCards < deliveryCount) {
-      logger.error(
-        { availableCards, needed: deliveryCount },
-        "Nedostatek karet v poolu"
-      );
-      return res.status(400).json({
-        error: availableCards === 0 ? "Karty moment\xE1ln\u011B nejsou na sklad\u011B." : `Na sklad\u011B zb\xFDv\xE1 pouze ${availableCards} ${availableCards === 1 ? "karta" : availableCards < 5 ? "karty" : "karet"}.`,
-        availableCards,
-        outOfStock: true
-      });
-    }
-    if (availableCards - deliveryCount <= LOW_STOCK_THRESHOLD) {
-      logger.warn(
-        { remaining: availableCards - deliveryCount },
-        "N\xEDzk\xE1 z\xE1soba karet"
-      );
-      sendLowStockAlert(availableCards - deliveryCount).catch(
-        (err) => logger.error(
-          { err },
-          "Nepoda\u0159ilo se odeslat upozorn\u011Bn\xED na n\xEDzkou z\xE1sobu"
-        )
-      );
-    }
-  }
-  try {
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        phone: order.phone,
-        address: order.address || void 0,
-        city: order.city || void 0,
-        zipCode: order.zipCode || void 0,
-        country: order.country || void 0,
-        companyName: order.companyName || void 0,
-        companyICO: order.companyICO || void 0,
-        companyDIC: order.companyDIC || void 0,
-        companyAddress: order.companyAddress || void 0,
-        companyCity: order.companyCity || void 0,
-        companyZipCode: order.companyZipCode || void 0
-      }
-    });
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      customer_email: order.email,
-      line_items: resolvedItems.map((i) => ({
-        price_data: {
-          currency: "czk",
-          unit_amount: Math.round(i.safePrice * 100),
-          product_data: { name: i.safeName }
-        },
-        quantity: Number(i.original.quantity) || 1
-      })),
-      mode: "payment",
-      metadata: {
-        userId: String(userId)
-      },
-      success_url: `${process.env.FRONTEND_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.FRONTEND_URL}/payment/cancel`
-    });
-    await prisma.pendingCheckout.create({
-      data: {
-        id: session.id,
-        userId,
-        data: JSON.stringify({
-          totalPrice: serverTotal,
-          address: order.address || null,
-          city: order.city || null,
-          zipCode: order.zipCode || null,
-          country: order.country || null,
-          phone: order.phone || null,
-          companyName: order.companyName || null,
-          companyAddress: order.companyAddress || null,
-          companyCity: order.companyCity || null,
-          companyDIC: order.companyDIC || null,
-          companyICO: order.companyICO || null,
-          companyZipCode: order.companyZipCode || null,
-          items: resolvedItems.map((i) => ({
-            productId: i.original.id || null,
-            name: i.safeName,
-            price: i.safePrice,
-            credit: i.safeCredit,
-            quantity: Number(i.original.quantity) || 1,
-            delivery: !!i.original.delivery,
-            cardNumber: i.original.cardNumber || null,
-            shipping: i.original.shipping || null
-          }))
-        })
-      }
-    });
-    logger.info(
-      { sessionId: session.id, total: serverTotal, userId },
-      "Stripe session zah\xE1jena, \u010Dek\xE1 na platbu"
-    );
-    res.json({ url: session.url });
-  } catch (error) {
-    logger.error({ error, userId }, "Chyba p\u0159i inicializaci platby");
-    res.status(500).json({ error: "Chyba p\u0159i inicializaci platby" });
-  }
-};
-var getOrderBySession = async (req, res) => {
-  const { sessionId } = req.params;
-  const userId = req.user?.id;
-  try {
-    const order = await prisma.order.findUnique({
-      where: { stripeId: sessionId },
-      select: { orderFullNumber: true, orderIdentifier: true, totalPrice: true, userId: true }
-    });
-    if (!order || order.userId !== userId) {
-      return res.status(404).json({ error: "Objedn\xE1vka nenalezena" });
-    }
-    return res.json({ orderFullNumber: order.orderFullNumber, orderIdentifier: order.orderIdentifier, totalPrice: order.totalPrice });
-  } catch (error) {
-    logger.error({ error, sessionId }, "Chyba p\u0159i na\u010D\xEDt\xE1n\xED objedn\xE1vky");
-    return res.status(500).json({ error: "Chyba serveru" });
-  }
-};
-
-// src/routes/paymentRoutes.ts
-var router3 = express3.Router();
-router3.post(
-  "/create-checkout-session",
-  orderLimiter,
-  authMiddleware,
-  validateRequest(paymentSchema),
-  payment
-);
-router3.get("/order-by-session/:sessionId", authMiddleware, getOrderBySession);
-var paymentRoutes_default = router3;
-
-// src/routes/webhookRoutes.ts
-import express4 from "express";
-
-// src/controllers/webhookController.ts
-import Stripe2 from "stripe";
-
-// src/services/nayaxService.ts
-var BASE_URL = process.env.NAYAX_BASE_URL;
-var NAYAX_TOKEN = process.env.NAYAX_TOKEN;
-var ACTOR_ID = Number(process.env.NAYAX_ACTOR_ID);
-var fetchNayax = async (endpoint, options = {}) => {
-  const url = `${BASE_URL}${endpoint}`;
-  const defaultHeaders = {
-    accept: "application/json",
-    "content-type": "application/json",
-    Authorization: `Bearer ${NAYAX_TOKEN}`
-  };
-  logger.info(
-    { url, method: options.method || "GET" },
-    "Nayax API \u2192 odes\xEDl\xE1m request"
-  );
-  const response = await fetch(url, {
-    ...options,
-    headers: { ...defaultHeaders, ...options.headers }
-  });
-  const responseText = await response.text();
-  if (!response.ok) {
-    logger.error(
-      {
-        url,
-        status: response.status,
-        responseBody: responseText?.substring(0, 2e3)
-      },
-      "Nayax API \u2190 chyba"
-    );
-    throw new Error(
-      `Nayax API Error [${response.status}]: ${responseText || response.statusText}`
-    );
-  }
-  if (!responseText || !responseText.trim()) {
-    logger.info({ url, status: response.status }, "Nayax API \u2190 pr\xE1zdn\xE1 odpov\u011B\u010F");
-    return null;
-  }
-  try {
-    const parsed = JSON.parse(responseText);
-    logger.info(
-      {
-        url,
-        status: response.status,
-        hasCardDetails: !!parsed?.CardDetails,
-        cardID: parsed?.CardDetails?.CardID ?? null
-      },
-      "Nayax API \u2190 odpov\u011B\u010F OK"
-    );
-    return parsed;
-  } catch {
-    logger.warn(
-      { url, responseText: responseText.substring(0, 500) },
-      "Nayax API \u2190 odpov\u011B\u010F nen\xED JSON"
-    );
-    return responseText;
-  }
-};
-var assignCardFromPool = async (tx, userId) => {
-  const card = await tx.card.findFirst({
-    where: { userId: null, status: "IN_STOCK" },
-    orderBy: { createdAt: "asc" }
-  });
-  if (!card) return null;
-  await tx.card.update({
-    where: { id: card.id, userId: null, status: "IN_STOCK" },
-    data: { userId }
-  });
-  return card;
-};
-var getCardByIdentifier = async (identifier) => {
-  return fetchNayax(
-    `/operational/v1/cards?CardUniqueIdentifier=${encodeURIComponent(identifier)}`,
-    { method: "GET" }
-  );
-};
-var createCardInNayax = async (user, credit, card) => {
-  const requestBody = {
-    CardDetails: {
-      ActorID: ACTOR_ID,
-      CardUniqueIdentifier: card.identifier,
-      CardDisplayNumber: card.number,
-      CardTypeID: 33,
-      PhysicalTypeID: 30000530,
-      Notes: null,
-      Status: 1,
-      ExternalApplicationUserID: null
-    },
-    CardHolderDetails: {
-      CardHolderName: `${user.firstName} ${user.lastName}`,
-      UserIdentity: null,
-      CountryID: null,
-      MobileNumber: user.phone || null,
-      Email: user.email,
-      MemberTypeID: null
-    },
-    CardCreditAttributes: {
-      CurrencyID: null,
-      Credit: credit,
-      RevalueCredit: 0,
-      CreditTypeMoneyBit: true,
-      CreditAccumulateBit: true,
-      CreditSingleUseBit: false,
-      RevalueCashBit: true,
-      RevalueCreditCardBit: true,
-      AmountMonthlyReload: 0,
-      TransactionsMonthlyReload: 0,
-      DiscountTypeBit: 0,
-      DiscountValue: 0
-    },
-    CardCreditLimits: {
-      AmountDailyLimit: 0,
-      AmountWeeklyLimit: 0,
-      AmountMonthlyLimit: 0,
-      TransactionsDailyLimit: 0,
-      TransactionsWeeklyLimit: 0,
-      TransactionsMonthlyLimit: 0,
-      DiscountTransactionsTotalLimit: 0,
-      MaxRevalueAmountLimit: 0,
-      WeekDayLimitEnabledBit: false,
-      WeekDayAmountLimit: "0",
-      WeekDayTransactionLimit: "0"
-    },
-    CardDateRules: {
-      ActivationDate: null,
-      ExpirationDate: null,
-      RevalueExpirationDate: null,
-      SetSingleUseDate: null,
-      RemoveSingleUseDate: null
-    }
-  };
-  logger.info(
-    {
-      cardIdentifier: card.identifier,
-      cardNumber: card.number,
-      actorId: ACTOR_ID,
-      credit,
-      email: user.email
-    },
-    "Nayax: vytv\xE1\u0159\xEDme kartu \u2014 request body"
-  );
-  return fetchNayax(`/operational/v2/cards`, {
-    method: "POST",
-    body: JSON.stringify(requestBody)
-  });
-};
-var updateCardInNayax = async (user, credit, card, existingCard) => {
-  if (!card.cardId)
-    throw new Error("Missing Nayax CardId for update operation.");
-  const requestBody = {
-    CardDetails: {
-      ...existingCard.CardDetails,
-      Status: 1
-    },
-    CardHolderDetails: {
-      ...existingCard.CardHolderDetails,
-      CardHolderName: `${user.firstName} ${user.lastName}`,
-      Email: user.email,
-      MobileNumber: user.phone || null,
-      MemberTypeID: null
-    },
-    CardCreditAttributes: {
-      ...existingCard.CardCreditAttributes,
-      Credit: credit
-    },
-    CardCreditLimits: existingCard.CardCreditLimits || {},
-    CardDateRules: existingCard.CardDateRules || null,
-    CardRevalueRewardRules: existingCard.CardRevalueRewardRules || null,
-    GroupLocationLimits: existingCard.GroupLocationLimits || null
-  };
-  logger.info(
-    {
-      cardId: card.cardId,
-      cardIdentifier: card.identifier,
-      credit
-    },
-    "Nayax: aktualizujeme kartu \u2014 request body"
-  );
-  return fetchNayax(`/operational/v2/cards/${card.cardId}`, {
-    method: "PUT",
-    body: JSON.stringify(requestBody)
-  });
-};
-var createOrUpdateCardInNayax = async (user, credit, card) => {
-  try {
-    logger.info(
-      {
-        cardId: card.id,
-        cardIdentifier: card.identifier,
-        cardNumber: card.number,
-        existingCardId: card.cardId,
-        credit,
-        userEmail: user.email
-      },
-      "createOrUpdateCardInNayax: start"
-    );
-    let existingCard = null;
-    try {
-      const existingCardResponse = await getCardByIdentifier(card.identifier);
-      logger.info(
-        {
-          cardIdentifier: card.identifier,
-          responseIsArray: Array.isArray(existingCardResponse),
-          responseLength: Array.isArray(existingCardResponse) ? existingCardResponse.length : "N/A",
-          responseType: typeof existingCardResponse
-        },
-        "Nayax lookup: v\xFDsledek"
-      );
-      if (Array.isArray(existingCardResponse) && existingCardResponse.length > 0) {
-        existingCard = existingCardResponse[0];
-      }
-    } catch (lookupErr) {
-      if (lookupErr.message?.includes("[404]")) {
-        logger.info(
-          { cardIdentifier: card.identifier },
-          "Karta nenalezena v Nayax (404) \u2014 vytvo\u0159\xEDme novou"
-        );
-      } else {
-        logger.error(
-          { cardIdentifier: card.identifier, error: lookupErr.message },
-          "Nayax lookup: neo\u010Dek\xE1van\xE1 chyba"
-        );
-        throw lookupErr;
-      }
-    }
-    const cardExists = !!existingCard;
-    let resolvedNayaxCardId;
-    if (!cardExists) {
-      logger.info(
-        { cardIdentifier: card.identifier },
-        "Karta neexistuje v Nayax \u2014 vytv\xE1\u0159\xEDme novou"
-      );
-      const createResponse = await createCardInNayax(user, credit, card);
-      logger.info(
-        {
-          cardIdentifier: card.identifier,
-          responseCardID: createResponse?.CardDetails?.CardID,
-          responseStatus: createResponse?.CardDetails?.Status,
-          responseCredit: createResponse?.CardCreditAttributes?.Credit
-        },
-        "Nayax CREATE: odpov\u011B\u010F"
-      );
-      let cardIdFromResponse = createResponse?.CardDetails?.CardID;
-      if (cardIdFromResponse == null) {
-        logger.warn(
-          { cardIdentifier: card.identifier },
-          "CREATE response missing CardID \u2014 re-fetching"
-        );
-        const refetch = await getCardByIdentifier(card.identifier);
-        const refetchedCard = Array.isArray(refetch) ? refetch[0] : refetch;
-        cardIdFromResponse = refetchedCard?.CardDetails?.CardID;
-        logger.info(
-          { cardIdentifier: card.identifier, refetchedCardID: cardIdFromResponse },
-          "Re-fetch v\xFDsledek"
-        );
-      }
-      if (cardIdFromResponse == null) {
-        throw new Error(
-          `Cannot resolve Nayax CardID for newly created card (identifier: ${card.identifier})`
-        );
-      }
-      resolvedNayaxCardId = String(cardIdFromResponse);
-    } else {
-      const knownCardId = card.cardId ?? existingCard?.CardDetails?.CardID;
-      if (!knownCardId) {
-        throw new Error(
-          `Card exists in Nayax but CardID is missing (identifier: ${card.identifier})`
-        );
-      }
-      logger.info(
-        { cardIdentifier: card.identifier, nayaxCardId: knownCardId },
-        "Karta existuje v Nayax \u2014 aktualizujeme"
-      );
-      const updateResponse = await updateCardInNayax(
-        user,
-        credit,
-        { ...card, cardId: knownCardId },
-        existingCard
-      );
-      resolvedNayaxCardId = String(
-        updateResponse?.CardDetails?.CardID ?? knownCardId
-      );
-    }
-    logger.info(
-      {
-        cardDbId: card.id,
-        cardIdentifier: card.identifier,
-        resolvedNayaxCardId,
-        credit
-      },
-      "Ukl\xE1d\xE1me kartu do DB"
-    );
-    const updatedCard = await prisma.card.update({
-      where: { id: card.id },
-      data: {
-        cardId: resolvedNayaxCardId,
-        email: user.email,
-        assignedAt: /* @__PURE__ */ new Date(),
-        status: "ASSIGNED",
-        userId: user.id,
-        credit
-      }
-    });
-    logger.info(
-      {
-        cardDbId: updatedCard.id,
-        cardId: updatedCard.cardId,
-        status: updatedCard.status,
-        credit: updatedCard.credit,
-        assignedAt: updatedCard.assignedAt
-      },
-      "Karta \xFAsp\u011B\u0161n\u011B ulo\u017Eena do DB"
-    );
-    return updatedCard;
-  } catch (error) {
-    logger.error(
-      {
-        error: error.message,
-        stack: error.stack,
-        cardDbId: card.id,
-        cardIdentifier: card.identifier
-      },
-      "CHYBA: createOrUpdateCardInNayax selhalo"
-    );
-    throw new Error(`Failed to sync card with Nayax: ${error.message}`);
-  }
-};
-var addCreditToCard = async (cardIdentifier, credit) => {
-  const data = await fetchNayax(
-    `/operational/v1/cards/${encodeURIComponent(cardIdentifier)}/credit/add?CardCredit=${credit}`,
-    { method: "POST" }
-  );
-  logger.info(
-    { cardIdentifier, credit, responseValue: data?.value },
-    "addCreditToCard: odpov\u011B\u010F"
-  );
-  if (data?.value != null) return Math.round(data.value);
-  logger.warn(
-    { cardIdentifier },
-    "addCreditToCard: response missing value \u2014 re-fetching balance"
-  );
-  const cardData = await getCardByIdentifier(cardIdentifier);
-  const fetched = Array.isArray(cardData) ? cardData[0] : cardData;
-  const balance = fetched?.CardCreditAttributes?.Credit;
-  if (balance == null) {
-    throw new Error(
-      `Cannot determine new balance for card ${cardIdentifier} after credit add`
-    );
-  }
-  return Math.round(balance);
 };
 
 // src/controllers/webhookController.ts
@@ -2136,6 +2150,17 @@ var handleStripeWebhook = async (req, res) => {
         );
       }
     }
+    const deliveryItemCount = order.items.filter((i) => i.delivery).reduce((sum, i) => sum + i.quantity, 0);
+    if (deliveryItemCount > 0) {
+      const remainingCards = await prisma.card.count({
+        where: { userId: null, status: "IN_STOCK" }
+      });
+      if (remainingCards <= LOW_STOCK_THRESHOLD) {
+        sendLowStockAlert(remainingCards).catch(
+          (err) => logger.error({ err }, "Nepoda\u0159ilo se odeslat upozorn\u011Bn\xED na n\xEDzkou z\xE1sobu")
+        );
+      }
+    }
     const emailResults = await Promise.allSettled([
       sendOrderEmailToUser(order.user, order),
       sendOrderEmailToCompany(order.user, order)
@@ -2170,36 +2195,40 @@ import express5 from "express";
 
 // src/controllers/nayaxController.ts
 var refreshCards = async (req, res) => {
+  const user = req.user;
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
   try {
-    const user = req.user;
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
-    }
     const cards = await fetchNayax(
       `/operational/v1/cards?CardEmail=${encodeURIComponent(user.email ?? "")}`,
       { method: "GET" }
     );
-    if (!cards || cards.length === 0) {
-      return res.status(404).json({ error: "No cards found for this email" });
+    if (Array.isArray(cards) && cards.length > 0) {
+      for (const card of cards) {
+        const identifier = card.CardDetails?.CardUniqueIdentifier;
+        const credit = card.CardCreditAttributes?.Credit;
+        if (!identifier || credit == null) continue;
+        await prisma.card.updateMany({
+          where: { identifier, userId: user.id },
+          data: { credit: Math.round(credit) }
+        });
+      }
+      logger.info(
+        { userId: user.id, count: cards.length },
+        "Karty synchronizov\xE1ny z Nayax"
+      );
     }
-    for (const card of cards) {
-      await prisma.card.update({
-        where: { identifier: card.CardDetails.CardUniqueIdentifier },
-        data: { credit: Math.round(card.CardCreditAttributes.Credit) }
-      });
-    }
-    const updatedCards = await prisma.card.findMany({
-      where: { userId: user.id }
-    });
-    logger.info(
-      { userId: user.id, count: updatedCards.length },
-      "Karty synchronizov\xE1ny z Nayax"
-    );
-    res.json({ cards: updatedCards });
   } catch (error) {
-    logger.error({ error: error.message }, "Chyba p\u0159i synchronizaci karet");
-    res.status(500).json({ error: "Failed to refresh cards" });
+    logger.warn(
+      { userId: user.id, error: error.message },
+      "Nayax sync selhal \u2014 vrac\xEDm karty z DB"
+    );
   }
+  const dbCards = await prisma.card.findMany({
+    where: { userId: user.id }
+  });
+  return res.json({ cards: dbCards });
 };
 var toggleCardStatus = async (req, res) => {
   try {
@@ -2338,32 +2367,93 @@ var adminMiddleware = (req, res, next) => {
 
 // src/controllers/adminController.ts
 import multer from "multer";
+
+// src/utils/uploads.ts
 import path from "path";
-import fs from "fs";
+import fs from "fs/promises";
+import fsSync from "fs";
+import crypto2 from "crypto";
+import sharp from "sharp";
 var UPLOADS_DIR = path.join(process.cwd(), "uploads");
-fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-var uploadMiddleware = multer({
-  storage: multer.diskStorage({
-    destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+var MAX_IMAGE_WIDTH = 1920;
+var WEBP_QUALITY = 82;
+sharp.cache(false);
+sharp.concurrency(1);
+fsSync.mkdirSync(UPLOADS_DIR, { recursive: true });
+function randomName() {
+  return `${Date.now()}-${crypto2.randomBytes(6).toString("hex")}.webp`;
+}
+async function processImageToWebp(buffer) {
+  const filename = randomName();
+  const target = path.join(UPLOADS_DIR, filename);
+  await sharp(buffer, { failOn: "error" }).rotate().resize({
+    width: MAX_IMAGE_WIDTH,
+    withoutEnlargement: true,
+    fit: "inside"
+  }).webp({ quality: WEBP_QUALITY, effort: 4 }).toFile(target);
+  return filename;
+}
+function isManagedUploadName(name) {
+  if (typeof name !== "string") return false;
+  if (name.startsWith("/") || name.startsWith("http://") || name.startsWith("https://")) {
+    return false;
+  }
+  return /^[A-Za-z0-9._-]+$/.test(name) && !name.includes("..");
+}
+async function deleteUploadedImage(name) {
+  if (!isManagedUploadName(name)) return;
+  const target = path.join(UPLOADS_DIR, name);
+  const resolved = path.resolve(target);
+  if (!resolved.startsWith(path.resolve(UPLOADS_DIR) + path.sep)) return;
+  try {
+    await fs.unlink(resolved);
+  } catch (err) {
+    if (err?.code !== "ENOENT") {
+      logger.warn({ err, name }, "deleteUploadedImage failed");
     }
-  }),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  }
+}
+async function deleteUploadedImages(names) {
+  await Promise.all(names.map((n) => deleteUploadedImage(n)));
+}
+function diffRemovedImages(oldList, newList) {
+  const keep = new Set(newList);
+  return oldList.filter((n) => !keep.has(n));
+}
+
+// src/controllers/adminController.ts
+var MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
+var MAX_UPLOAD_COUNT = 10;
+var uploadMiddleware = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: MAX_UPLOAD_BYTES, files: MAX_UPLOAD_COUNT },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith("image/")) cb(null, true);
     else cb(new Error("Pouze obr\xE1zky"));
   }
-}).array("images", 10);
+}).array("images", MAX_UPLOAD_COUNT);
 var uploadImages = (req, res) => {
-  uploadMiddleware(req, res, (err) => {
+  uploadMiddleware(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });
     const files = req.files ?? [];
-    const urls = files.map((f) => f.filename);
-    return res.json({ urls });
+    if (files.length === 0) return res.json({ urls: [] });
+    try {
+      const urls = [];
+      for (const file of files) {
+        const filename = await processImageToWebp(file.buffer);
+        urls.push(filename);
+      }
+      return res.json({ urls });
+    } catch (error) {
+      logger.error({ error }, "uploadImages: konverze do WebP selhala");
+      return res.status(400).json({ error: "Obr\xE1zek nelze zpracovat" });
+    }
   });
 };
+function sanitizeImageList(input) {
+  if (!Array.isArray(input)) return [];
+  return input.filter((s) => typeof s === "string" && s.length > 0 && s.length < 512);
+}
 var getAdminStats = async (req, res) => {
   try {
     const cardGroups = await prisma.card.groupBy({
@@ -2432,7 +2522,7 @@ var getAdminStats = async (req, res) => {
     }));
     const recentOrdersRaw = await prisma.order.findMany({
       where: { status: { not: "PENDING" } },
-      take: 15,
+      take: 10,
       orderBy: { createdAt: "desc" },
       include: { user: { select: { email: true } } }
     });
@@ -2514,46 +2604,66 @@ var LEGACY_NEWS = [
   {
     title: "Slavnostn\xED otev\u0159en\xED myc\xEDho centra v sobotu 18.4.2026 od 10 hodin",
     text: "P\u0159ije\u010Fte se k n\xE1m pod\xEDvat, klob\xE1sy z grilu a n\xE1poje zdarma pro v\u0161echny z\xE1kazn\xEDky do vy\u010Derp\xE1n\xED z\xE1sob. R\xE1di se s v\xE1mi setk\xE1me osobn\u011B. T\u011B\u0161\xEDme se na v\xE1s!",
-    images: ["IMG_3217.jpg", "IMG_3167.jpg", "IMG_3250.jpg", "IMG_3184.jpg", "IMG_3174.jpg"]
+    images: ["/images/IMG_3217.jpg", "/images/IMG_3167.jpg", "/images/IMG_3250.jpg", "/images/IMG_3184.jpg", "/images/IMG_3174.jpg"]
   },
   {
     title: "Online n\xE1kup a dobit\xED fx karet",
     text: "Ji\u017E brzy pro v\xE1s spust\xEDme mo\u017Enost nakoupit si online zv\xFDhodn\u011Bn\xE9 v\u011Brnostn\xED fx karty.",
-    images: ["IMG_3217.jpg", "IMG_3167.jpg", "IMG_3250.jpg", "IMG_3184.jpg", "IMG_3174.jpg"]
+    images: ["/images/IMG_3217.jpg", "/images/IMG_3167.jpg", "/images/IMG_3250.jpg", "/images/IMG_3184.jpg", "/images/IMG_3174.jpg"]
   },
   {
     title: "M\xE1me otev\u0159eno!",
     text: "Po t\xFDdnu zku\u0161ebn\xEDho provozu m\xE1me otev\u0159eno pro v\u0161echny z\xE1kazn\xEDky nonstop. M\u016F\u017Eete u n\xE1s platit v hotovosti i platebn\xED kartou. Myc\xED centrum je vybaveno m\u011Bni\u010Dkou pen\u011Bz. K dispozici je v\xFDkonn\xFD vysava\u010D a mo\u017Enost dopln\u011Bn\xED nemrznouc\xED sm\u011Bsi do ost\u0159ikova\u010D\u016F ( -20 \xB0C).",
-    images: ["IMG_3217.jpg", "IMG_3167.jpg", "IMG_3250.jpg", "IMG_3184.jpg", "IMG_3174.jpg"]
+    images: ["/images/IMG_3217.jpg", "/images/IMG_3167.jpg", "/images/IMG_3250.jpg", "/images/IMG_3184.jpg", "/images/IMG_3174.jpg"]
   },
   {
     title: "Otev\u0159en\xED se bl\xED\u017E\xED",
     text: "U\u017E fini\u0161ujeme, lad\xEDme posledn\xED detaily a testujeme kvalitu myt\xED pro 100% spokojenost na\u0161ich budouc\xEDch z\xE1kazn\xEDk\u016F. P\u0159edb\u011B\u017En\xFD term\xEDn otev\u0159en\xED myc\xEDho centra je 17.12.2025.",
-    images: ["Image-10.jpg", "Image-12.jpg", "Image-16.jpg", "Image-13.jpg", "Image-15.jpg"]
+    images: ["/images/Image-10.jpg", "/images/Image-12.jpg", "/images/Image-16.jpg", "/images/Image-13.jpg", "/images/Image-15.jpg"]
   },
   {
     title: "Pr\xE1ce fini\u0161uj\xED. Pl\xE1n dokon\u010Den\xED: prosinec 2025",
     text: "V\u0161e b\u011B\u017E\xED dle pl\xE1nu a v prosinci 2025 bychom m\u011Bli m\xEDt kompletn\u011B hotovo. \u010Cek\xE1 n\xE1s dod\xE1vka samotn\xE9 konstrukce myc\xEDho centra a jej\xED napojen\xED na s\xEDt\u011B. Finalizujeme tak\xE9 \xFApravy okol\xED, kter\xE9 bychom V\xE1m r\xE1di zp\u0159\xEDjemnili. O term\xEDnu otev\u0159en\xED V\xE1s budeme brzy informovat.",
-    images: ["IMG_2523.jpg", "image_3.jpg", "image_1.jpg", "image_2.jpg", "image_5.jpg"]
+    images: ["/images/IMG_2523.jpg", "/images/image_3.jpg", "/images/image_1.jpg", "/images/image_2.jpg", "/images/image_5.jpg"]
   },
   {
     title: "Zah\xE1jen\xED v\xFDstavby myc\xEDho centra",
     text: "Projekt v\xFDstavby myc\xEDho centra v Horn\xED B\u0159\xEDze za\u010Dal v pr\u016Fb\u011Bhu roku 2024, kdy jsme se intenzivn\u011B v\u011Bnovali v\xFDb\u011Bru kvalitn\xEDho a spolehliv\xE9ho partnera pro realizaci v\xFDstavby. T\xEDmto partnerem se pro n\xE1s stala spole\u010Dnost MY WASH Technology s.r.o. Stavebn\xED pr\xE1ce p\u0159\xEDmo na m\xEDst\u011B za\u010Daly v l\xE9t\u011B 2025 a ji\u017E koncem srpna se poda\u0159ilo dokon\u010Dit a kompletn\u011B p\u0159ipravit z\xE1klady. U\u017E to pro V\xE1s chyst\xE1me!",
-    images: ["car-news-image-2.jpg", "car-news-image-1.jpg"]
+    images: ["/images/car-news-image-2.jpg", "/images/car-news-image-1.jpg"]
   }
 ];
 var seedLegacyNews = async (req, res) => {
   try {
     const creatorId = req.user?.id;
     if (!creatorId) return res.status(401).json({ error: "Unauthorized" });
-    const existing = await prisma.news.count();
-    if (existing > 0) return res.json({ skipped: true, message: "DB ji\u017E obsahuje novinky" });
+    const legacyTitles = new Set(LEGACY_NEWS.map((n) => n.title));
+    const existing = await prisma.news.findMany({
+      select: { id: true, title: true, images: true }
+    });
+    if (existing.length > 0) {
+      let fixed = 0;
+      for (const item of existing) {
+        if (!legacyTitles.has(item.title)) continue;
+        const hasWrongPaths = item.images.some((img) => !img.startsWith("/") && !img.startsWith("http"));
+        if (hasWrongPaths) {
+          const fixedImages = item.images.map(
+            (img) => !img.startsWith("/") && !img.startsWith("http") ? `/images/${img}` : img
+          );
+          await prisma.news.update({
+            where: { id: item.id },
+            data: { images: fixedImages }
+          });
+          fixed++;
+        }
+      }
+      return res.json({ skipped: true, message: "DB ji\u017E obsahuje novinky", fixed });
+    }
     for (const item of LEGACY_NEWS) {
       await prisma.news.create({
         data: {
           title: item.title,
           text: item.text,
-          imagePath: JSON.stringify(item.images),
+          images: item.images,
           creatorId
         }
       });
@@ -2568,19 +2678,13 @@ var getNews = async (req, res) => {
   try {
     const news = await prisma.news.findMany({
       orderBy: { createdAt: "desc" },
-      select: { id: true, title: true, text: true, imagePath: true, createdAt: true }
+      select: { id: true, title: true, text: true, images: true, createdAt: true }
     });
     const mapped = news.map((n) => ({
       id: n.id,
       title: n.title,
       text: n.text,
-      image: (() => {
-        try {
-          return JSON.parse(n.imagePath);
-        } catch {
-          return [n.imagePath];
-        }
-      })(),
+      image: n.images,
       createdAt: n.createdAt
     }));
     return res.json(mapped);
@@ -2592,16 +2696,19 @@ var getNews = async (req, res) => {
 var createNews = async (req, res) => {
   try {
     const { title, text, images } = req.body;
-    if (!title?.trim() || !text?.trim()) {
+    const titleStr = typeof title === "string" ? title.trim() : "";
+    const textStr = typeof text === "string" ? text.trim() : "";
+    if (!titleStr || !textStr) {
       return res.status(400).json({ error: "N\xE1zev a text jsou povinn\xE9" });
     }
     const creatorId = req.user?.id;
     if (!creatorId) return res.status(401).json({ error: "Unauthorized" });
+    const cleanImages = sanitizeImageList(images);
     const news = await prisma.news.create({
       data: {
-        title: title.trim(),
-        text: text.trim(),
-        imagePath: JSON.stringify(Array.isArray(images) && images.length ? images : []),
+        title: titleStr,
+        text: textStr,
+        images: cleanImages,
         creatorId
       }
     });
@@ -2615,17 +2722,31 @@ var updateNews = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, text, images } = req.body;
-    if (!title?.trim() || !text?.trim()) {
+    const titleStr = typeof title === "string" ? title.trim() : "";
+    const textStr = typeof text === "string" ? text.trim() : "";
+    if (!titleStr || !textStr) {
       return res.status(400).json({ error: "N\xE1zev a text jsou povinn\xE9" });
     }
+    const existing = await prisma.news.findUnique({
+      where: { id: String(id) },
+      select: { images: true }
+    });
+    if (!existing) return res.status(404).json({ error: "Novinka nenalezena" });
+    const nextImages = sanitizeImageList(images);
+    const removed = diffRemovedImages(existing.images, nextImages);
     await prisma.news.update({
       where: { id: String(id) },
       data: {
-        title: title.trim(),
-        text: text.trim(),
-        imagePath: JSON.stringify(Array.isArray(images) ? images : [])
+        title: titleStr,
+        text: textStr,
+        images: nextImages
       }
     });
+    if (removed.length > 0) {
+      deleteUploadedImages(removed).catch(
+        (err) => logger.warn({ err, removed }, "updateNews: \xFAklid star\xFDch soubor\u016F selhal")
+      );
+    }
     return res.json({ success: true });
   } catch (error) {
     logger.error({ error }, "updateNews error");
@@ -2635,7 +2756,18 @@ var updateNews = async (req, res) => {
 var deleteNews = async (req, res) => {
   try {
     const { id } = req.params;
+    const existing = await prisma.news.findUnique({
+      where: { id: String(id) },
+      select: { images: true }
+    });
+    if (!existing) return res.status(404).json({ error: "Novinka nenalezena" });
+    const images = existing.images;
     await prisma.news.delete({ where: { id: String(id) } });
+    if (images.length > 0) {
+      deleteUploadedImages(images).catch(
+        (err) => logger.warn({ err, images }, "deleteNews: \xFAklid soubor\u016F selhal")
+      );
+    }
     return res.json({ success: true });
   } catch (error) {
     logger.error({ error }, "deleteNews error");
@@ -2697,8 +2829,8 @@ import express8 from "express";
 var sendContactEmail = async (req, res) => {
   const { email, telephone, message } = req.body;
   try {
-    await transporter.sendMail({
-      from: `"FX Carwash web" <${process.env.EMAIL_FROM}>`,
+    const { data, error } = await resend.emails.send({
+      from: `FX Carwash web <${process.env.EMAIL_FROM}>`,
       to: process.env.FXCARWASH_EMAIL,
       replyTo: email,
       subject: `Nov\xE1 zpr\xE1va z kontaktn\xEDho formul\xE1\u0159e`,
@@ -2729,10 +2861,14 @@ var sendContactEmail = async (req, res) => {
         </div>
       `
     });
-    logger.info({ email }, "Kontaktn\xED formul\xE1\u0159 odesl\xE1n");
+    if (error) {
+      logger.error({ error }, "Resend API vr\xE1tila chybu");
+      return res.status(500).json({ error: "Nepoda\u0159ilo se odeslat zpr\xE1vu. Zkuste to pros\xEDm znovu." });
+    }
+    logger.info({ email, messageId: data?.id }, "Kontaktn\xED formul\xE1\u0159 odesl\xE1n");
     res.status(200).json({ status: "success", message: "Zpr\xE1va byla \xFAsp\u011B\u0161n\u011B odesl\xE1na." });
   } catch (err) {
-    logger.error({ err }, "Chyba p\u0159i odes\xEDl\xE1n\xED kontaktn\xEDho emailu");
+    logger.error({ err, message: err?.message }, "Chyba p\u0159i odes\xEDl\xE1n\xED kontaktn\xEDho emailu");
     res.status(500).json({ error: "Nepoda\u0159ilo se odeslat zpr\xE1vu. Zkuste to pros\xEDm znovu." });
   }
 };
@@ -2760,10 +2896,11 @@ app.use(
     credentials: true
   })
 );
+var uploadsPath = path2.join(__dirname, "..", "uploads");
 app.use("/uploads", (_req, res, next) => {
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
   next();
-}, express9.static(path2.join(process.cwd(), "uploads")));
+}, express9.static(uploadsPath));
 app.use("/api", webhookRoutes_default);
 app.use(express9.json({ limit: "10kb" }));
 app.use(cookieParser());
