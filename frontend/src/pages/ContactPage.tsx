@@ -7,12 +7,14 @@ function ContactPage() {
   return (
     <div className="flex flex-col w-full h-full">
       <Header homePage={false} />
-      <div className="header-color w-full page-title-height header-margin flex justify-center items-center  flex-col gap-1">
+      <div className="header-color w-full page-title-height header-margin flex justify-center items-center text-center flex-col gap-1 px-6 lg:px-10">
         <h2 className="text-white page-title-size mb-7">KONTAKT</h2>
-        <p className="text-center textUnder">
+        <p className="textUnder max-w-4xl">
           NAJDETE NÁS U ČERPACÍ STANICE MOL HORNÍ BŘÍZA
         </p>
-        <p className="textUnder">K ČERNÉMU MOSTU, 330 12 HORNÍ BŘÍZA</p>
+        <p className="textUnder max-w-4xl">
+          K ČERNÉMU MOSTU, 330 12 HORNÍ BŘÍZA
+        </p>
       </div>
       <div className="w-full h-60 lg:h-180 relative">
         <img
@@ -47,7 +49,7 @@ function ContactPage() {
       </div>
       <div className="w-full header-color flex flex-col justify-center items-center gap-6 px-6 sm:px-10 py-14 lg:py-20 text-center">
         <h3 className="text-3xl lg:text-4xl">ZÁKAZNICKÁ PODPORA</h3>
-        <p className="text-[14px] lg:text-[16px] max-w-3xl">
+        <p className="text-[14px] lg:text-[16px] max-w-3xl text-justify hyphens-auto">
           V případě technického problému, dotazu k platbě nebo připomínky
           k&nbsp;našim službám nás kontaktujte na tel.:{" "}
           <a

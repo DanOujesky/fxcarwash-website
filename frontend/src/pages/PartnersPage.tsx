@@ -37,7 +37,7 @@ function PartnersPage() {
     <div className="flex flex-col w-full h-full">
       <Header homePage={false} />
       <div className="header-color w-full page-title-height header-margin flex justify-center items-center text-center flex-col gap-5">
-        <h2 className="text-white page-title-size mb-7t mx-10">FIRMY</h2>
+        <h2 className="text-white page-title-size mb-7t mx-6 lg:mx-10">FIRMY</h2>
         <p className="mx-6 lg:mx-10 text-[16px] max-w-4xl ">
           Jednoduché a přehledné řešení mytí Vašich firemních vozidel.
         </p>
@@ -49,7 +49,7 @@ function PartnersPage() {
               Program pro&nbsp;Firmy
             </h3>
             <div>
-              <p className="text-[14px] text-left sm:text-justify">
+              <p className="text-[14px] text-justify hyphens-auto">
                 Firemní program F.X. CarWash Vám umožní pohodlně využívat naše
                 mycí centrum bez nutnosti hotovostních plateb a zároveň mít
                 náklady na mytí vozidel plně pod kontrolou.
@@ -60,7 +60,7 @@ function PartnersPage() {
                   {benefits.map((benefit) => (
                     <li
                       key={benefit.title}
-                      className="text-[14px] mb-2 text-left sm:text-justify"
+                      className="text-[14px] mb-2 text-justify hyphens-auto"
                     >
                       <strong className="font-bold">{benefit.title}</strong> –{" "}
                       {benefit.text}
@@ -68,12 +68,12 @@ function PartnersPage() {
                   ))}
                 </ul>
               </div>
-              <p className="text-[14px] text-left sm:text-justify mt-5">
+              <p className="text-[14px] text-justify hyphens-auto mt-5">
                 Ať provozujete několik služebních vozidel nebo větší firemní
                 flotilu, rádi pro Vás připravíme řešení odpovídající Vašim
                 potřebám.
               </p>
-              <p className="text-[14px] text-left sm:text-justify mt-5 font-bold">
+              <p className="text-[14px] text-justify hyphens-auto mt-5 font-bold">
                 Pro individuální nabídku a nastavení firemního programu nás
                 neváhejte kontaktovat.
               </p>

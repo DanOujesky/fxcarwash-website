@@ -40,6 +40,12 @@ p {
 li {
   font-family: "Inter";
 }
+
+/* Blokove zarovnani nesmi na uzkych displejich pretekat */
+p,
+li {
+  overflow-wrap: break-word;
+}
 @font-face {
   font-family: "Ethnocentric";
   src: url("/fonts/Ethnocentric-Regular.otf") format("opentype");

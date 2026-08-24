@@ -30,7 +30,7 @@ function NewsPage() {
   return (
     <div className="flex flex-col w-full h-full">
       <Header homePage={false} />
-      <div className="header-color w-full page-title-height header-margin flex justify-center items-center">
+      <div className="header-color w-full page-title-height header-margin flex justify-center items-center text-center flex-col gap-5 px-6 lg:px-10">
         <h2 className="text-white page-title-size">Novinky</h2>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2">
