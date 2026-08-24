@@ -34,8 +34,18 @@ function Footer() {
         <div className="flex flex-col items-center lg:items-baseline">
           <h2 className="sm:text-2xl text-xl mb-2 lg:mb-3">KONTAKT</h2>
           <div className="flex flex-col items-center lg:items-baseline">
-            <p className="lg:text-[18px] text-[13px]">+420 603 159 572</p>
-            <p className="lg:text-[18px] text-[13px]">SALES@FXCARWASH.CZ</p>
+            <a
+              href="tel:+420603159572"
+              className="lg:text-[18px] text-[13px] contactText hover:text-gray-300 transition-colors"
+            >
+              +420 603 159 572
+            </a>
+            <a
+              href="mailto:sales@fxcarwash.cz"
+              className="lg:text-[18px] text-[13px] contactText hover:text-gray-300 transition-colors"
+            >
+              SALES@FXCARWASH.CZ
+            </a>
           </div>
         </div>
       </div>

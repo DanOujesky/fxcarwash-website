@@ -3,9 +3,8 @@ import Footer from "../components/Footer";
 import Header from "../components/Header";
 
 const slides = [
-  { src: "/images/hero-exterior.webp", kb: "kb-1" },
-  { src: "/images/hero-action.webp",   kb: "kb-2" },
-  { src: "/images/hero-aerial.webp",   kb: "kb-3" },
+  { src: "/images/hero-action.webp", kb: "kb-2" },
+  { src: "/images/hero-aerial.webp", kb: "kb-3" },
 ];
 
 function HomePage() {
@@ -36,7 +35,7 @@ function HomePage() {
               key={i === current ? tick : i}
               src={slide.src}
               alt=""
-              className={`absolute inset-0 w-full h-full object-cover origin-center ${
+              className={`absolute inset-0 w-full h-full object-cover origin-center brightness-[1.12] saturate-[1.25] contrast-[1.05] ${
                 i === current ? slide.kb : ""
               }`}
             />
@@ -44,9 +43,9 @@ function HomePage() {
         ))}
 
         {/* Overlay */}
-        <div className="absolute inset-0 sm:bg-black/40" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 sm:from-black/85 via-black/10 sm:via-black/15 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/20 sm:from-black/60 via-transparent sm:via-black/10 to-transparent" />
+        <div className="absolute inset-0 sm:bg-black/15" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/65 sm:from-black/75 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/10 sm:from-black/35 via-transparent to-transparent" />
 
         {/* Text */}
         <div className="absolute bottom-12 left-6 sm:bottom-16 sm:left-16 flex flex-col gap-3 sm:gap-4 max-w-[85vw] sm:max-w-2xl">
@@ -60,7 +59,9 @@ function HomePage() {
             className="hero-fade-in text-[42px] sm:text-6xl lg:text-[90px] text-white font-bold leading-none tracking-wider"
             style={{ animationDelay: "0.9s" }}
           >
-            F.X.<br />CARWASH
+            F.X.
+            <br />
+            CARWASH
           </h1>
           <div
             className="hero-fade-in flex items-center gap-3 mt-1"
@@ -78,9 +79,14 @@ function HomePage() {
           {slides.map((_, i) => (
             <div
               key={i}
-              onClick={() => { setCurrent(i); setTick((t) => t + 1); }}
+              onClick={() => {
+                setCurrent(i);
+                setTick((t) => t + 1);
+              }}
               className={`rounded-full cursor-pointer transition-all duration-500 ${
-                i === current ? "w-6 h-1.5 bg-white" : "w-1.5 h-1.5 bg-white/30 hover:bg-white/60"
+                i === current
+                  ? "w-6 h-1.5 bg-white"
+                  : "w-1.5 h-1.5 bg-white/30 hover:bg-white/60"
               }`}
             />
           ))}

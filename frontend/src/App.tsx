@@ -11,6 +11,7 @@ import NewsPage from "./pages/NewsPage";
 import PartnersPage from "./pages/PartnersPage";
 import ContactPage from "./pages/ContactPage";
 import OfferPage from "./pages/OfferPage";
+import WashProgramsPage from "./pages/WashProgramsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgetPasswordPage from "./pages/ForgetPasswordPage";
@@ -41,6 +42,7 @@ function App() {
         <Route path="o-nas" element={<AboutPage />} />
         <Route path="novinky" element={<NewsPage />} />
         <Route path="nabidka" element={<OfferPage />} />
+        <Route path="programy-na-myti" element={<WashProgramsPage />} />
         <Route path="firmy" element={<PartnersPage />} />
         <Route path="kontakt" element={<ContactPage />} />
         <Route path="payment/success" element={<PaymentSuccessPage />} />

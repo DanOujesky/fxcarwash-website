@@ -222,6 +222,18 @@ function Header({
                       isActive ? "header-navlink-active" : "text-white"
                     } header-navlink`
                   }
+                  to="/programy-na-myti"
+                >
+                  PROGRAMY
+                </NavLink>
+              </li>
+              <li>
+                <NavLink
+                  className={({ isActive }) =>
+                    `${
+                      isActive ? "header-navlink-active" : "text-white"
+                    } header-navlink`
+                  }
                   to="/firmy"
                 >
                   FIRMY

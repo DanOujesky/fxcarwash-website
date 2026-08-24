@@ -9,40 +9,67 @@ function AboutPage() {
         <h2 className="text-white page-title-size mb-7t mx-10">
           MODERNÍ MYCÍ CENTRUM
         </h2>
-        <p className="mx-10 text-ml">
-          Zakládáme si na kvalitě a využití inovativních technologií. Spojujeme
-          vášeň pro krásná auta s technologiemi, které Vaše auto ošetří
-          efektivně a zároveň šetrně.
+        <p className="mx-6 lg:mx-10 text-ml max-w-4xl ">
+          F.X. CarWash vznikl s jednoduchou myšlenkou – vybudovat moderní
+          bezkontaktní mycí centrum, kam se zákazníci budou rádi vracet.
         </p>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="h-full py-10  lg:py-20 flex justify-center items-center px-10 lg:px-30 body-bg-color">
+        <div className="h-full py-10  lg:py-20 flex justify-center items-center px-6 sm:px-10 lg:px-30 body-bg-color">
           <div className="flex flex-col gap-10 items-center justify-center">
             <h3 className="text-4xl">O nás</h3>
             <div>
-              <p className="text-[14px] text-justify">
-                Partnerem našeho projektu je společnost My Wash Technology
-                s.r.o., která má v oblasti realizace bezkontaktních mycích
-                center dlouholeté zkušenosti. Kvalitní komponenty zajišťují
-                vysokou účinnost umytí, s důrazem na ekologické řešení, úsporu
-                vody a maximální komfort pro zákazníky. Vše&nbsp;doplňuje
-                příjemný a nadčasový design myčky.
+              <p className="text-[14px] text-left sm:text-justify">
+                Společnost{" "}
+                <strong className="font-bold">F.X. CarWash s.r.o.</strong> byla
+                založena v roce 2025, samotná cesta k prvnímu mycímu centru ale
+                začala už v roce 2023. Od začátku jsme měli jasnou představu:
+                nabídnout zákazníkům vysokou kvalitu mytí, moderní technologie,
+                příjemné prostředí, a především spolehlivou službu, dostupnou
+                kdykoli.
               </p>
-              <p className="text-[14px] mt-5 text-justify">
-                Máme zájem Vám nabídnout kvalitní službu a přispět tak k lepší
-                nabídce služeb ve Vašem regionu. Doufáme, že návštěva našeho
-                mycího centra bude pro Vás příjemným zážitkem.
+              <p className="text-[14px] mt-5 text-left sm:text-justify">
+                Velkou pozornost jsme proto věnovali výběru technologického
+                partnera. Hledali jsme společnost, která nám pomůže vybudovat
+                nejen moderní mycí centrum, ale zároveň dokáže zajistit
+                prvotřídní technologickou podporu a servis během jeho
+                každodenního provozu.
               </p>
-              <p className="mt-5 text-justify text-[14px]">
-                Přijeďte se k nám podívat. Máme otevřeno 24/7.
+              <p className="text-[14px] mt-5 text-left sm:text-justify">
+                Po dlouhém výběru jsme navázali spolupráci se společností{" "}
+                <strong className="font-bold">My Wash Technology s.r.o.</strong>
+                , která má s realizací bezkontaktních mycích center dlouholeté
+                zkušenosti. Použité technologie a kvalitní komponenty zajišťují
+                vysokou účinnost jednotlivých mycích programů s důrazem na
+                šetrnost k&nbsp;vozidlu, ekologický provoz, úsporu vody a
+                maximální komfort zákazníků. To vše doplňuje moderní a nadčasový
+                design celého mycího centra.
+              </p>
+              <p className="text-[14px] mt-5 text-left sm:text-justify">
+                Naše{" "}
+                <strong className="font-bold">
+                  první F.X. CarWash jsme otevřeli v Horní Bříze nedaleko Plzně
+                </strong>
+                . Od zahájení provozu se neustále věnujeme ladění jednotlivých
+                mycích programů, kvality používané chemie i celkového zázemí
+                tak, abychom zákazníkům nabídli co nejlepší výsledek při každé
+                návštěvě.
+              </p>
+              <p className="text-[14px] mt-5 text-left sm:text-justify">
+                Naším cílem ale není zůstat pouze u jednoho mycího centra.{" "}
+                <strong className="font-bold">
+                  F.X. CarWash chceme postupně rozvíjet i v dalších lokalitách a
+                  budovat značku, která bude synonymem pro kvalitní bezkontaktní
+                  mytí, moderní prostředí a spolehlivý zákaznický servis.
+                </strong>
               </p>
             </div>
           </div>
         </div>
-        <div className="h-70 lg:h-full 2xl:h-120">
+        <div className="h-48 sm:h-70 lg:h-full">
           <img
             className="h-full w-full object-cover"
-            src="/images/about_page.JPG"
+            src="/images/1000025959.jpg"
             alt="image"
           />
         </div>
