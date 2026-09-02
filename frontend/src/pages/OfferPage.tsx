@@ -72,7 +72,9 @@ function OfferPage() {
     <div className="flex flex-col w-full h-full">
       <Header homePage={false} />
       <div className="header-color w-full page-title-height header-margin flex justify-center items-center text-center flex-col gap-5">
-        <h2 className="text-white page-title-size mb-7t mx-6 lg:mx-10">NABÍDKA</h2>
+        <h2 className="text-white page-title-size mb-7t mx-6 lg:mx-10">
+          NABÍDKA
+        </h2>
         <p className="mx-6 lg:mx-10 text-[16px] max-w-4xl ">
           Vše pro perfektně čistý vůz na jednom místě
         </p>
@@ -97,7 +99,7 @@ function OfferPage() {
         <div className="h-48 sm:h-70 lg:h-full">
           <img
             className="h-full w-full object-cover"
-            src="/images/image-offer-page-2.jpeg"
+            src="/images/DJI_0753.DNG"
             alt="image"
           />
         </div>
