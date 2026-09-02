@@ -99,7 +99,7 @@ function OfferPage() {
         <div className="h-48 sm:h-70 lg:h-full">
           <img
             className="h-full w-full object-cover"
-            src="/images/DJI_0753.DNG"
+            src="/images/DJI_0753.JPG"
             alt="image"
           />
         </div>
