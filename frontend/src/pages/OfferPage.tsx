@@ -81,7 +81,7 @@ function OfferPage() {
         <div className="h-full py-10 lg:py-20 flex justify-center items-center px-6 sm:px-10 lg:px-30 body-bg-color">
           <div className="flex flex-col gap-6 lg:gap-10 items-center justify-center">
             <h3 className="text-4xl text-center">Naše služby</h3>
-            <p className="text-[14px] text-justify hyphens-auto">
+            <p className="text-[14px] text-justify hyphens-none">
               V F.X. CarWash Vám chceme nabídnout nejen kvalitní bezkontaktní
               mytí, ale také moderní a příjemné prostředí s vybavením, které Vám
               usnadní kompletní péči o Váš vůz.
@@ -110,7 +110,7 @@ function OfferPage() {
               className="body-bg-color border-[1px] border-gray-500 p-5 sm:p-6 lg:p-8 flex flex-col gap-3"
             >
               <p className="text-[16px] titleText">{service.title}</p>
-              <p className="text-[14px] text-justify hyphens-auto">
+              <p className="text-[14px] text-justify hyphens-none">
                 {service.text}
               </p>
             </div>

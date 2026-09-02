@@ -49,7 +49,7 @@ function ContactPage() {
       </div>
       <div className="w-full header-color flex flex-col justify-center items-center gap-6 px-6 sm:px-10 py-14 lg:py-20 text-center">
         <h3 className="text-3xl lg:text-4xl">ZÁKAZNICKÁ PODPORA</h3>
-        <p className="text-[14px] lg:text-[16px] max-w-3xl text-justify hyphens-auto">
+        <p className="text-[14px] lg:text-[16px] max-w-3xl text-justify hyphens-none">
           V případě technického problému, dotazu k platbě nebo připomínky
           k&nbsp;našim službám nás kontaktujte na tel.:{" "}
           <a

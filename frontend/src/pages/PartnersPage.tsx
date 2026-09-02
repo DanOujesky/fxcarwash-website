@@ -49,7 +49,7 @@ function PartnersPage() {
               Program pro&nbsp;Firmy
             </h3>
             <div>
-              <p className="text-[14px] text-justify hyphens-auto">
+              <p className="text-[14px] text-justify hyphens-none">
                 Firemní program F.X. CarWash Vám umožní pohodlně využívat naše
                 mycí centrum bez nutnosti hotovostních plateb a zároveň mít
                 náklady na mytí vozidel plně pod kontrolou.
@@ -60,7 +60,7 @@ function PartnersPage() {
                   {benefits.map((benefit) => (
                     <li
                       key={benefit.title}
-                      className="text-[14px] mb-2 text-justify hyphens-auto"
+                      className="text-[14px] mb-2 text-justify hyphens-none"
                     >
                       <strong className="font-bold">{benefit.title}</strong> –{" "}
                       {benefit.text}
@@ -68,12 +68,12 @@ function PartnersPage() {
                   ))}
                 </ul>
               </div>
-              <p className="text-[14px] text-justify hyphens-auto mt-5">
+              <p className="text-[14px] text-justify hyphens-none mt-5">
                 Ať provozujete několik služebních vozidel nebo větší firemní
                 flotilu, rádi pro Vás připravíme řešení odpovídající Vašim
                 potřebám.
               </p>
-              <p className="text-[14px] text-justify hyphens-auto mt-5 font-bold">
+              <p className="text-[14px] text-justify hyphens-none mt-5 font-bold">
                 Pro individuální nabídku a nastavení firemního programu nás
                 neváhejte kontaktovat.
               </p>

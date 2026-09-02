@@ -19,7 +19,7 @@ function AboutPage() {
           <div className="flex flex-col gap-10 items-center justify-center">
             <h3 className="text-4xl">O nás</h3>
             <div>
-              <p className="text-[14px] text-justify hyphens-auto">
+              <p className="text-[14px] text-justify hyphens-none">
                 Společnost{" "}
                 <strong className="font-bold">F.X. CarWash s.r.o.</strong> byla
                 založena v roce 2025, samotná cesta k prvnímu mycímu centru ale
@@ -28,14 +28,14 @@ function AboutPage() {
                 příjemné prostředí, a především spolehlivou službu, dostupnou
                 kdykoli.
               </p>
-              <p className="text-[14px] mt-5 text-justify hyphens-auto">
+              <p className="text-[14px] mt-5 text-justify hyphens-none">
                 Velkou pozornost jsme proto věnovali výběru technologického
                 partnera. Hledali jsme společnost, která nám pomůže vybudovat
                 nejen moderní mycí centrum, ale zároveň dokáže zajistit
                 prvotřídní technologickou podporu a servis během jeho
                 každodenního provozu.
               </p>
-              <p className="text-[14px] mt-5 text-justify hyphens-auto">
+              <p className="text-[14px] mt-5 text-justify hyphens-none">
                 Po dlouhém výběru jsme navázali spolupráci se společností{" "}
                 <strong className="font-bold">My Wash Technology s.r.o.</strong>
                 , která má s realizací bezkontaktních mycích center dlouholeté
@@ -45,7 +45,7 @@ function AboutPage() {
                 maximální komfort zákazníků. To vše doplňuje moderní a nadčasový
                 design celého mycího centra.
               </p>
-              <p className="text-[14px] mt-5 text-justify hyphens-auto">
+              <p className="text-[14px] mt-5 text-justify hyphens-none">
                 Naše{" "}
                 <strong className="font-bold">
                   první F.X. CarWash jsme otevřeli v Horní Bříze nedaleko Plzně
@@ -55,7 +55,7 @@ function AboutPage() {
                 tak, abychom zákazníkům nabídli co nejlepší výsledek při každé
                 návštěvě.
               </p>
-              <p className="text-[14px] mt-5 text-justify hyphens-auto">
+              <p className="text-[14px] mt-5 text-justify hyphens-none">
                 Naším cílem ale není zůstat pouze u jednoho mycího centra.{" "}
                 <strong className="font-bold">
                   F.X. CarWash chceme postupně rozvíjet i v dalších lokalitách a

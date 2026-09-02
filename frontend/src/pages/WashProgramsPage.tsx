@@ -88,7 +88,7 @@ function WashProgramsPage() {
             <h3 className="text-2xl sm:text-3xl lg:text-4xl text-center">
               Postupujte&nbsp;krok za&nbsp;krokem
             </h3>
-            <p className="text-[14px] text-justify hyphens-auto">
+            <p className="text-[14px] text-justify hyphens-none">
               Pro dosažení nejlepšího výsledku doporučujeme postupovat podle
               jednotlivých mycích programů v uvedeném pořadí. Pro snadnou
               orientaci jsou programy na ovládacím panelu{" "}
@@ -142,7 +142,7 @@ function WashProgramsPage() {
                 >
                   {step.program}
                 </span>
-                <p className="text-[14px] text-justify hyphens-auto mt-1">
+                <p className="text-[14px] text-justify hyphens-none mt-1">
                   {step.text}
                 </p>
                 <p className="text-[14px] font-bold flex items-start gap-2">
@@ -161,7 +161,7 @@ function WashProgramsPage() {
           <p className="titleText text-[16px] sm:text-[18px] lg:text-2xl">
             TIP F.X. CARWASH
           </p>
-          <p className="text-[14px] lg:text-[16px] text-justify hyphens-auto">
+          <p className="text-[14px] lg:text-[16px] text-justify hyphens-none">
             Pro dosažení nejlepšího výsledku doporučujeme absolvovat{" "}
             <strong className="font-bold">
               všech 6 kroků v uvedeném pořadí
